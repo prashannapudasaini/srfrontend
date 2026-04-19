@@ -1,0 +1,55 @@
+/* frontend/src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    /* --- THE 3D ATTRACTIVE BACKGROUND --- */
+    background-color: #f3f4f6; /* Soft silver base */
+    background-image: 
+      radial-gradient(at 15% 15%, rgba(255, 255, 255, 1) 0px, transparent 40%),
+      radial-gradient(at 85% 10%, rgba(200, 16, 46, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 60%, rgba(255, 255, 255, 0.8) 0px, transparent 60%),
+      radial-gradient(at 10% 90%, rgba(200, 16, 46, 0.05) 0px, transparent 40%);
+    background-attachment: fixed;
+    /* ------------------------------------ */
+    
+    @apply font-sans text-dairyBlack antialiased min-h-screen;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-dairyRed text-white;
+  }
+}
+
+@layer components {
+  .btn-premium {
+    @apply bg-dairyRed text-white font-bold py-3 px-8 rounded-full border-2 border-dairyRed transition-all duration-300 hover:bg-dairyBlack hover:border-dairyBlack hover:scale-105 shadow-lg;
+  }
+  
+  .btn-outline-red {
+    @apply bg-transparent text-dairyRed font-semibold py-2 px-6 rounded-full border-2 border-dairyRed transition-all duration-300 hover:bg-dairyRed hover:text-white hover:scale-105;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-dairyBlack rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-dairyRed;
+  }
+}
