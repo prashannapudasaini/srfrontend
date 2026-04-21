@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 
 // --- Constants ---
 const MARQUEE_ITEMS = [
-  "FRESH A2 MILK", "PURE DESI GHEE", "PROBIOTIC CURD", 
-  "FARM FRESH PANEER", "CREAMY BUTTER", "FLAVORED LASSI"
+  "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART", "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART"
 ];
 
 const EXPLORE_LINKS = ["Home", "Products", "Our Story", "Services", "Notices"];

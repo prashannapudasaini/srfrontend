@@ -1,4 +1,4 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import ProductDetail from '../components/Products/ProductDetail';
@@ -12,20 +12,21 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  
+  // FIX: Instead of holding the whole object in state, hold the index.
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
     const fetchSingleProduct = async () => {
       try {
-        // Fetching all products and finding the specific one by ID
         const res = await api.get('/products/index.php');
         if (res.data.status === 'success') {
           const foundProduct = res.data.data.find(p => p.id === parseInt(id));
           if (foundProduct) {
             setProduct(foundProduct);
-            setSelectedVariant(foundProduct.variants[0]); // Select first variant by default
+            setSelectedIndex(0); // Reset to first variant
           }
         }
       } catch (error) {
@@ -39,21 +40,39 @@ export default function ProductDetailPage() {
   }, [id]);
 
   const handleAddToCart = () => {
-    if (product && selectedVariant) {
+    const currentVariant = product?.variants?.[selectedIndex];
+    if (product && currentVariant) {
       const cartItem = {
         ...product, 
-        cartItemId: `${product.id}-${selectedVariant.size}`, 
-        selectedSize: selectedVariant.size, 
-        price_npr: selectedVariant.price_npr, 
-        image: selectedVariant.image || product.image
+        cartItemId: `${product.id}-${currentVariant.size}`, 
+        selectedSize: currentVariant.size, 
+        price_npr: currentVariant.price_npr, 
+        image: currentVariant.image || product.image || '/logo.png'
       };
       addToCart(cartItem, quantity);
       navigate('/cart');
     }
   };
 
-  if (loading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#002147]"></div></div>;
-  if (!product) return <div className="min-h-screen pt-40 text-center text-2xl font-bold text-[#002147]">Product Not Found</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F0] pt-40 flex justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#002147]"></div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#F9F6F0] pt-40 flex flex-col items-center">
+        <h2 className="text-3xl font-serif font-bold text-[#002147] mb-4">Product Not Found</h2>
+        <p className="text-gray-500 mb-8">This item may be out of stock or removed.</p>
+        <button onClick={() => navigate('/products')} className="px-8 py-3 bg-[#002147] text-white rounded-xl font-bold">
+          Browse Catalog
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#F9F6F0] min-h-screen pt-32 pb-12 relative overflow-hidden">
@@ -61,8 +80,8 @@ export default function ProductDetailPage() {
         <div className="bg-white/40 backdrop-blur-md rounded-[3rem] p-4 shadow-xl border border-white/60">
           <ProductDetail 
             product={product} 
-            selectedVariant={selectedVariant}
-            setSelectedVariant={setSelectedVariant}
+            selectedIndex={selectedIndex}
+            setSelectedIndex={setSelectedIndex}
             quantity={quantity} 
             setQuantity={setQuantity} 
             handleAddToCart={handleAddToCart}

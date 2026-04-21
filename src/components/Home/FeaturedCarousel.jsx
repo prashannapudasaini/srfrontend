@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 
 const FeaturedCarousel = () => {
   const featured = [
-    "100% ORGANIC A2 MILK", 
-    "TRADITIONAL BILONA GHEE", 
-    "PROBIOTIC JUJU DHAU", 
-    "FARM FRESH PANEER", 
-    "ARTISANAL SWEET LASSI", 
-    "PURE DESI BUTTER"
+    "We're Featured In", 
+    "We're Featured In", 
+    "We're Featured In", 
+    "We're Featured In", 
+    "We're Featured In", 
+    "We're Featured In"
   ];
 
   return (

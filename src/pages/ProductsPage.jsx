@@ -1,13 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../services/api'; // Ensure this points to your axios instance
+import api from '../services/api';
 
 export default function ProductsPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // Allows us to read the ?category= parameter from the URL
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  // Read URL parameters on mount and whenever the URL changes (e.g., clicking Header links)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setActiveCategory(categoryParam);
+    } else {
+      setActiveCategory("All");
+    }
+  }, [location.search]);
 
   // Fetch products from the backend on load
   useEffect(() => {
@@ -28,20 +40,19 @@ export default function ProductsPage() {
 
   const BASE_CATEGORIES = [...new Set(products.map(p => p.category))];
 
-  const toggleCategory = (category) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== category));
+  // Filter products based on the active category
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === "All") return products;
+    return products.filter(p => p.category === activeCategory);
+  }, [products, activeCategory]);
+
+  const handleCategoryClick = (category) => {
+    if (category === "All") {
+      navigate('/products'); // Clears the URL parameter
     } else {
-      setSelectedCategories([...selectedCategories, category]);
+      navigate(`/products?category=${category}`); // Updates URL for easy sharing/refreshing
     }
   };
-
-  // Orders the categories dynamically so selected ones move to the top
-  const orderedCategories = useMemo(() => {
-    const selected = BASE_CATEGORIES.filter(c => selectedCategories.includes(c));
-    const unselected = BASE_CATEGORIES.filter(c => !selectedCategories.includes(c));
-    return [...selected, ...unselected];
-  }, [selectedCategories, BASE_CATEGORIES]);
 
   if (loading) {
     return (
@@ -62,13 +73,13 @@ export default function ProductsPage() {
         <div className="w-16 h-1 bg-red-700 mx-auto rounded-full"></div>
       </div>
 
-      {/* 2. MULTI-SELECT CATEGORY FILTERS */}
+      {/* 2. CATEGORY FILTERS */}
       <div className="max-w-7xl mx-auto px-4 mb-16 flex flex-col items-center gap-4">
         <div className="flex flex-wrap justify-center gap-3">
           <button
-            onClick={() => setSelectedCategories([])}
+            onClick={() => handleCategoryClick("All")}
             className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${
-              selectedCategories.length === 0 
+              activeCategory === "All" 
                 ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md' 
                 : 'bg-white text-gray-500 border-gray-200 hover:border-[#002147] hover:text-[#002147]'
             }`}
@@ -79,9 +90,9 @@ export default function ProductsPage() {
           {BASE_CATEGORIES.map(category => (
             <button
               key={category}
-              onClick={() => toggleCategory(category)}
+              onClick={() => handleCategoryClick(category)}
               className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${
-                selectedCategories.includes(category) 
+                activeCategory === category 
                   ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md transform scale-105' 
                   : 'bg-white text-gray-500 border-gray-200 hover:border-[#002147] hover:text-[#002147]'
               }`}
@@ -90,49 +101,18 @@ export default function ProductsPage() {
             </button>
           ))}
         </div>
-        
-        {/* Helper text letting users know they are sorting */}
-        {selectedCategories.length > 0 && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm font-medium text-gray-500 italic">
-            Showing {selectedCategories.join(" & ")} first.
-          </motion.p>
-        )}
       </div>
 
-      {/* 3. SECTION-WISE PRODUCT GRID (Animated Sorting) */}
+      {/* 3. UNIFIED PRODUCT GRID */}
       <div className="max-w-7xl mx-auto px-4">
-        {products.length === 0 ? (
-          <div className="text-center text-gray-500 py-10">No products available at the moment.</div>
+        {filteredProducts.length === 0 ? (
+          <div className="text-center text-gray-500 py-10">No products available in this category.</div>
         ) : (
-          <motion.div layout className="flex flex-col gap-16">
-            <AnimatePresence>
-              {orderedCategories.map((category) => {
-                const categoryProducts = products.filter(p => p.category === category);
-                const isSelected = selectedCategories.length === 0 || selectedCategories.includes(category);
-
-                if (categoryProducts.length === 0) return null;
-
-                return (
-                  <motion.div 
-                    layout key={category}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: isSelected ? 1 : 0.4, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className={`transition-all duration-500 ${!isSelected ? 'grayscale-[20%] hover:opacity-100 hover:grayscale-0' : ''}`}
-                  >
-                    <h2 className="text-3xl font-serif font-black text-[#002147] mb-8 flex items-center gap-6">
-                      {category}
-                      <div className="h-[2px] bg-gray-200 flex-grow rounded-full"></div>
-                    </h2>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                      {categoryProducts.map(product => (
-                        <ProductCard key={product.id} product={product} navigate={navigate} />
-                      ))}
-                    </div>
-                  </motion.div>
-                );
-              })}
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map(product => (
+                <ProductCard key={product.id} product={product} navigate={navigate} />
+              ))}
             </AnimatePresence>
           </motion.div>
         )}
@@ -153,7 +133,11 @@ function ProductCard({ product, navigate }) {
 
   return (
     <motion.div 
-      layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      layout 
+      initial={{ opacity: 0, scale: 0.9 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.3 }}
       onClick={() => navigate(`/products/${product.id}`)}
       className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
     >
@@ -175,6 +159,7 @@ function ProductCard({ product, navigate }) {
       </div>
 
       <div className="p-6 flex flex-col flex-grow relative bg-white z-20">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{product.category}</p>
         <h3 className="text-xl font-bold text-[#002147] mb-3 leading-tight">{product.name}</h3>
         
         <div className="flex flex-wrap gap-1.5 mb-6">
