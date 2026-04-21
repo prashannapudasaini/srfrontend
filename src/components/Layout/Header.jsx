@@ -23,7 +23,7 @@ const Header = () => {
   const activeLink = location.pathname === '/' ? 'home' : location.pathname.slice(1);
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  // Added dropdown sub-items to the Products link
+  // Updated dropdown sub-items to match your exact categories and link to them
   const navItems = [
     { id: 'home', label: 'Home', path: '/' },
     { 
@@ -31,11 +31,16 @@ const Header = () => {
       label: 'Products', 
       path: '/products',
       dropdown: [
-        { label: 'All Products', path: '/products' },
-        { label: 'Ghee & Butter', path: '/products' },
-        { label: 'Curd & Paneer', path: '/products' },
-        { label: 'Ice Cream', path: '/products' },
-        { label: 'Beverages', path: '/products' }
+        { label: 'All Products', path: '/products?category=All' },
+        { label: 'Ghee', path: '/products?category=Ghee' },
+        { label: 'Curd', path: '/products?category=Curd' },
+        { label: 'Paneer', path: '/products?category=Paneer' },
+        { label: 'Cheese', path: '/products?category=Cheese' },
+        { label: 'Icecream', path: '/products?category=Ice Cream' },
+        { label: 'Beverage', path: '/products?category=Beverages' },
+        { label: 'Milk', path: '/products?category=Milk' },
+        { label: 'Butter', path: '/products?category=Butter' },
+        { label: 'Lassi', path: '/products?category=Lassi' }
       ]
     },
     { id: 'about', label: 'Our Story', path: '/about' },
@@ -57,6 +62,21 @@ const Header = () => {
             
             {/* === LOGO SECTION FIXED FOR MOBILE === */}
             <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+              
+              {/* Added Rotating Image Before Logo */}
+              <motion.img 
+                src="/leading.png" /* Make sure to add your image in the public folder with this name, or change the path */
+                alt="Rotating Symbol"
+                className="w-20 h-20 sm:w-16 sm:h-16 object-contain"
+                animate={{ rotate: 360 }}
+                transition={{ 
+                  duration: 1, 
+                  repeat: Infinity, 
+                  repeatDelay: 2, 
+                  ease: "easeInOut" 
+                }}
+              />
+
               <img 
                 src="/logo.png" 
                 alt="Sita Ram Organic Dairy Logo" 
