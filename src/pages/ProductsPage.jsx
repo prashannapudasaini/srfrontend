@@ -2,15 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
+import { useCart } from '../context/CartContext'; // Added to make the Add + button work
 
 export default function ProductsPage() {
   const navigate = useNavigate();
-  const location = useLocation(); // Allows us to read the ?category= parameter from the URL
+  const location = useLocation();
+  const { addToCart } = useCart(); // Initialize Cart
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
 
-  // Read URL parameters on mount and whenever the URL changes (e.g., clicking Header links)
+  // Read URL parameters on mount and whenever the URL changes
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const categoryParam = searchParams.get('category');
@@ -48,29 +51,31 @@ export default function ProductsPage() {
 
   const handleCategoryClick = (category) => {
     if (category === "All") {
-      navigate('/products'); // Clears the URL parameter
+      navigate('/products');
     } else {
-      navigate(`/products?category=${category}`); // Updates URL for easy sharing/refreshing
+      navigate(`/products?category=${category}`);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F9F6F0] pt-40 flex justify-center items-start">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#002147]"></div>
+      <div className="min-h-screen bg-[#FDF8E7] pt-40 flex justify-center items-start">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9e111a]"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F9F6F0] min-h-screen pt-28 pb-20">
-      {/* 1. PAGE HEADER */}
+    <div className="bg-[#FDF8E7] min-h-screen pt-28 pb-20">
+      {/* 1. PAGE HEADER (Styled to match screenshot) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10 mt-8">
-        <p className="text-xs font-bold text-red-700 uppercase tracking-[0.2em] mb-4">Our Complete Catalog</p>
-        <h1 className="text-4xl md:text-6xl font-serif font-black text-[#002147] mb-6">
-          Premium Dairy <span className="text-red-700">Selection</span>
+        <p className="text-xs font-bold text-[#9e111a] uppercase tracking-[0.3em] mb-4">
+          Our Collection
+        </p>
+        <h1 className="text-5xl md:text-6xl font-serif font-black text-[#1A1A1A] mb-6 drop-shadow-sm">
+          Premium Dairy <span className="text-[#9e111a]">Selection</span>
         </h1>
-        <div className="w-16 h-1 bg-red-700 mx-auto rounded-full"></div>
+        <div className="w-24 h-1 bg-[#9e111a] mx-auto rounded-full"></div>
       </div>
 
       {/* 2. CATEGORY FILTERS */}
@@ -80,8 +85,8 @@ export default function ProductsPage() {
             onClick={() => handleCategoryClick("All")}
             className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${
               activeCategory === "All" 
-                ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md' 
-                : 'bg-white text-gray-500 border-gray-200 hover:border-[#002147] hover:text-[#002147]'
+                ? 'border-[#9e111a] bg-[#9e111a] text-white shadow-md' 
+                : 'bg-white text-gray-500 border-gray-200 hover:border-[#9e111a] hover:text-[#9e111a]'
             }`}
           >
             All Products
@@ -93,8 +98,8 @@ export default function ProductsPage() {
               onClick={() => handleCategoryClick(category)}
               className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border-2 ${
                 activeCategory === category 
-                  ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md transform scale-105' 
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-[#002147] hover:text-[#002147]'
+                  ? 'border-[#9e111a] bg-[#9e111a] text-white shadow-md transform scale-105' 
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-[#9e111a] hover:text-[#9e111a]'
               }`}
             >
               {category}
@@ -104,14 +109,19 @@ export default function ProductsPage() {
       </div>
 
       {/* 3. UNIFIED PRODUCT GRID */}
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6">
         {filteredProducts.length === 0 ? (
           <div className="text-center text-gray-500 py-10">No products available in this category.</div>
         ) : (
           <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             <AnimatePresence mode="popLayout">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} navigate={navigate} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  navigate={navigate} 
+                  addToCart={addToCart} 
+                />
               ))}
             </AnimatePresence>
           </motion.div>
@@ -121,15 +131,17 @@ export default function ProductsPage() {
   );
 }
 
-// --- SUB-COMPONENT: FULL-FIT PRODUCT CARD ---
-function ProductCard({ product, navigate }) {
+// --- SUB-COMPONENT: FULL-FIT PRODUCT CARD (Styled to match screenshot) ---
+function ProductCard({ product, navigate, addToCart }) {
   // Protect against products with no variants yet
   const lowestPrice = product.variants?.length > 0 
     ? Math.min(...product.variants.map(v => parseFloat(v.price_npr) || 0)) 
     : 0;
 
-  // Prioritize main image, fallback to first variant image, or default logo
+  // Extract display details
   const displayImage = product.image || product.variants?.[0]?.image || '/logo.png';
+  const subtitle = product.variants?.[0]?.description || "Farm Fresh Dairy";
+  const unit = product.variants?.[0]?.size ? ` / ${product.variants[0].size}` : '';
 
   return (
     <motion.div 
@@ -139,50 +151,64 @@ function ProductCard({ product, navigate }) {
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
       onClick={() => navigate(`/products/${product.id}`)}
-      className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+      className="group relative cursor-pointer"
     >
-      <div className="relative h-64 bg-gray-100 overflow-hidden">
-        <img 
-          src={displayImage} 
-          alt={product.name} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" 
-        />
+      <div className="bg-white rounded-[2rem] overflow-hidden shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-500 flex flex-col h-full z-10 relative">
         
-        {/* Subtle bottom gradient to ensure details text pops */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#002147]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        {/* Top Image Section */}
+        <div className="relative h-64 overflow-hidden bg-white flex items-center justify-center">
+          <img
+            src={displayImage}
+            alt={product.name}
+            className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700 mix-blend-multiply"
+          />
 
-        {product.badge && (
-          <div className="absolute top-4 right-4 bg-red-700/90 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase shadow-lg z-10 border border-white/20">
-            {product.badge}
-          </div>
-        )}
-      </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#9e111a]/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
-      <div className="p-6 flex flex-col flex-grow relative bg-white z-20">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{product.category}</p>
-        <h3 className="text-xl font-bold text-[#002147] mb-3 leading-tight">{product.name}</h3>
-        
-        <div className="flex flex-wrap gap-1.5 mb-6">
-          {product.variants?.slice(0, 2).map((v, index) => (
-            <span key={index} className="text-[10px] bg-gray-50 text-gray-500 border border-gray-100 px-2 py-1 rounded-md font-semibold">
-              {v.size}
-            </span>
-          ))}
-          {product.variants?.length > 2 && (
-            <span className="text-[10px] bg-gray-50 text-gray-500 border border-gray-100 px-2 py-1 rounded-md font-semibold">
-              +{product.variants.length - 2} Options
+          {/* Red Badge */}
+          {product.badge && (
+            <span className="absolute top-4 right-4 bg-[#9e111a] text-white px-3 py-1 text-[10px] font-black tracking-widest rounded uppercase shadow-md">
+              {product.badge}
             </span>
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-5 border-t border-gray-50">
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Starting from</p>
-            <p className="text-2xl font-black text-[#E2B254]">Rs. {lowestPrice}</p>
-          </div>
-          
-          <div className="w-12 h-12 rounded-full bg-[#002147]/5 flex items-center justify-center group-hover:bg-[#002147] transition-colors duration-300 shadow-sm border border-[#002147]/10 group-hover:border-[#002147]">
-            <span className="text-[#002147] group-hover:text-[#E2B254] font-bold text-lg transition-colors">→</span>
+        {/* Content Section */}
+        <div className="p-6 flex flex-col flex-grow text-center">
+          <p className="text-[#9e111a] text-[10px] font-black uppercase mb-2 tracking-widest">
+            {product.category}
+          </p>
+
+          <h4 className="text-xl font-serif font-bold text-[#1A1A1A] mb-1 line-clamp-1">
+            {product.name}
+          </h4>
+
+          <p className="text-gray-500 font-medium text-xs mb-4 line-clamp-1">
+            {subtitle}
+          </p>
+
+          <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+            <span className="text-lg font-black text-[#1A1A1A]">
+              NPR {lowestPrice}<span className="text-xs text-gray-400 font-bold ml-1">{unit}</span>
+            </span>
+
+            {/* Add to Cart Button */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation(); // Prevents navigating to the detail page when clicking add
+                const cartItem = {
+                  ...product,
+                  cartItemId: `${product.id}-${product.variants?.[0]?.size || 'default'}`,
+                  selectedSize: product.variants?.[0]?.size || 'Standard',
+                  price_npr: lowestPrice,
+                  image: displayImage
+                };
+                if(addToCart) addToCart(cartItem, 1);
+              }}
+              className="bg-[#9e111a] text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-[#1A1A1A] transition-colors shadow-md hover:shadow-xl"
+            >
+              Add +
+            </button>
           </div>
         </div>
       </div>

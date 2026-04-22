@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 // Global Layout Components
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
-import FloatingChat from './components/FloatingChat'; // <--- 1. Import your new Chat component
+import FloatingChat from './components/FloatingChat'; 
 
 // Public Facing Pages
 import HomePage from './pages/HomePage';
@@ -14,6 +14,8 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import NoticesPage from './pages/NoticesPage';
+import AvailabilityPage from './pages/AvailabilityPage'; // <--- NEW IMPORT
+import OutletsPage from './pages/OutletsPage';           // <--- NEW IMPORT
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -58,7 +60,6 @@ const PublicLayout = ({ children }) => (
     </main>
     <Footer />
     
-    {/* === 2. ADDED FLOATING CHAT HERE === */}
     {/* This will float over all public pages */}
     <FloatingChat /> 
   </div>
@@ -83,6 +84,10 @@ function App() {
         <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
         <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
         <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
+        
+        {/* === NEWLY ADDED PAGES === */}
+        <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
+        <Route path="/outlets" element={<PublicLayout><OutletsPage /></PublicLayout>} />
         
         {/* === AUTHENTICATION === */}
         <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />

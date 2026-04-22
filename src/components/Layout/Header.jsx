@@ -23,7 +23,7 @@ const Header = () => {
   const activeLink = location.pathname === '/' ? 'home' : location.pathname.slice(1);
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  // Updated dropdown sub-items to match your exact categories and link to them
+  // UPDATED: Added Availability and Outlets next to Farm Updates
   const navItems = [
     { id: 'home', label: 'Home', path: '/' },
     { 
@@ -46,6 +46,8 @@ const Header = () => {
     { id: 'about', label: 'Our Story', path: '/about' },
     { id: 'services', label: 'Services', path: '/services' },
     { id: 'notices', label: 'Farm Updates', path: '/notices' },
+    { id: 'availability', label: 'Availability', path: '/availability' }, // <--- NEW
+    { id: 'outlets', label: 'Outlets', path: '/outlets' }, // <--- NEW
   ];
 
   const handleLogout = async () => {
@@ -60,21 +62,13 @@ const Header = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 relative">
           <div className="flex justify-between items-center">
             
-            {/* === LOGO SECTION FIXED FOR MOBILE === */}
             <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
-              
-              {/* Added Rotating Image Before Logo */}
               <motion.img 
-                src="/leading.png" /* Make sure to add your image in the public folder with this name, or change the path */
+                src="/rotating-icon.png" 
                 alt="Rotating Symbol"
-                className="w-20 h-20 sm:w-16 sm:h-16 object-contain"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
                 animate={{ rotate: 360 }}
-                transition={{ 
-                  duration: 1, 
-                  repeat: Infinity, 
-                  repeatDelay: 2, 
-                  ease: "easeInOut" 
-                }}
+                transition={{ duration: 1, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
               />
 
               <img 
@@ -88,18 +82,18 @@ const Header = () => {
               </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex gap-8 items-center">
+            {/* Desktop Nav - Adjusted gap for extra links */}
+            <nav className="hidden lg:flex gap-4 xl:gap-8 items-center">
               {navItems.map((item) => (
                 <div 
                   key={item.id} 
-                  className="relative group py-2" // Wrapper to handle hover state for dropdown
+                  className="relative group py-2"
                   onMouseEnter={() => setHoveredItem(item.id)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
                   <Link
                     to={item.path}
-                    className={`text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
+                    className={`text-xs xl:text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
                       activeLink === item.id 
                         ? 'text-dairyBlack font-bold' 
                         : 'text-gray-700 font-medium hover:text-dairyBlack hover:font-bold'
@@ -115,7 +109,6 @@ const Header = () => {
                     )}
                   </Link>
 
-                  {/* Desktop Dropdown Menu */}
                   {item.dropdown && (
                     <AnimatePresence>
                       {hoveredItem === item.id && (
@@ -124,7 +117,6 @@ const Header = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
                           transition={{ duration: 0.2 }}
-                          // pt-4 creates an invisible bridge so the mouse doesn't fall off the hover area
                           className="absolute top-full left-0 pt-4 w-48 z-50"
                         >
                           <div className="bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden flex flex-col">
@@ -146,7 +138,6 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Right Side Icons */}
             <div className="flex items-center gap-3 sm:gap-5">
               <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-dairyBlack hover:text-dairyRed transition-colors">
                 <PhoneCall size={20} />
@@ -154,16 +145,10 @@ const Header = () => {
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Link 
-                    to={user?.role === 'admin' ? '/admin' : '/history'} 
-                    className="text-dairyBlack hover:text-dairyRed transition-colors"
-                  >
+                  <Link to={user?.role === 'admin' ? '/admin' : '/history'} className="text-dairyBlack hover:text-dairyRed transition-colors">
                     <User size={20} className="sm:w-[22px] sm:h-[22px]" />
                   </Link>
-                  <button 
-                    onClick={handleLogout} 
-                    className="hidden sm:block text-dairyBlack hover:text-dairyRed transition-colors"
-                  >
+                  <button onClick={handleLogout} className="hidden sm:block text-dairyBlack hover:text-dairyRed transition-colors">
                     <LogOut size={22} />
                   </button>
                 </div>
@@ -189,7 +174,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -211,16 +195,10 @@ const Header = () => {
                       {item.label}
                     </Link>
                     
-                    {/* Mobile Nested Dropdown Items */}
                     {item.dropdown && (
                       <div className="flex flex-col ml-4 mt-3 gap-3 border-l-2 border-gray-100 pl-4">
                         {item.dropdown.map((dropItem, idx) => (
-                          <Link
-                            key={idx}
-                            to={dropItem.path}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-dairyRed"
-                          >
+                          <Link key={idx} to={dropItem.path} onClick={() => setIsMobileMenuOpen(false)} className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-dairyRed">
                             {dropItem.label}
                           </Link>
                         ))}
@@ -229,24 +207,13 @@ const Header = () => {
                   </div>
                 ))}
                 
-                {/* Mobile Login/Logout Link */}
                 <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
                   {!isAuthenticated ? (
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-sm tracking-wider uppercase font-bold text-gray-800"
-                    >
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm tracking-wider uppercase font-bold text-gray-800">
                       Login
                     </Link>
                   ) : (
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="text-sm tracking-wider uppercase font-bold text-red-600 text-left flex items-center gap-2"
-                    >
+                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-red-600 text-left flex items-center gap-2">
                       <LogOut size={16} /> Logout
                     </button>
                   )}
