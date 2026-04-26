@@ -15,7 +15,7 @@ const SOCIAL_LINKS = [
   { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
 ];
 
-// --- Partner Logos (Nepali Supermarkets) ---
+// --- Partner Logos (Using reliable URLs) ---
 const AVAILABLE_ON = [
   { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
   { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
@@ -97,7 +97,7 @@ const Footer = () => {
             </div>
 
             {/* LINKS & PARTNERS GRID */}
-            <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               
               {/* Explore */}
               <div className="space-y-4">
@@ -145,13 +145,13 @@ const Footer = () => {
                 <div className="mt-4 p-3 bg-red-900/40 rounded-xl border border-white/10 max-w-[180px]">
                    <p className="text-xs text-red-100 leading-snug font-semibold">
                      🚚 Free Delivery<br/>
-                     <span className="text-[9px] uppercase font-bold tracking-tighter text-red-300">On orders above ₨500</span>
+                     <span className="text-[9px] uppercase font-bold tracking-tighter text-red-300">On orders above ₨2000</span>
                    </p>
                 </div>
               </div>
 
-              {/* CLEAN, SIZED Available On Section */}
-              <div className="space-y-4 min-w-max">
+              {/* Available On Section */}
+              <div className="space-y-4 w-full">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Available On</h4>
                 <div className="flex flex-wrap gap-2.5 mt-2">
                   {AVAILABLE_ON.map((partner, index) => (
