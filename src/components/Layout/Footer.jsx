@@ -10,9 +10,17 @@ const MARQUEE_ITEMS = [
 const EXPLORE_LINKS = ["Home", "Products", "Our Story", "Services", "Notices"];
 
 const SOCIAL_LINKS = [
-  { icon: (s) => <Facebook s={s} />, label: "Facebook", href: "#" },
-  { icon: (s) => <Instagram s={s} />, label: "Instagram", href: "#" },
-  { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "#" }
+  { icon: (s) => <Facebook s={s} />, label: "Facebook", href: "https://www.facebook.com/sitaramdairy" },
+  { icon: (s) => <Instagram s={s} />, label: "Instagram", href: "https://www.instagram.com/sitaramdairy" },
+  { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
+];
+
+// --- Partner Logos (Nepali Supermarkets) ---
+const AVAILABLE_ON = [
+  { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
+  { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
+  { name: "KK Mart", url: "https://tse1.mm.bing.net/th/id/OIP.U4blkqB6U0pgmqLdPialjgHaCL?rs=1&pid=ImgDetMain&o=7&rm=3", initials: "KK" },
+  { name: "Big Mart", url: "https://storage.googleapis.com/kaggle-datasets-images/1593544/2621633/648c031d1be543da31ca46572025c7be/dataset-card.jpg?t=2021-09-16-17-28-12", initials: "BM" }
 ];
 
 // --- Custom Icons ---
@@ -31,7 +39,7 @@ const Footer = () => {
     <footer className="w-full flex flex-col bg-white overflow-hidden">
       
       {/* 1. Marquee Section */}
-      <div className="bg-white text-red-700 py-2.5 border-t border-b border-red-100 overflow-hidden">
+      <div className="bg-white text-red-700 py-2.5 border-t border-b border-red-100 overflow-hidden mt-6">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
@@ -39,8 +47,8 @@ const Footer = () => {
         >
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex gap-10 px-5">
-              {MARQUEE_ITEMS.map((item) => (
-                <span key={item} className="flex items-center gap-1.5">
+              {MARQUEE_ITEMS.map((item, index) => (
+                <span key={`${item}-${index}`} className="flex items-center gap-1.5">
                   <span className="text-red-300 text-xs">✦</span> {item}
                 </span>
               ))}
@@ -50,12 +58,11 @@ const Footer = () => {
       </div>
 
       {/* 2. Main Body Section */}
-      <div className="relative bg-red-700 text-white">
+      <div className="relative bg-[#C8102E] text-white">
         
-        {/* Background Decorative Layer - Image Removed */}
+        {/* Background Decorative Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Liquid Edge Divider (Kept for subtle texture) */}
-          <div className="hidden lg:block absolute top-0 left-[43%] w-[250px] h-full z-10 translate-x-[-50%]">
+          <div className="hidden lg:block absolute top-0 left-[40%] w-[250px] h-full z-10 translate-x-[-50%]">
              <svg viewBox="0 0 200 800" preserveAspectRatio="none" className="h-full w-full fill-white/5 opacity-30">
                 <path d="M0,0 L60,0 C140,80 20,160 150,240 C190,280 40,360 170,440 C220,520 30,600 140,680 C180,740 60,800 100,800 L0,800 Z" />
              </svg>
@@ -66,32 +73,31 @@ const Footer = () => {
         <div className="relative z-20 max-w-7xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
             
-            {/* Brand Column */}
-            <div className="lg:col-span-5 space-y-6">
+            {/* BRAND COLUMN */}
+            <div className="lg:col-span-4 space-y-6">
               <div className="flex items-center gap-4">
-                {/* Logo Image */}
-                <div className="bg-white p-1 rounded-xl shadow-lg">
+                <div className="bg-white p-1.5 rounded-xl shadow-lg">
                   <img 
                     src="/logo.png" 
                     alt="Sita Ram Dairy Logo" 
-                    className="w-16 h-16 object-contain"
+                    className="w-14 h-14 object-contain"
                   />
                 </div>
                 <div>
                   <h3 className="text-2xl font-serif font-bold tracking-tight">
                     Sita Ram <span className="text-red-200">Dairy</span>
                   </h3>
-                  <p className="text-red-100/60 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
+                  <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
                 </div>
               </div>
               
-              <p className="text-sm text-red-50 leading-relaxed max-w-md">
+              <p className="text-sm text-red-50 leading-relaxed pr-4">
                 Generations of pure goodness. Premium organic dairy and artisanal bakery products from Nepal's lush pastures.
               </p>
             </div>
 
-            {/* Links Grid */}
-            <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* LINKS & PARTNERS GRID */}
+            <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
               
               {/* Explore */}
               <div className="space-y-4">
@@ -123,19 +129,51 @@ const Footer = () => {
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Follow Us</h4>
                 <div className="flex gap-3">
-                  {SOCIAL_LINKS.map(({ icon: Icon, label }) => (
-                    <a key={label} href="#" className="w-9 h-9 rounded-full bg-white text-red-700 flex items-center justify-center hover:bg-red-100 transition-colors shadow-md group" aria-label={label}>
+                  {SOCIAL_LINKS.map(({ icon: Icon, label, href }) => (
+                    <a 
+                      key={label} 
+                      href={href} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-full bg-white text-red-700 flex items-center justify-center hover:bg-red-100 transition-colors shadow-md group" 
+                      aria-label={label}
+                    >
                       <div className="group-hover:scale-110 transition-transform">{Icon(16)}</div>
                     </a>
                   ))}
                 </div>
-                <div className="mt-3 p-3 bg-red-800/40 rounded-xl border border-white/10">
+                <div className="mt-4 p-3 bg-red-900/40 rounded-xl border border-white/10 max-w-[180px]">
                    <p className="text-xs text-red-100 leading-snug font-semibold">
                      🚚 Free Delivery<br/>
                      <span className="text-[9px] uppercase font-bold tracking-tighter text-red-300">On orders above ₨500</span>
                    </p>
                 </div>
               </div>
+
+              {/* CLEAN, SIZED Available On Section */}
+              <div className="space-y-4 min-w-max">
+                <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Available On</h4>
+                <div className="flex flex-wrap gap-2.5 mt-2">
+                  {AVAILABLE_ON.map((partner, index) => (
+                    <div 
+                      key={index} 
+                      className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center group border border-red-900/20 p-1 shrink-0 transition-transform hover:-translate-y-1"
+                    >
+                      <img 
+                        src={partner.url} 
+                        alt={partner.name} 
+                        title={partner.name}
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 bg-white"
+                        onError={(e) => {
+                          e.target.onerror = null; 
+                          e.target.src = `https://placehold.co/150x150/ffffff/C8102E?text=${partner.initials}&font=Montserrat`;
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

@@ -1,214 +1,148 @@
-// frontend/src/pages/ContactPage.jsx
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Facebook, Instagram, Youtube } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X, User, Phone, Mail, MessageSquare, Send, Clock } from 'lucide-react';
 
-export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [focusedField, setFocusedField] = useState(null);
+export default function ContactModal({ isOpen, onClose }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Add your API logic here
+    // Handle your form submission logic here
+    console.log("Form submitted:", formData);
+    onClose(); 
   };
 
   return (
-    <main className="bg-cheeseCream min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* === HEADER SECTION === */}
-        <div className="mb-20 text-center lg:text-left">
-          <h1 className="text-6xl md:text-7xl font-serif font-bold text-[#7A0000] red-text-shadow leading-tight">
-            Connect <span className="text-[#1A1A1A]">With Us</span>
-          </h1>
-          <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.6em] mt-6">
-            Direct from Tokha Farm to your Doorstep • Since 1985
-          </p>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Dark Blurred Overlay */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+          />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 rounded-[4rem] shadow-premium overflow-hidden bg-white border border-gray-100">
-          
-          {/* LEFT SIDE: INFO PANEL (Heritage Red) - lg:span-5 */}
-          <div className="lg:col-span-5 bg-[#7A0000] p-12 md:p-20 text-white relative flex flex-col justify-between">
-            {/* Decorative SR Watermark */}
-            <div className="absolute -bottom-20 -left-20 text-[35rem] font-serif font-black text-white opacity-[0.04] select-none pointer-events-none">
-              SR
-            </div>
+          {/* Modal Container */}
+          <div className="fixed inset-0 flex items-center justify-center z-[101] p-4 pointer-events-none">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="w-full max-w-[500px] bg-white rounded-2xl shadow-2xl overflow-hidden pointer-events-auto relative flex flex-col"
+            >
+              
+              {/* Floating Close Button */}
+              <button 
+                onClick={onClose}
+                className="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-500 hover:text-[#9e111a] hover:bg-gray-100 shadow-sm transition-all z-10"
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
 
-            <div className="relative z-10 space-y-16">
-              <div className="space-y-4">
-                <h3 className="text-4xl font-serif font-bold">Our Heritage Site</h3>
-                <div className="w-16 h-1 bg-white/20 rounded-full" />
-                <p className="text-[#FDF8E7]/70 font-medium leading-relaxed text-lg">
-                  Visit our organic pastures in Tokha. We are open for fresh dairy pickup and farm inquiries.
+              {/* Red Header */}
+              <div className="bg-[#b91c1c] pt-10 pb-8 px-8 text-center relative">
+                <h2 className="text-3xl font-serif font-bold text-white mb-2 tracking-wide">
+                  Contact Us
+                </h2>
+                <p className="text-red-100 text-sm font-medium">
+                  We'd love to hear from you
                 </p>
               </div>
 
-              <div className="space-y-10">
-                <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-[#7A0000] transition-all duration-500">
-                    <MapPin size={28} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">Our Location</p>
-                    <p className="font-bold text-xl">Tokha-03, Kathmandu, Nepal</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-[#7A0000] transition-all duration-500">
-                    <Phone size={28} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">Direct Line</p>
-                    <p className="font-bold text-xl">+977 1 4350000</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-6 group">
-                  <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-[#7A0000] transition-all duration-500">
-                    <Mail size={28} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">Email Ledger</p>
-                    <p className="font-bold text-xl">pure@sitaramdairy.com</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Links Integration */}
-            <div className="relative z-10 pt-16 flex items-center gap-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Follow Us</span>
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-[#7A0000] transition-all"><Facebook size={18} /></a>
-                <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-[#7A0000] transition-all"><Instagram size={18} /></a>
-                <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-[#7A0000] transition-all"><Youtube size={18} /></a>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT SIDE: INTERACTIVE FORM - lg:span-7 */}
-          <div className="lg:col-span-7 p-12 md:p-20 bg-white flex flex-col">
-            <AnimatePresence mode="wait">
-              {!submitted ? (
-                <motion.div 
-                  key="form"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex-1"
-                >
-                  <div className="mb-12">
-                    <h3 className="text-3xl font-serif font-bold text-[#1A1A1A]">Send a Message</h3>
-                    <p className="text-gray-400 font-medium mt-2">Expect a response from our farm manager within 4 hours.</p>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Full Name</label>
+              {/* Form Body */}
+              <div className="p-8">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  
+                  {/* Row: Name & Phone */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Full Name *</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                          <User size={16} />
+                        </div>
                         <input 
-                          type="text" 
-                          required
-                          onFocus={() => setFocusedField('name')}
-                          onBlur={() => setFocusedField(null)}
-                          className="w-full px-8 py-5 rounded-3xl bg-cheeseCream/50 border-2 border-transparent focus:border-[#7A0000]/10 focus:bg-white outline-none font-bold text-[#1A1A1A] transition-all shadow-sm" 
-                          placeholder="Ram Bahadur" 
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Email Identifier</label>
-                        <input 
-                          type="email" 
-                          required
-                          onFocus={() => setFocusedField('email')}
-                          onBlur={() => setFocusedField(null)}
-                          className="w-full px-8 py-5 rounded-3xl bg-cheeseCream/50 border-2 border-transparent focus:border-[#7A0000]/10 focus:bg-white outline-none font-bold text-[#1A1A1A] transition-all shadow-sm" 
-                          placeholder="ram@heritage.com" 
+                          type="text" required placeholder="Enter your name"
+                          value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
+                          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#b91c1c] focus:ring-1 focus:ring-[#b91c1c] transition-all placeholder:text-gray-400"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Subject of Inquiry</label>
-                      <select className="w-full px-8 py-5 rounded-3xl bg-cheeseCream/50 border-2 border-transparent focus:border-[#7A0000]/10 focus:bg-white outline-none font-bold text-[#1A1A1A] appearance-none cursor-pointer">
-                        <option>General Support</option>
-                        <option>Wholesale & Bulk Supplies</option>
-                        <option>Subscription Adjustments</option>
-                        <option>Feedback & Quality Control</option>
-                      </select>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Phone Number</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                          <Phone size={16} />
+                        </div>
+                        <input 
+                          type="tel" placeholder="+977..."
+                          value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
+                          className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#b91c1c] focus:ring-1 focus:ring-[#b91c1c] transition-all placeholder:text-gray-400"
+                        />
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] ml-2">Detail Your Requirements</label>
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Email Address *</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                        <Mail size={16} />
+                      </div>
+                      <input 
+                        type="email" required placeholder="Enter your email address"
+                        value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#b91c1c] focus:ring-1 focus:ring-[#b91c1c] transition-all placeholder:text-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Message *</label>
+                    <div className="relative">
+                      <div className="absolute top-3.5 left-3.5 pointer-events-none text-gray-400">
+                        <MessageSquare size={16} />
+                      </div>
                       <textarea 
-                        rows="5" 
-                        required
-                        onFocus={() => setFocusedField('message')}
-                        onBlur={() => setFocusedField(null)}
-                        className="w-full px-8 py-5 rounded-3xl bg-cheeseCream/50 border-2 border-transparent focus:border-[#7A0000]/10 focus:bg-white outline-none font-bold text-[#1A1A1A] transition-all shadow-sm resize-none" 
-                        placeholder="Tell us how we can help..."
+                        required placeholder="How can we help you?" rows="4"
+                        value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#b91c1c] focus:ring-1 focus:ring-[#b91c1c] transition-all resize-none placeholder:text-gray-400"
                       ></textarea>
                     </div>
-
-                    <button 
-                      type="submit"
-                      className="w-full bg-[#7A0000] text-white py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-[#1A1A1A] transition-all duration-500 shadow-redGlow flex items-center justify-center gap-4 group"
-                    >
-                      Dispatch To Farm
-                      <Send size={18} className="group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
-                    </button>
-                  </form>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="h-full flex flex-col items-center justify-center text-center py-20"
-                >
-                  <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-inner">
-                    <CheckCircle2 size={48} />
                   </div>
-                  <h3 className="text-4xl font-serif font-bold text-[#1A1A1A] mb-4">Transmission Successful</h3>
-                  <p className="text-gray-500 font-medium max-w-sm mx-auto text-lg leading-relaxed">
-                    Your inquiry has been logged in our system. A Sita Ram specialist will contact you shortly.
-                  </p>
-                  <button 
-                    onClick={() => setSubmitted(false)}
-                    className="mt-12 text-[#7A0000] font-black text-[11px] uppercase tracking-widest hover:bg-[#7A0000] hover:text-white border border-[#7A0000] px-8 py-3 rounded-full transition-all"
-                  >
-                    Draft New Message
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
 
-        {/* === MAP SECTION === */}
-        <div className="mt-24 bg-white rounded-[4rem] shadow-premium overflow-hidden h-[450px] relative border border-gray-100">
-           {/* Replace this with an actual Google Maps iframe embed if needed */}
-           <div className="absolute inset-0 bg-[#FDF8E7]/30 flex items-center justify-center">
-             <div className="text-center space-y-4">
-                <MapPin size={48} className="text-[#7A0000] mx-auto opacity-20" />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">Google Maps Integration Area</p>
-                <p className="text-gray-400 italic">Farm Location: Tokha, Kathmandu</p>
-             </div>
-           </div>
-           {/* Example Iframe: 
-           <iframe 
-             src="https://www.google.com/maps/embed?..." 
-             className="w-full h-full grayscale opacity-80" 
-             style={{ border: 0 }} 
-             allowFullScreen="" 
-             loading="lazy"
-           ></iframe> 
-           */}
-        </div>
-      </div>
-    </main>
+                  {/* Submit Button */}
+                  <button 
+                    type="submit"
+                    className="w-full bg-[#b91c1c] hover:bg-[#9e111a] text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-md mt-2"
+                  >
+                    Send Message <Send size={16} className="ml-1" />
+                  </button>
+
+                  {/* Footer Note */}
+                  <div className="flex items-center justify-center gap-1.5 pt-3 text-gray-400">
+                    <Clock size={12} />
+                    <span className="text-[11px] font-medium">Usually responds within 4 hours</span>
+                  </div>
+
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

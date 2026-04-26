@@ -1,4 +1,3 @@
-// frontend/src/components/Layout/Header.jsx
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; 
@@ -23,7 +22,6 @@ const Header = () => {
   const activeLink = location.pathname === '/' ? 'home' : location.pathname.slice(1);
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  // UPDATED: Added Availability and Outlets next to Farm Updates
   const navItems = [
     { id: 'home', label: 'Home', path: '/' },
     { 
@@ -46,8 +44,8 @@ const Header = () => {
     { id: 'about', label: 'Our Story', path: '/about' },
     { id: 'services', label: 'Services', path: '/services' },
     { id: 'notices', label: 'Farm Updates', path: '/notices' },
-    { id: 'availability', label: 'Availability', path: '/availability' }, // <--- NEW
-    { id: 'outlets', label: 'Outlets', path: '/outlets' }, // <--- NEW
+    { id: 'availability', label: 'Availability', path: '/availability' },
+    { id: 'outlets', label: 'Outlets', path: '/outlets' },
   ];
 
   const handleLogout = async () => {
@@ -58,31 +56,35 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-white/40 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] sticky top-0 z-40 border-b border-white/60">
+      <header className="bg-white/70 backdrop-blur-xl shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 relative">
           <div className="flex justify-between items-center">
             
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <Link to="/" className="flex items-center gap-3 sm:gap-4 group shrink-0">
+              {/* === AESTHETIC POPPING BADGE === */}
               <motion.img 
-                src="/rotating-icon.png" 
-                alt="Rotating Symbol"
-                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                src="/leading.png" 
+                alt="Leading Brand Badge"
+                className="w-10 h-10 sm:w-14 sm:h-14 object-contain drop-shadow-sm"
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
               />
 
-              <img 
-                src="/logo.png" 
-                alt="Sita Ram Organic Dairy Logo" 
-                className="w-10 h-10 sm:w-14 sm:h-14 object-contain group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="flex flex-col justify-center">
-                <h1 className="text-base sm:text-xl font-serif font-bold text-dairyBlack leading-none">Sita Ram</h1>
-                <span className="text-[7px] sm:text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em] mt-0.5">Gokul Milk</span>
+              {/* Main Logo & Text */}
+              <div className="flex items-center gap-3 border-l border-gray-200 pl-3 sm:pl-4">
+                <img 
+                  src="/logo.png" 
+                  alt="Sita Ram Dairy Logo" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="flex flex-col justify-center">
+                  <h1 className="text-lg sm:text-2xl font-serif font-black text-[#1A1A1A] leading-none">Sita Ram</h1>
+                  <span className="text-[8px] sm:text-[10px] font-bold text-[#E41E26] uppercase tracking-[0.2em] mt-0.5">Gokul Milk</span>
+                </div>
               </div>
             </Link>
 
-            {/* Desktop Nav - Adjusted gap for extra links */}
+            {/* Desktop Nav */}
             <nav className="hidden lg:flex gap-4 xl:gap-8 items-center">
               {navItems.map((item) => (
                 <div 
@@ -95,17 +97,17 @@ const Header = () => {
                     to={item.path}
                     className={`text-xs xl:text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
                       activeLink === item.id 
-                        ? 'text-dairyBlack font-bold' 
-                        : 'text-gray-700 font-medium hover:text-dairyBlack hover:font-bold'
+                        ? 'text-[#1A1A1A] font-black' 
+                        : 'text-gray-600 font-bold hover:text-[#1A1A1A]'
                     }`}
                   >
                     {item.label}
                     
                     {hoveredItem === item.id && activeLink !== item.id && (
-                      <motion.div layoutId="navHover" className="absolute -bottom-2 left-0 right-0 h-[2px] bg-dairyRed/50" />
+                      <motion.div layoutId="navHover" className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#E41E26]/50" />
                     )}
                     {activeLink === item.id && (
-                      <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-dairyRed shadow-[0_2px_8px_rgba(200,16,46,0.5)]" />
+                      <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#E41E26]" />
                     )}
                   </Link>
 
@@ -124,7 +126,7 @@ const Header = () => {
                               <Link
                                 key={idx}
                                 to={dropItem.path}
-                                className="px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-dairyRed hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-none"
+                                className="px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#E41E26] hover:bg-red-50 transition-colors border-b border-gray-50 last:border-none"
                               >
                                 {dropItem.label}
                               </Link>
@@ -138,42 +140,44 @@ const Header = () => {
               ))}
             </nav>
 
+            {/* Actions */}
             <div className="flex items-center gap-3 sm:gap-5">
-              <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-dairyBlack hover:text-dairyRed transition-colors">
+              <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#E41E26] transition-colors">
                 <PhoneCall size={20} />
               </button>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <Link to={user?.role === 'admin' ? '/admin' : '/history'} className="text-dairyBlack hover:text-dairyRed transition-colors">
+                  <Link to={user?.role === 'admin' ? '/admin' : '/history'} className="text-gray-700 hover:text-[#E41E26] transition-colors">
                     <User size={20} className="sm:w-[22px] sm:h-[22px]" />
                   </Link>
-                  <button onClick={handleLogout} className="hidden sm:block text-dairyBlack hover:text-dairyRed transition-colors">
+                  <button onClick={handleLogout} className="hidden sm:block text-gray-700 hover:text-[#E41E26] transition-colors">
                     <LogOut size={22} />
                   </button>
                 </div>
               ) : (
-                <Link to="/login" className="hidden sm:block text-sm font-bold text-dairyBlack hover:text-dairyRed transition-colors uppercase tracking-wider">
+                <Link to="/login" className="hidden sm:block text-sm font-bold text-gray-700 hover:text-[#E41E26] transition-colors uppercase tracking-wider">
                   Login
                 </Link>
               )}
 
-              <button onClick={() => setIsCartOpen(true)} className="relative text-dairyBlack hover:text-dairyRed transition-colors p-1">
+              <button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#E41E26] transition-colors p-1">
                 <ShoppingCart size={22} className="sm:w-[24px] sm:h-[24px]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-dairyRed text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shadow-redGlow">
+                  <span className="absolute -top-1 -right-1 bg-[#E41E26] text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shadow-sm">
                     {cartCount}
                   </span>
                 )}
               </button>
 
-              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-dairyBlack z-50 p-1">
+              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
                 {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
             </div>
           </div>
         </div>
 
+        {/* Mobile Nav */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -189,7 +193,7 @@ const Header = () => {
                       to={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={`text-sm tracking-wider uppercase font-bold ${
-                        activeLink === item.id ? 'text-dairyRed' : 'text-gray-800'
+                        activeLink === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
                       }`}
                     >
                       {item.label}
@@ -198,7 +202,7 @@ const Header = () => {
                     {item.dropdown && (
                       <div className="flex flex-col ml-4 mt-3 gap-3 border-l-2 border-gray-100 pl-4">
                         {item.dropdown.map((dropItem, idx) => (
-                          <Link key={idx} to={dropItem.path} onClick={() => setIsMobileMenuOpen(false)} className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-dairyRed">
+                          <Link key={idx} to={dropItem.path} onClick={() => setIsMobileMenuOpen(false)} className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-[#E41E26]">
                             {dropItem.label}
                           </Link>
                         ))}
@@ -209,11 +213,11 @@ const Header = () => {
                 
                 <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
                   {!isAuthenticated ? (
-                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm tracking-wider uppercase font-bold text-gray-800">
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A]">
                       Login
                     </Link>
                   ) : (
-                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-red-600 text-left flex items-center gap-2">
+                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-[#E41E26] text-left flex items-center gap-2">
                       <LogOut size={16} /> Logout
                     </button>
                   )}
