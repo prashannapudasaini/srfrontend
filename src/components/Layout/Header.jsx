@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; 
-import { ShoppingCart, User, PhoneCall, Menu, X, LogOut } from 'lucide-react'; 
+import { ShoppingCart, User, PhoneCall, Menu, X, LogOut, ChevronDown } from 'lucide-react'; 
 import ContactModal from '../ContactModal';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,7 @@ const Header = () => {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedMobileMenu, setExpandedMobileMenu] = useState(null); // Added state for mobile dropdown
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,6 +53,10 @@ const Header = () => {
     await logout();
     if (clearCart) clearCart();
     navigate('/login');
+  };
+
+  const toggleMobileMenu = (id) => {
+    setExpandedMobileMenu(expandedMobileMenu === id ? null : id);
   };
 
   return (
@@ -146,7 +151,10 @@ const Header = () => {
                 <PhoneCall size={20} />
               </button>
 
-              {isAuthenticated ? (
+              {/* ========================================================= */}
+              {/* LOGIN AND CART BUTTONS TEMPORARILY COMMENTED OUT HERE     */}
+              {/* ========================================================= */}
+              {/* {isAuthenticated ? (
                 <div className="flex items-center gap-3 sm:gap-4">
                   <Link to={user?.role === 'admin' ? '/admin' : '/history'} className="text-gray-700 hover:text-[#E41E26] transition-colors">
                     <User size={20} className="sm:w-[22px] sm:h-[22px]" />
@@ -169,6 +177,7 @@ const Header = () => {
                   </span>
                 )}
               </button>
+              */}
 
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
                 {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
@@ -189,28 +198,62 @@ const Header = () => {
               <div className="flex flex-col px-6 py-4 gap-4">
                 {navItems.map((item) => (
                   <div key={item.id} className="flex flex-col">
-                    <Link
-                      to={item.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`text-sm tracking-wider uppercase font-bold ${
-                        activeLink === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
                     
-                    {item.dropdown && (
-                      <div className="flex flex-col ml-4 mt-3 gap-3 border-l-2 border-gray-100 pl-4">
-                        {item.dropdown.map((dropItem, idx) => (
-                          <Link key={idx} to={dropItem.path} onClick={() => setIsMobileMenuOpen(false)} className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-[#E41E26]">
-                            {dropItem.label}
-                          </Link>
-                        ))}
-                      </div>
+                    {/* Check if item has a dropdown to make it a toggle button on mobile */}
+                    {item.dropdown ? (
+                      <button
+                        onClick={() => toggleMobileMenu(item.id)}
+                        className={`text-sm tracking-wider uppercase font-bold flex justify-between items-center text-left ${
+                          activeLink === item.id || expandedMobileMenu === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
+                        }`}
+                      >
+                        {item.label}
+                        <ChevronDown 
+                          size={18} 
+                          className={`transition-transform duration-300 ${expandedMobileMenu === item.id ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                    ) : (
+                      <Link
+                        to={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`text-sm tracking-wider uppercase font-bold ${
+                          activeLink === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
                     )}
+                    
+                    {/* Dropdown Content */}
+                    <AnimatePresence>
+                      {item.dropdown && expandedMobileMenu === item.id && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="flex flex-col ml-4 mt-3 gap-3 border-l-2 border-gray-100 pl-4 overflow-hidden"
+                        >
+                          {item.dropdown.map((dropItem, idx) => (
+                            <Link 
+                              key={idx} 
+                              to={dropItem.path} 
+                              onClick={() => setIsMobileMenuOpen(false)} 
+                              className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-[#E41E26]"
+                            >
+                              {dropItem.label}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ))}
                 
+                {/* ========================================================= */}
+                {/* MOBILE LOGIN SECTION TEMPORARILY COMMENTED OUT HERE       */}
+                {/* ========================================================= */}
+                {/*
                 <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
                   {!isAuthenticated ? (
                     <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A]">
@@ -222,6 +265,7 @@ const Header = () => {
                     </button>
                   )}
                 </div>
+                */}
               </div>
             </motion.div>
           )}

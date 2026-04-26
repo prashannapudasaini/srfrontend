@@ -85,7 +85,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-serif font-bold tracking-tight">
-                    Sita Ram <span className="text-red-200">Dairy</span>
+                    Sita Ram <span className="text-red-200">Gokul Milk</span>
                   </h3>
                   <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
                 </div>
@@ -142,12 +142,7 @@ const Footer = () => {
                     </a>
                   ))}
                 </div>
-                <div className="mt-4 p-3 bg-red-900/40 rounded-xl border border-white/10 max-w-[180px]">
-                   <p className="text-xs text-red-100 leading-snug font-semibold">
-                     🚚 Free Delivery<br/>
-                     <span className="text-[9px] uppercase font-bold tracking-tighter text-red-300">On orders above ₨2000</span>
-                   </p>
-                </div>
+                
               </div>
 
               {/* Available On Section */}

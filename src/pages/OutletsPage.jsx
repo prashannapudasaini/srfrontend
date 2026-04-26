@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, MapPin, Phone, Clock, ArrowRight, RefreshCw } from 'lucide-react';
 
-// Updated: Centralized data for dynamic dropdowns (1 State, 3 Cities)
+// Centralized data for dynamic dropdowns (1 State, 3 Cities)
 const REGION_DATA = {
   "Bagmati": {
     cities: {
@@ -13,7 +13,7 @@ const REGION_DATA = {
   }
 };
 
-// Updated: All physical outlets mapped with state, city, and Google Map Embed URLs
+// All physical outlets mapped with state, city, and Real Google Map Embed URLs
 const ALL_OUTLETS = [
   {
     name: "Tokha Headquarters",
@@ -23,7 +23,7 @@ const ALL_OUTLETS = [
     phone: "+977 1-438xxxx",
     hours: "5:00 AM - 7:00 PM (Daily)",
     isMain: true,
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14122.393437149098!2d85.3195029!3d27.7599028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1edebc3d790d%3A0x6b77134d16611361!2sTokha%2C%20Kathmandu%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Bhutkhel,+Tokha,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
   },
   {
     name: "Chabahil Outlet",
@@ -33,7 +33,7 @@ const ALL_OUTLETS = [
     phone: "+977 980-xxxxxxx",
     hours: "6:30 AM - 8:00 PM (Daily)",
     isMain: false,
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.062024105267!2d85.34444531506222!3d27.71536708278854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb196e1b696aab%3A0xc3b0e45447c28c!2sChabahil%20Chowk!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Chabahil+Chowk,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
   },
   {
     name: "Koteshwor Bhatbhateni",
@@ -43,8 +43,7 @@ const ALL_OUTLETS = [
     phone: "+977 1-412xxxx",
     hours: "7:00 AM - 8:00 PM (Daily)",
     isMain: false,
-    // Using the actual Google Maps embed for Koteshwor Bhatbhateni to ensure it renders correctly
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.1555543169766!2d85.342138!3d27.68156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19920d367463%3A0xe54fb77d018b323a!2sBhat-Bhateni%20Supermarket%20and%20Departmental%20Store%2C%20Koteshwor!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Bhatbhateni+Supermarket,+Koteshwor,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
   },
   {
     name: "Jhamsikhel Heritage Branch",
@@ -54,7 +53,7 @@ const ALL_OUTLETS = [
     phone: "+977 981-xxxxxxx",
     hours: "6:30 AM - 7:30 PM (Daily)",
     isMain: false,
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.178972824989!2d85.308232!3d27.6808!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb183556093557%3A0xeab50d3c40fa96b5!2sJhamsikhel%2C%20Patan%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Jhamsikhel,+Lalitpur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
   },
   {
     name: "Suryabinayak Fresh Outlet",
@@ -64,7 +63,7 @@ const ALL_OUTLETS = [
     phone: "+977 1-661xxxx",
     hours: "6:00 AM - 7:00 PM (Daily)",
     isMain: false,
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.8824103138676!2d85.4217105!3d27.6745749!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1aa9c2627993%3A0xa6436ef8df9644ba!2sSuryabinayak%2C%20Bhaktapur%2044800!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Suryabinayak+Chowk,+Bhaktapur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
   }
 ];
 
@@ -278,8 +277,8 @@ export default function OutletsPage() {
                     </div>
                   </div>
 
-                  {/* Google Maps Embed */}
-                  <div className="mt-auto w-full h-48 rounded-xl overflow-hidden border border-gray-200">
+                  {/* Real Interactive Google Maps Embed */}
+                  <div className="mt-auto w-full h-48 rounded-xl overflow-hidden border border-gray-200 shadow-inner bg-gray-100">
                     <iframe 
                       src={outlet.mapUrl} 
                       width="100%" 
