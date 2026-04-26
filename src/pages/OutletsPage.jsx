@@ -1,60 +1,70 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, MapPin, Phone, Clock, ArrowRight } from 'lucide-react';
+import { Store, MapPin, Phone, Clock, ArrowRight, RefreshCw } from 'lucide-react';
 
-// Centralized data for dynamic dropdowns
+// Updated: Centralized data for dynamic dropdowns (1 State, 3 Cities)
 const REGION_DATA = {
-  "Kathmandu": {
-    cities: ["Kathmandu Metro", "Tokha", "Chabahil"],
-    stores: ["Chabahil Outlet", "Tokha Headquarters"]
-  },
-  "Bhaktapur": {
-    cities: ["Bhaktapur Municipality", "Suryabinayak"],
-    stores: ["Suryabinayak Fresh Outlet"]
-  },
-  "Lalitpur": {
-    cities: ["Lalitpur Metro", "Jhamsikhel"],
-    stores: ["Jhamsikhel Heritage Branch"]
+  "Bagmati": {
+    cities: {
+      "Kathmandu": ["Tokha Headquarters", "Chabahil Outlet", "Koteshwor Bhatbhateni"],
+      "Bhaktapur": ["Suryabinayak Fresh Outlet"],
+      "Lalitpur": ["Jhamsikhel Heritage Branch"]
+    }
   }
 };
 
-// All physical outlets mapped with metadata for filtering
+// Updated: All physical outlets mapped with state, city, and Google Map Embed URLs
 const ALL_OUTLETS = [
   {
     name: "Tokha Headquarters",
-    state: "Kathmandu",
-    city: "Tokha",
+    state: "Bagmati",
+    city: "Kathmandu",
     address: "Bhutkhel, Tokha, Kathmandu 44600",
     phone: "+977 1-438xxxx",
     hours: "5:00 AM - 7:00 PM (Daily)",
-    isMain: true
+    isMain: true,
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14122.393437149098!2d85.3195029!3d27.7599028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1edebc3d790d%3A0x6b77134d16611361!2sTokha%2C%20Kathmandu%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
   },
   {
     name: "Chabahil Outlet",
-    state: "Kathmandu",
-    city: "Chabahil",
+    state: "Bagmati",
+    city: "Kathmandu",
     address: "Chabahil Chowk, Kathmandu",
     phone: "+977 980-xxxxxxx",
     hours: "6:30 AM - 8:00 PM (Daily)",
-    isMain: false
+    isMain: false,
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.062024105267!2d85.34444531506222!3d27.71536708278854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb196e1b696aab%3A0xc3b0e45447c28c!2sChabahil%20Chowk!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+  },
+  {
+    name: "Koteshwor Bhatbhateni",
+    state: "Bagmati",
+    city: "Kathmandu",
+    address: "Koteshwor, Kathmandu",
+    phone: "+977 1-412xxxx",
+    hours: "7:00 AM - 8:00 PM (Daily)",
+    isMain: false,
+    // Using the actual Google Maps embed for Koteshwor Bhatbhateni to ensure it renders correctly
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.1555543169766!2d85.342138!3d27.68156!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19920d367463%3A0xe54fb77d018b323a!2sBhat-Bhateni%20Supermarket%20and%20Departmental%20Store%2C%20Koteshwor!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
   },
   {
     name: "Jhamsikhel Heritage Branch",
-    state: "Lalitpur",
-    city: "Jhamsikhel",
+    state: "Bagmati",
+    city: "Lalitpur",
     address: "Jhamsikhel Road, Lalitpur",
     phone: "+977 981-xxxxxxx",
     hours: "6:30 AM - 7:30 PM (Daily)",
-    isMain: false
+    isMain: false,
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.178972824989!2d85.308232!3d27.6808!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb183556093557%3A0xeab50d3c40fa96b5!2sJhamsikhel%2C%20Patan%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
   },
   {
     name: "Suryabinayak Fresh Outlet",
-    state: "Bhaktapur",
-    city: "Suryabinayak",
+    state: "Bagmati",
+    city: "Bhaktapur",
     address: "Suryabinayak Chowk, Bhaktapur",
     phone: "+977 1-661xxxx",
     hours: "6:00 AM - 7:00 PM (Daily)",
-    isMain: false
+    isMain: false,
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.8824103138676!2d85.4217105!3d27.6745749!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1aa9c2627993%3A0xa6436ef8df9644ba!2sSuryabinayak%2C%20Bhaktapur%2044800!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
   }
 ];
 
@@ -92,6 +102,14 @@ export default function OutletsPage() {
     }
 
     setDisplayedOutlets(filtered);
+  };
+
+  // Reset Logic
+  const handleReset = () => {
+    setSelectedState("");
+    setSelectedCity("");
+    setSelectedStore("");
+    setDisplayedOutlets(ALL_OUTLETS);
   };
 
   return (
@@ -148,7 +166,7 @@ export default function OutletsPage() {
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
               >
                 <option value="">City</option>
-                {selectedState && REGION_DATA[selectedState].cities.map(city => (
+                {selectedState && Object.keys(REGION_DATA[selectedState].cities).map(city => (
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
@@ -159,25 +177,35 @@ export default function OutletsPage() {
               <select 
                 value={selectedStore} 
                 onChange={(e) => setSelectedStore(e.target.value)}
-                disabled={!selectedState}
+                disabled={!selectedCity}
                 className="w-full h-12 px-4 border border-gray-200 rounded-lg text-gray-600 text-sm focus:outline-none focus:border-[#9e111a] appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
               >
                 <option value="">Store</option>
-                {selectedState && REGION_DATA[selectedState].stores.map(store => (
+                {selectedState && selectedCity && REGION_DATA[selectedState].cities[selectedCity].map(store => (
                   <option key={store} value={store}>{store}</option>
                 ))}
               </select>
             </div>
 
-            {/* Action Button */}
-            <button 
-              onClick={handleFindStore}
-              className="flex-1 h-12 bg-[#002147] hover:bg-[#00152e] text-white text-[15px] font-bold uppercase tracking-wide rounded-lg flex items-center justify-between px-6 transition-colors shadow-md"
-            >
-              <span>Find Store</span>
-              <ArrowRight size={18} />
-            </button>
+            {/* Action Buttons: Find & Reset */}
+            <div className="flex-1 flex gap-3">
+              <button 
+                onClick={handleFindStore}
+                className="flex-1 h-12 bg-[#002147] hover:bg-[#00152e] text-white text-[14px] font-bold uppercase tracking-wide rounded-lg flex items-center justify-between px-4 lg:px-6 transition-colors shadow-md"
+              >
+                <span>Find Store</span>
+                <ArrowRight size={18} className="hidden sm:block" />
+              </button>
+              
+              <button 
+                onClick={handleReset}
+                title="Reset Filters"
+                className="w-12 h-12 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-lg flex items-center justify-center transition-colors border border-gray-200 shadow-sm shrink-0"
+              >
+                <RefreshCw size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -205,7 +233,7 @@ export default function OutletsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white border border-gray-200 p-8 rounded-2xl relative hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  className="bg-white border border-gray-200 p-8 rounded-2xl relative hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
                 >
                   {/* Headquarters Red Badge */}
                   {outlet.isMain && (
@@ -233,7 +261,7 @@ export default function OutletsPage() {
                   <div className="w-full h-px bg-gray-100 mb-6"></div>
                   
                   {/* Information Rows */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 mb-8">
                     <div className="flex items-start gap-4 text-gray-600">
                       <MapPin className="shrink-0 text-gray-400 mt-0.5" size={18} />
                       <p className="text-[15px] font-medium">{outlet.address}</p>
@@ -248,6 +276,20 @@ export default function OutletsPage() {
                       <Clock className="shrink-0 text-[#9e111a]" size={18} />
                       <p className="text-[15px] font-bold">{outlet.hours}</p>
                     </div>
+                  </div>
+
+                  {/* Google Maps Embed */}
+                  <div className="mt-auto w-full h-48 rounded-xl overflow-hidden border border-gray-200">
+                    <iframe 
+                      src={outlet.mapUrl} 
+                      width="100%" 
+                      height="100%" 
+                      style={{ border: 0 }} 
+                      allowFullScreen="" 
+                      loading="lazy" 
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`${outlet.name} Location Map`}
+                    ></iframe>
                   </div>
                 </motion.div>
               ))}
