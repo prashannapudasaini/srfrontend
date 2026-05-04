@@ -14,7 +14,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import NoticesPage from './pages/NoticesPage';
-import MediaPage from './pages/MediaPage';           // <--- NEW IMPORT
+import MediaPage from './pages/MediaPage';         
 import AvailabilityPage from './pages/AvailabilityPage'; 
 import OutletsPage from './pages/OutletsPage';           
 
