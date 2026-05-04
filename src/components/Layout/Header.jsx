@@ -11,7 +11,7 @@ const Header = () => {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [expandedMobileMenu, setExpandedMobileMenu] = useState(null); // Added state for mobile dropdown
+  const [expandedMobileMenu, setExpandedMobileMenu] = useState(null); 
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +45,16 @@ const Header = () => {
     { id: 'about', label: 'Our Story', path: '/about' },
     { id: 'services', label: 'Services', path: '/services' },
     { id: 'notices', label: 'Farm Updates', path: '/notices' },
+    { 
+      id: 'media', 
+      label: 'Media', 
+      path: '/media',
+      dropdown: [
+        { label: 'Images', path: '/media?tab=images' },
+        { label: 'Videos', path: '/media?tab=videos' },
+        { label: 'YouTube', path: '/media?tab=youtube' }
+      ]
+    },
     { id: 'availability', label: 'Availability', path: '/availability' },
     { id: 'outlets', label: 'Outlets', path: '/outlets' },
   ];
@@ -66,7 +76,6 @@ const Header = () => {
           <div className="flex justify-between items-center">
             
             <Link to="/" className="flex items-center gap-3 sm:gap-4 group shrink-0">
-              {/* === AESTHETIC POPPING BADGE === */}
               <motion.img 
                 src="/leading.png" 
                 alt="Leading Brand Badge"
@@ -75,7 +84,6 @@ const Header = () => {
                 transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2.5, ease: "easeInOut" }}
               />
 
-              {/* Main Logo & Text */}
               <div className="flex items-center gap-3 border-l border-gray-200 pl-3 sm:pl-4">
                 <img 
                   src="/logo.png" 
@@ -107,7 +115,6 @@ const Header = () => {
                     }`}
                   >
                     {item.label}
-                    
                     {hoveredItem === item.id && activeLink !== item.id && (
                       <motion.div layoutId="navHover" className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#E41E26]/50" />
                     )}
@@ -145,39 +152,10 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Actions */}
             <div className="flex items-center gap-3 sm:gap-5">
               <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#E41E26] transition-colors">
                 <PhoneCall size={20} />
               </button>
-
-              {/* ========================================================= */}
-              {/* LOGIN AND CART BUTTONS TEMPORARILY COMMENTED OUT HERE     */}
-              {/* ========================================================= */}
-              {/* {isAuthenticated ? (
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <Link to={user?.role === 'admin' ? '/admin' : '/history'} className="text-gray-700 hover:text-[#E41E26] transition-colors">
-                    <User size={20} className="sm:w-[22px] sm:h-[22px]" />
-                  </Link>
-                  <button onClick={handleLogout} className="hidden sm:block text-gray-700 hover:text-[#E41E26] transition-colors">
-                    <LogOut size={22} />
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="hidden sm:block text-sm font-bold text-gray-700 hover:text-[#E41E26] transition-colors uppercase tracking-wider">
-                  Login
-                </Link>
-              )}
-
-              <button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#E41E26] transition-colors p-1">
-                <ShoppingCart size={22} className="sm:w-[24px] sm:h-[24px]" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#E41E26] text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shadow-sm">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-              */}
 
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
                 {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
@@ -198,8 +176,6 @@ const Header = () => {
               <div className="flex flex-col px-6 py-4 gap-4">
                 {navItems.map((item) => (
                   <div key={item.id} className="flex flex-col">
-                    
-                    {/* Check if item has a dropdown to make it a toggle button on mobile */}
                     {item.dropdown ? (
                       <button
                         onClick={() => toggleMobileMenu(item.id)}
@@ -225,7 +201,6 @@ const Header = () => {
                       </Link>
                     )}
                     
-                    {/* Dropdown Content */}
                     <AnimatePresence>
                       {item.dropdown && expandedMobileMenu === item.id && (
                         <motion.div 
@@ -249,23 +224,6 @@ const Header = () => {
                     </AnimatePresence>
                   </div>
                 ))}
-                
-                {/* ========================================================= */}
-                {/* MOBILE LOGIN SECTION TEMPORARILY COMMENTED OUT HERE       */}
-                {/* ========================================================= */}
-                {/*
-                <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
-                  {!isAuthenticated ? (
-                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A]">
-                      Login
-                    </Link>
-                  ) : (
-                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-[#E41E26] text-left flex items-center gap-2">
-                      <LogOut size={16} /> Logout
-                    </button>
-                  )}
-                </div>
-                */}
               </div>
             </motion.div>
           )}

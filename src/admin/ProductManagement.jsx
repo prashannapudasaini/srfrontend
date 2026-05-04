@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Edit, Trash2, Plus, Package, Search, X, PlusCircle, AlertCircle, UploadCloud, Settings, AlertTriangle } from 'lucide-react';
+import { Edit, Trash2, Plus, Package, Search, X, PlusCircle, AlertCircle, UploadCloud, Settings, AlertTriangle, AlignLeft, Activity } from 'lucide-react';
 import api from '../services/api';
 
 export default function ProductManagement() {
@@ -81,7 +81,6 @@ export default function ProductManagement() {
     }
   };
 
-  // FIXED: Category deletion now uses api.delete to communicate properly with PHP
   const handleDeleteCategory = (id) => {
     showConfirm("Are you sure you want to permanently delete this category?", async () => {
       try {
@@ -157,7 +156,7 @@ export default function ProductManagement() {
   return (
     <div className="space-y-6 relative">
       
-      {/* CUSTOM UI DIALOG (Replaces window.confirm) */}
+      {/* CUSTOM UI DIALOG */}
       {dialog.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl text-center transform scale-100 animate-in fade-in zoom-in duration-200">
@@ -334,18 +333,71 @@ export default function ProductManagement() {
 // =====================================================================
 
 function ProductFormModal({ closeModal, product, categories, onSave, showAlert }) {
-  const [formData, setFormData] = useState(product || {
-    name: '', category: categories.length > 0 ? categories[0] : '', image: '', badge: '',
-    is_premium: false, is_essential: false,
-    variants: [{ size: '', price_npr: '', stock_quantity: '', description: '', image: '' }]
+  // Safely parse JSON strings from the database back into arrays
+  let parsedFeatures = product?.features;
+  if (typeof parsedFeatures === 'string') {
+    if (parsedFeatures.trim().startsWith('[')) {
+      try { parsedFeatures = JSON.parse(parsedFeatures); } catch(e) {}
+    } else {
+      parsedFeatures = parsedFeatures.split('\n').filter(f => f.trim() !== '');
+    }
+  }
+  const initialFeatures = Array.isArray(parsedFeatures) && parsedFeatures.length > 0 ? parsedFeatures : [''];
+
+  let parsedNutrition = product?.nutrition;
+  if (typeof parsedNutrition === 'string') {
+    try { parsedNutrition = JSON.parse(parsedNutrition); } catch(e) {}
+  }
+  const initialNutrition = Array.isArray(parsedNutrition) && parsedNutrition.length > 0 ? parsedNutrition : [{ nutrient: '', value: '' }];
+
+  const [formData, setFormData] = useState({
+    ...(product || {
+      name: '', category: categories.length > 0 ? categories[0] : '', image: '', badge: '',
+      is_premium: false, is_essential: false,
+      variants: [{ size: '', price_npr: '', stock_quantity: '', description: '', image: '' }]
+    }),
+    description: product?.description || '',
+    features: initialFeatures,
+    nutrition: initialNutrition
   });
   
   const [isUploading, setIsUploading] = useState(false);
 
+  // === Dynamic Arrays Handlers ===
+  const handleFeatureChange = (index, value) => {
+    const newFeatures = [...formData.features];
+    newFeatures[index] = value;
+    setFormData({ ...formData, features: newFeatures });
+  };
+  const addFeature = () => setFormData({ ...formData, features: [...formData.features, ''] });
+  const removeFeature = (index) => setFormData({ ...formData, features: formData.features.filter((_, i) => i !== index) });
+
+  const handleNutritionChange = (index, field, value) => {
+    const newNutrition = [...formData.nutrition];
+    newNutrition[index][field] = value;
+    setFormData({ ...formData, nutrition: newNutrition });
+  };
+  const addNutrition = () => setFormData({ ...formData, nutrition: [...formData.nutrition, { nutrient: '', value: '' }] });
+  const removeNutrition = (index) => setFormData({ ...formData, nutrition: formData.nutrition.filter((_, i) => i !== index) });
+
+  // === Variant Handlers ===
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
     newVariants[index][field] = value;
     setFormData({ ...formData, variants: newVariants });
+  };
+
+  const addVariant = () => {
+    setFormData({ 
+      ...formData, 
+      variants: [...formData.variants, { size: '', price_npr: '', stock_quantity: '', description: '', image: '' }] 
+    });
+  };
+
+  const removeVariant = (index) => {
+    if (formData.variants.length > 1) {
+      setFormData({ ...formData, variants: formData.variants.filter((_, i) => i !== index) });
+    }
   };
 
   const handleImageUpload = async (file, isMain = false, variantIndex = null) => {
@@ -372,26 +424,21 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
     }
   };
 
-  const addVariant = () => {
-    setFormData({ 
-      ...formData, 
-      variants: [...formData.variants, { size: '', price_npr: '', stock_quantity: '', description: '', image: '' }] 
-    });
-  };
-
-  const removeVariant = (index) => {
-    if (formData.variants.length > 1) {
-      setFormData({ ...formData, variants: formData.variants.filter((_, i) => i !== index) });
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (categories.length === 0) {
       showAlert("Please create at least one category before adding a product.");
       return;
     }
-    onSave(formData);
+
+    // Sanitize empty rows before saving to database
+    const cleanedData = {
+      ...formData,
+      features: formData.features.filter(f => f.trim() !== ''),
+      nutrition: formData.nutrition.filter(n => n.nutrient.trim() !== '' || n.value.trim() !== '')
+    };
+
+    onSave(cleanedData);
   };
 
   return (
@@ -403,13 +450,15 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
             <h2 className="text-2xl font-serif font-black text-[#1A1A1A]">
               {product ? 'Edit Product' : 'Create New Product'}
             </h2>
-            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Include variant details</p>
+            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">Include descriptions and variant details</p>
           </div>
           <button onClick={closeModal} className="p-2 bg-gray-50 hover:bg-gray-200 text-gray-500 rounded-full transition-colors"><X size={20} /></button>
         </div>
 
-        <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar flex-grow">
+        <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar flex-grow space-y-8">
           <form id="productForm" onSubmit={handleSubmit} className="space-y-8">
+            
+            {/* 1. Base Product Details */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><Package size={16}/> Base Product Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -426,7 +475,7 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block text-xs font-bold text-gray-500 mb-2">Badge / Tag (Optional)</label><input type="text" value={formData.badge || ''} onChange={e => setFormData({...formData, badge: e.target.value})} className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none" /></div>
+                    <div><label className="block text-xs font-bold text-gray-500 mb-2">Badge / Tag (Optional)</label><input type="text" value={formData.badge || ''} onChange={e => setFormData({...formData, badge: e.target.value})} placeholder="e.g., Best Seller, New" className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none" /></div>
                     <div>
                       <label className="block text-xs font-bold text-gray-500 mb-2">Home Page Display Options</label>
                       <div className="flex flex-col gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
@@ -439,6 +488,81 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
               </div>
             </div>
 
+            {/* 2. Overview, Description & Features */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+              <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><AlignLeft size={16}/> Overview & Features</h3>
+              
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-2">Base Product Description</label>
+                <textarea 
+                  value={formData.description || ''} 
+                  onChange={e => setFormData({...formData, description: e.target.value})} 
+                  placeholder="Enter the main description for the product..."
+                  className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none h-32 resize-none custom-scrollbar" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-2">Special Features (Bullet Points)</label>
+                <div className="space-y-3">
+                  {formData.features.map((feature, idx) => (
+                    <div key={idx} className="flex gap-2 items-center">
+                      <div className="bg-gray-100 p-3 rounded-xl shrink-0 text-gray-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                      </div>
+                      <input 
+                        type="text" 
+                        value={feature} 
+                        onChange={e => handleFeatureChange(idx, e.target.value)} 
+                        placeholder="e.g. 100% Pure & Natural Source" 
+                        className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none" 
+                      />
+                      <button type="button" onClick={() => removeFeature(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shrink-0">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={addFeature} className="bg-gray-50 text-[#1A1A1A] hover:bg-gray-100 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all mt-2">
+                    <PlusCircle size={14} /> Add Feature Line
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Nutritional Information */}
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><Activity size={16}/> Nutritional Information</h3>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">Approximate Composition Per 100g/mL</p>
+              
+              <div className="space-y-3">
+                {formData.nutrition.map((item, idx) => (
+                  <div key={idx} className="flex flex-col sm:flex-row gap-3 items-center">
+                    <input 
+                      type="text" 
+                      placeholder="Nutrient (e.g. Calcium (mg))" 
+                      value={item.nutrient} 
+                      onChange={e => handleNutritionChange(idx, 'nutrient', e.target.value)} 
+                      className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Value (e.g. 120.5)" 
+                      value={item.value} 
+                      onChange={e => handleNutritionChange(idx, 'value', e.target.value)} 
+                      className="w-full p-3 rounded-xl border border-gray-200 focus:border-[#9e111a] outline-none"
+                    />
+                    <button type="button" onClick={() => removeNutrition(idx)} className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shrink-0 w-full sm:w-auto flex justify-center">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={addNutrition} className="bg-gray-50 text-[#1A1A1A] hover:bg-gray-100 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all mt-2">
+                  <PlusCircle size={14} /> Add Nutrient Row
+                </button>
+              </div>
+            </div>
+
+            {/* 4. Product Variants */}
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div><h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest">Product Variants</h3><p className="text-[10px] text-gray-500 mt-1">Set individual prices, stock, descriptions, and images.</p></div>
@@ -448,7 +572,7 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
                 {formData.variants.map((v, idx) => (
                   <div key={idx} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm relative group">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div><label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Variant Name</label><input type="text" required value={v.size} onChange={e => handleVariantChange(idx, 'size', e.target.value)} className="w-full p-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147]" /></div>
+                      <div><label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Variant Size/Name</label><input type="text" required value={v.size} onChange={e => handleVariantChange(idx, 'size', e.target.value)} className="w-full p-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147]" /></div>
                       <div><label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Price (NPR)</label><input type="number" required value={v.price_npr} onChange={e => handleVariantChange(idx, 'price_npr', Number(e.target.value))} className="w-full p-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147]" /></div>
                       <div><label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Stock Quantity</label><input type="number" required value={v.stock_quantity} onChange={e => handleVariantChange(idx, 'stock_quantity', Number(e.target.value))} className="w-full p-2.5 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147]" /></div>
                     </div>
@@ -459,8 +583,8 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
                         {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#002147]"></div></div>}
                       </div>
                       <div className="md:col-span-3">
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Variant Description</label>
-                        <textarea value={v.description || ''} onChange={e => handleVariantChange(idx, 'description', e.target.value)} className="w-full p-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147] h-32 resize-none custom-scrollbar" />
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Variant Overriding Description (Optional)</label>
+                        <textarea value={v.description || ''} onChange={e => handleVariantChange(idx, 'description', e.target.value)} placeholder="Leave blank to use base description" className="w-full p-3 text-sm rounded-xl border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-[#002147] h-32 resize-none custom-scrollbar" />
                       </div>
                     </div>
                     {formData.variants.length > 1 && <button type="button" onClick={() => removeVariant(idx)} className="absolute -top-3 -right-3 bg-white border border-gray-200 text-red-500 hover:text-white hover:bg-red-500 rounded-full p-1.5 shadow-md transition-colors"><Trash2 size={14} /></button>}
@@ -468,12 +592,15 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
                 ))}
               </div>
             </div>
+
           </form>
         </div>
 
         <div className="p-6 bg-white border-t border-gray-100 flex justify-end gap-4 shrink-0">
           <button type="button" onClick={closeModal} className="px-6 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50" disabled={isUploading}>Cancel</button>
-          <button type="submit" form="productForm" className="px-8 py-3 rounded-xl font-black text-white bg-[#1A1A1A] hover:bg-[#9e111a] transition-colors shadow-lg disabled:opacity-50" disabled={isUploading}>{isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Publish to Store')}</button>
+          <button type="submit" form="productForm" className="px-8 py-3 rounded-xl font-black text-white bg-[#1A1A1A] hover:bg-[#9e111a] transition-colors shadow-lg disabled:opacity-50" disabled={isUploading}>
+            {isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Publish to Store')}
+          </button>
         </div>
       </div>
     </div>

@@ -14,8 +14,9 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import AboutPage from './pages/AboutPage';
 import ServicesPage from './pages/ServicesPage';
 import NoticesPage from './pages/NoticesPage';
-import AvailabilityPage from './pages/AvailabilityPage'; // <--- NEW IMPORT
-import OutletsPage from './pages/OutletsPage';           // <--- NEW IMPORT
+import MediaPage from './pages/MediaPage';           // <--- NEW IMPORT
+import AvailabilityPage from './pages/AvailabilityPage'; 
+import OutletsPage from './pages/OutletsPage';           
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -85,6 +86,9 @@ function App() {
         <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
         <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
         
+        {/* === MEDIA & UPDATES === */}
+        <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> {/* <--- NEW ROUTE */}
+        
         {/* === NEWLY ADDED PAGES === */}
         <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
         <Route path="/outlets" element={<PublicLayout><OutletsPage /></PublicLayout>} />
@@ -99,7 +103,6 @@ function App() {
         <Route path="/history" element={<PublicLayout><OrderHistoryPage /></PublicLayout>} />
 
         {/* === ADMIN PANEL (NESTED) === */}
-        {/* We use a separate layout/Dashboard here, so FloatingChat won't show up */}
         <Route path="/admin" element={<Dashboard />}>
           <Route index element={<Overview />} /> 
           <Route path="products" element={<ProductManagement />} />
