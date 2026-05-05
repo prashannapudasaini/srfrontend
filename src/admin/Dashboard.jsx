@@ -1,7 +1,6 @@
-// frontend/src/admin/Dashboard.jsx
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X } from 'lucide-react';
+import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X, Video } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Dashboard() {
@@ -21,6 +20,7 @@ export default function Dashboard() {
     { name: 'Milk Inventory', path: '/admin/milk', icon: Droplets },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
     { name: 'Banners', path: '/admin/banners', icon: ImageIcon },
+    { name: 'Media Center', path: '/admin/media', icon: Video }, // <-- NEW MEDIA LINK
     { name: 'Staff & Admins', path: '/admin/users', icon: Users },
   ];
 

@@ -35,6 +35,7 @@ import MilkStockManagement from './admin/MilkStockManagement';
 import OrderManagement from './admin/OrderManagement';
 import BannerManagement from './admin/BannerManagement';
 import UserManagement from './admin/UserManagement'; 
+import MediaManagement from './admin/MediaManagement';
 
 /**
  * ScrollToTop Utility Component
@@ -110,6 +111,7 @@ function App() {
           <Route path="orders" element={<OrderManagement />} />
           <Route path="banners" element={<BannerManagement />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="media" element={<MediaManagement />} />
         </Route>
 
         {/* === 404 NOT FOUND === */}
