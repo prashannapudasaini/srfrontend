@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X, Video } from 'lucide-react';
+import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X, Video, CalendarDays } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Dashboard() {
@@ -19,8 +19,9 @@ export default function Dashboard() {
     { name: 'Products', path: '/admin/products', icon: Package },
     { name: 'Milk Inventory', path: '/admin/milk', icon: Droplets },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+    { name: 'Subscriptions', path: '/admin/subscriptions', icon: CalendarDays }, // <-- NEW SUBSCRIPTIONS LINK
     { name: 'Banners', path: '/admin/banners', icon: ImageIcon },
-    { name: 'Media Center', path: '/admin/media', icon: Video }, // <-- NEW MEDIA LINK
+    { name: 'Media Center', path: '/admin/media', icon: Video },
     { name: 'Staff & Admins', path: '/admin/users', icon: Users },
   ];
 
