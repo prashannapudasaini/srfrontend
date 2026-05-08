@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CalendarDays } from 'lucide-react'; // <-- Imported icon for the subscribe button
 import api from '../services/api';
-import { useCart } from '../context/CartContext'; // Added to make the Add + button work
+import { useCart } from '../context/CartContext'; 
 
 export default function ProductsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addToCart } = useCart(); // Initialize Cart
+  const { addToCart } = useCart(); 
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +68,7 @@ export default function ProductsPage() {
 
   return (
     <div className="bg-[#FDF8E7] min-h-screen pt-28 pb-20">
-      {/* 1. PAGE HEADER (Styled to match screenshot) */}
+      {/* 1. PAGE HEADER */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10 mt-8">
         <p className="text-xs font-bold text-[#9e111a] uppercase tracking-[0.3em] mb-4">
           Our Collection
@@ -131,7 +132,7 @@ export default function ProductsPage() {
   );
 }
 
-// --- SUB-COMPONENT: FULL-FIT PRODUCT CARD (Styled to match screenshot) ---
+// --- SUB-COMPONENT: FULL-FIT PRODUCT CARD ---
 function ProductCard({ product, navigate, addToCart }) {
   // Protect against products with no variants yet
   const lowestPrice = product.variants?.length > 0 
@@ -165,7 +166,19 @@ function ProductCard({ product, navigate, addToCart }) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#9e111a]/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
-          {/* Red Badge */}
+          {/* --- UPDATED: Bigger Eye-Catchy Subscribe Button (Top Left on Hover) --- */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents navigating to product detail
+              navigate('/availability');
+            }}
+            className="absolute top-4 left-4 z-20 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-gradient-to-br from-[#002147] to-[#00152e] text-[#E2B254] px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center gap-2 border border-[#E2B254]/40 hover:scale-105 hover:shadow-2xl"
+          >
+            <CalendarDays size={16} className="animate-pulse" />
+            Buy Subscription
+          </button>
+
+          {/* Red Badge (Top Right) */}
           {product.badge && (
             <span className="absolute top-4 right-4 bg-[#9e111a] text-white px-3 py-1 text-[10px] font-black tracking-widest rounded uppercase shadow-md">
               {product.badge}

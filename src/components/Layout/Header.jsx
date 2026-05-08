@@ -66,8 +66,8 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-white/70 backdrop-blur-xl shadow-sm sticky top-0 z-40 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 relative">
+      <header className="bg-white/80 backdrop-blur-xl shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
           <div className="flex justify-between items-center">
             
             <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center gap-3 sm:gap-4 group shrink-0">
@@ -87,7 +87,7 @@ const Header = () => {
                 />
                 <div className="flex flex-col justify-center">
                   <h1 className="text-lg sm:text-2xl font-serif font-black text-[#1A1A1A] leading-none">Sita Ram</h1>
-                  <span className="text-[8px] sm:text-[10px] font-bold text-[#E41E26] uppercase tracking-[0.2em] mt-0.5">Gokul Milk</span>
+                  <span className="text-[8px] sm:text-[10px] font-bold text-[#9e111a] uppercase tracking-[0.2em] mt-0.5">Gokul Milk</span>
                 </div>
               </div>
             </Link>
@@ -106,16 +106,16 @@ const Header = () => {
                     onClick={() => window.scrollTo(0, 0)}
                     className={`text-xs xl:text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
                       activeLink === item.id 
-                        ? 'text-[#1A1A1A] font-black' 
+                        ? 'text-[#9e111a] font-black' 
                         : 'text-gray-600 font-bold hover:text-[#1A1A1A]'
                     }`}
                   >
                     {item.label}
                     {hoveredItem === item.id && activeLink !== item.id && (
-                      <motion.div layoutId="navHover" className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#E41E26]/50" />
+                      <motion.div layoutId="navHover" className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#9e111a]/50" />
                     )}
                     {activeLink === item.id && (
-                      <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#E41E26]" />
+                      <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#9e111a]" />
                     )}
                   </Link>
 
@@ -135,7 +135,7 @@ const Header = () => {
                                 key={idx}
                                 to={dropItem.path}
                                 onClick={() => window.scrollTo(0, 0)}
-                                className="px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#E41E26] hover:bg-red-50 transition-colors border-b border-gray-50 last:border-none"
+                                className="px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#9e111a] hover:bg-red-50 transition-colors border-b border-gray-50 last:border-none"
                               >
                                 {dropItem.label}
                               </Link>
@@ -149,43 +149,58 @@ const Header = () => {
               ))}
             </nav>
 
-            <div className="flex items-center gap-3 sm:gap-5">
-              <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#E41E26] transition-colors">
+            <div className="flex items-center gap-3 sm:gap-6">
+              <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#9e111a] transition-colors">
                 <PhoneCall size={20} />
               </button>
 
-              {/* ========================================================= */}
-              {/* LOGIN AND CART BUTTONS TEMPORARILY DISABLED               */}
-              {/* (Using 'false &&' bypasses the JSX parsing error!)        */}
-              {/* ========================================================= */}
-              {false && (
-                <>
-                  {isAuthenticated ? (
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <Link to={user?.role === 'admin' ? '/admin' : '/history'} onClick={() => window.scrollTo(0, 0)} className="text-gray-700 hover:text-[#E41E26] transition-colors">
-                        <User size={20} className="sm:w-[22px] sm:h-[22px]" />
-                      </Link>
-                      <button onClick={handleLogout} className="hidden sm:block text-gray-700 hover:text-[#E41E26] transition-colors">
-                        <LogOut size={22} />
-                      </button>
+              {/* Profile Dropdown / Login Block */}
+              {isAuthenticated ? (
+                <div className="relative group hidden sm:block">
+                  <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 py-1.5 px-3 rounded-full transition-colors cursor-pointer">
+                    <div className="w-6 h-6 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shrink-0">
+                      <User size={14} />
                     </div>
-                  ) : (
-                    <Link to="/login" onClick={() => window.scrollTo(0, 0)} className="hidden sm:block text-sm font-bold text-gray-700 hover:text-[#E41E26] transition-colors uppercase tracking-wider">
-                      Login
-                    </Link>
-                  )}
-
-                  <button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#E41E26] transition-colors p-1">
-                    <ShoppingCart size={22} className="sm:w-[24px] sm:h-[24px]" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-[#E41E26] text-white text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shadow-sm">
-                        {cartCount}
-                      </span>
-                    )}
+                    <span className="text-xs font-bold text-[#1A1A1A] tracking-wider uppercase">
+                      {user?.name?.split(' ')[0] || 'Profile'}
+                    </span>
+                    <ChevronDown size={14} className="text-gray-500" />
                   </button>
-                </>
+                  
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <Link 
+                      to={user?.role === 'admin' ? '/admin' : '/history'} 
+                      onClick={() => window.scrollTo(0, 0)}
+                      className="block px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#9e111a] hover:bg-red-50 transition-colors border-b border-gray-50"
+                    >
+                      My Account
+                    </Link>
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full text-left px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#9e111a] hover:bg-red-50 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut size={14} /> Logout
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Link to="/login" onClick={() => window.scrollTo(0, 0)} className="hidden sm:flex text-xs font-black text-[#1A1A1A] hover:text-[#9e111a] transition-colors uppercase tracking-widest px-4 py-2 border border-gray-200 rounded-lg hover:border-[#9e111a]">
+                  Login
+                </Link>
               )}
 
+              {/* Cart Button */}
+              <button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#9e111a] transition-colors p-1">
+                <ShoppingCart size={24} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-[#9e111a] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Mobile Menu Toggle */}
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
                 {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
@@ -209,7 +224,7 @@ const Header = () => {
                       <button
                         onClick={() => toggleMobileMenu(item.id)}
                         className={`text-sm tracking-wider uppercase font-bold flex justify-between items-center text-left ${
-                          activeLink === item.id || expandedMobileMenu === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
+                          activeLink === item.id || expandedMobileMenu === item.id ? 'text-[#9e111a]' : 'text-[#1A1A1A]'
                         }`}
                       >
                         {item.label}
@@ -226,7 +241,7 @@ const Header = () => {
                           window.scrollTo(0, 0);
                         }}
                         className={`text-sm tracking-wider uppercase font-bold ${
-                          activeLink === item.id ? 'text-[#E41E26]' : 'text-[#1A1A1A]'
+                          activeLink === item.id ? 'text-[#9e111a]' : 'text-[#1A1A1A]'
                         }`}
                       >
                         {item.label}
@@ -249,7 +264,7 @@ const Header = () => {
                                 setIsMobileMenuOpen(false);
                                 window.scrollTo(0, 0);
                               }} 
-                              className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-[#E41E26]"
+                              className="text-xs tracking-wider uppercase font-bold text-gray-500 hover:text-[#9e111a]"
                             >
                               {dropItem.label}
                             </Link>
@@ -260,23 +275,24 @@ const Header = () => {
                   </div>
                 ))}
                 
-                {/* ========================================================= */}
-                {/* MOBILE LOGIN SECTION TEMPORARILY DISABLED                 */}
-                {/* (Using 'false &&' bypasses the JSX parsing error!)        */}
-                {/* ========================================================= */}
-                {false && (
-                  <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
-                    {!isAuthenticated ? (
-                      <Link to="/login" onClick={() => { setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A]">
-                        Login
+                {/* Mobile Auth Links */}
+                <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
+                  {!isAuthenticated ? (
+                    <Link to="/login" onClick={() => { setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A] flex items-center gap-2">
+                      <User size={18} /> Login / Register
+                    </Link>
+                  ) : (
+                    <>
+                      <Link to={user?.role === 'admin' ? '/admin' : '/history'} onClick={() => { setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="text-sm tracking-wider uppercase font-bold text-[#002147] flex items-center gap-2">
+                        <User size={18} /> My Account
                       </Link>
-                    ) : (
-                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-[#E41E26] text-left flex items-center gap-2">
-                        <LogOut size={16} /> Logout
+                      <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-[#9e111a] text-left flex items-center gap-2">
+                        <LogOut size={18} /> Logout
                       </button>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
+
               </div>
             </motion.div>
           )}

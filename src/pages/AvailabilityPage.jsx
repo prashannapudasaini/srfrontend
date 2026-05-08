@@ -1,312 +1,445 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, CalendarDays, Check, Loader2, Gift, Clock, Truck, Sun, Moon, Info } from 'lucide-react';
-import ContactModal from '../components/ContactModal';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; 
+import { MapPin, Check, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; 
+import api from '../services/api';
 
 const AVAILABLE_LOCATIONS = [
-  "Kathmandu Central (Thamel, Lazimpat, Naxal)",
-  "Lalitpur Core (Patan, Jawalakhel, Jhamsikhel)",
-  "Bhaktapur Area (Thimi, Suryabinayak)",
-  "Ring Road East (Koteshwor, Baneshwor)",
-  "Kathmandu North (Boudha, Chabahil, Kapan)",
-  "Kathmandu West (Kalanki, Swayambhu)",
-  "Kathmandu South (Balkhu, Kirtipur)",
-  "Lalitpur Outskirts (Sanepa, Kupondole)",
-  "Chandragiri & Thankot Route",
-  "Gongabu & Sitapaila Route"
+  "Kathmandu Central", "Lalitpur Core", "Bhaktapur Area", 
+  "Ring Road East", "Kathmandu North", "Kathmandu West", 
+  "Kathmandu South", "Lalitpur Outskirts"
 ];
 
-const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DAYS_OF_WEEK = [
+  { full: 'Monday', short: 'MON' },
+  { full: 'Tuesday', short: 'TUE' },
+  { full: 'Wednesday', short: 'WED' },
+  { full: 'Thursday', short: 'THU' },
+  { full: 'Friday', short: 'FRI' },
+  { full: 'Saturday', short: 'SAT' },
+  { full: 'Sunday', short: 'SUN' }
+];
 
 export default function AvailabilityPage() {
-  const [selectedLocation, setSelectedLocation] = useState(null); // <--- Changed to single selection
-  const [selectedDays, setSelectedDays] = useState([]);
-  const [subscriptionType, setSubscriptionType] = useState('weekly'); // 'weekly' or 'monthly'
-  const [deliveryTime, setDeliveryTime] = useState('morning'); // 'morning' or 'evening'
+  const navigate = useNavigate(); 
+  const { isAuthenticated } = useAuth(); 
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedLocation, setSelectedLocation] = useState(''); 
+  const [subscriptionType, setSubscriptionType] = useState('weekly'); 
+  const [activeDay, setActiveDay] = useState('Monday'); 
   
+  const [productSchedules, setProductSchedules] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); 
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Ghee Eligibility Check: Monthly plan + at least 5 days selected
-  const isEligibleForFreeGhee = subscriptionType === 'monthly' && selectedDays.length >= 5;
+  // Fetch Live Products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products/index.php');
+        if (res.data.status === 'success') {
+          const formattedProducts = res.data.data.map(p => {
+            const lowestPrice = p.variants?.length > 0 
+              ? Math.min(...p.variants.map(v => parseFloat(v.price_npr) || 0)) 
+              : 0;
+            const displayImage = p.image || p.variants?.[0]?.image || '/logo.png';
+            const unit = p.variants?.[0]?.size || 'Standard';
 
-  const handleToggleLocation = (loc) => {
-    // If clicking the already selected location, deselect it. Otherwise, select the new one.
-    setSelectedLocation(prev => prev === loc ? null : loc);
-    setSubmitStatus(null);
+            return {
+              id: p.id,
+              name: p.name,
+              size: unit,
+              price: lowestPrice,
+              img: displayImage
+            };
+          });
+          setProducts(formattedProducts);
+        }
+      } catch (error) {
+        console.error("Failed to load products for subscription", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const activeDays = useMemo(() => {
+    const daysSet = new Set();
+    Object.values(productSchedules).forEach(dayData => {
+      Object.entries(dayData).forEach(([day, qty]) => {
+        if (qty > 0) daysSet.add(day);
+      });
+    });
+    return DAYS_OF_WEEK.map(d => d.full).filter(day => daysSet.has(day));
+  }, [productSchedules]);
+
+  // --- FIXED THIS SECTION ---
+  const summaryItems = useMemo(() => {
+    const summary = {};
+    Object.entries(productSchedules).forEach(([productId, dayData]) => {
+      const totalQty = Object.values(dayData).reduce((sum, qty) => sum + qty, 0);
+      if (totalQty > 0) {
+        // Wrap both in String() to ensure Database IDs (Integers) match Object Keys (Strings)
+        const product = products.find(p => String(p.id) === String(productId)); 
+        if (product) {
+          summary[productId] = { ...product, totalQty };
+        }
+      }
+    });
+    return Object.values(summary);
+  }, [productSchedules, products]);
+
+  const weeklyTotalCost = summaryItems.reduce((sum, item) => sum + (item.price * item.totalQty), 0);
+  const monthlyTotalCost = weeklyTotalCost * 4; 
+  const monthlyDiscount = monthlyTotalCost * 0.10; 
+
+  // --- Handlers ---
+  const handleAddProductToActiveDay = (product) => {
+    if (!activeDay) return;
+    setProductSchedules(prev => {
+      const prodData = prev[product.id] || {};
+      const currentQty = prodData[activeDay] || 0;
+      return { ...prev, [product.id]: { ...prodData, [activeDay]: currentQty + 1 } };
+    });
   };
 
-  const handleToggleDay = (day) => {
-    setSelectedDays(prev => 
-      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
-    );
-    setSubmitStatus(null);
+  const handleUpdateProductDay = (productId, day, delta) => {
+    setProductSchedules(prev => {
+      const prodData = prev[productId] || {};
+      const currentQty = prodData[day] || 0;
+      const newQty = Math.max(0, currentQty + delta);
+      
+      const newProdData = { ...prodData };
+      if (newQty === 0) delete newProdData[day];
+      else newProdData[day] = newQty;
+
+      const newState = { ...prev };
+      if (Object.keys(newProdData).length === 0) delete newState[productId];
+      else newState[productId] = newProdData;
+      
+      return newState;
+    });
   };
 
+  // --- FIXED THIS SECTION ---
   const handleSubmit = async () => {
-    if (!selectedLocation || selectedDays.length === 0) return;
-    
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedLocation || summaryItems.length === 0) return;
     setIsSubmitting(true);
-    setSubmitStatus(null);
+
+    const cleanWeeklySchedule = activeDays.map(day => {
+      const itemsForDay = [];
+      Object.entries(productSchedules).forEach(([productId, dayData]) => {
+        if (dayData[day] && dayData[day] > 0) {
+          // Wrap both in String() here too!
+          const product = products.find(p => String(p.id) === String(productId));
+          if (product) {
+            itemsForDay.push({
+              productId: product.id, name: product.name, size: product.size, qty: dayData[day], price: product.price
+            });
+          }
+        }
+      });
+      return { day, items: itemsForDay };
+    });
+
+    const finalCost = subscriptionType === 'monthly' ? (monthlyTotalCost - monthlyDiscount) : weeklyTotalCost;
+
+    const orderPayload = {
+      subscriptionDetails: { type: subscriptionType, location: selectedLocation, qualifiesForFreeGhee: subscriptionType === 'monthly', weeklyTotalCost: finalCost },
+      weeklySchedule: cleanWeeklySchedule
+    };
 
     try {
       const response = await fetch('/api/user/delivery-schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          selectedLocation, // <--- Sending single location
-          selectedDays, 
-          subscriptionType,
-          deliveryTime,
-          qualifiesForFreeGhee: isEligibleForFreeGhee
-        }),
+        body: JSON.stringify(orderPayload),
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+      
       await new Promise(resolve => setTimeout(resolve, 1500)); 
-      setSubmitStatus('success');
+      
+      navigate('/subscription-success', { 
+        state: { orderData: orderPayload, itemCount: summaryItems.reduce((acc, curr) => acc + curr.totalQty, 0) } 
+      });
     } catch (error) {
-      console.error("Error saving schedule:", error);
-      setSubmitStatus('error');
-    } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FDF8E7] pt-40 flex flex-col justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9e111a] mb-4"></div>
+        <p className="text-[#002147] font-bold uppercase tracking-widest text-sm">Loading Catalog...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="bg-[#FAF9F6] min-h-screen pt-24 pb-20 font-sans">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6">
+    <div className="bg-[#FAF9F6] min-h-screen pt-28 pb-20 font-sans text-[#1A1A1A]">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-serif font-black text-[#002147] tracking-tight flex items-center justify-center gap-4">
+            <span className="text-[#E2B254]">✦</span> CURATE YOUR SUBSCRIPTION <span className="text-[#E2B254]">✦</span>
+          </h1>
+          <p className="text-gray-500 font-medium mt-4">Design your perfect routine. Select a day, add products, and choose your plan.</p>
+        </div>
+
+        {/* 3-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start h-auto lg:h-[calc(100vh-220px)] min-h-[750px]">
           
-          {/* Header Section */}
-          <div className="text-center mb-16">
-            <span className="inline-block py-1 px-3 rounded-full bg-[#9e111a]/10 text-[#9e111a] text-xs font-bold uppercase tracking-widest mb-4">
-              Doorstep Delivery
-            </span>
-            <h1 className="text-4xl md:text-5xl font-serif font-black text-[#002147] mb-6 tracking-tight">
-              Sita Ram <span className="text-[#9e111a]">Subscriptions</span>
-            </h1>
+          {/* ========================================== */}
+          {/* COLUMN 1: PRODUCT SELECTION */}
+          {/* ========================================== */}
+          <div className="lg:col-span-5 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
+            <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
+              <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
+                <ShoppingBag size={20} />
+              </div>
+              <h2 className="text-lg font-black uppercase tracking-widest text-[#002147]">
+                1. Product Selection
+              </h2>
+            </div>
+            
+            <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+                {products.map(product => (
+                  <button 
+                    key={product.id}
+                    onClick={() => handleAddProductToActiveDay(product)}
+                    className="group relative flex flex-col items-center p-4 rounded-2xl border border-gray-100 hover:border-[#002147]/30 hover:shadow-lg transition-all duration-300 bg-white hover:-translate-y-1 text-center h-full"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 rounded-2xl pointer-events-none"></div>
+                    
+                    {/* Hover Add Icon */}
+                    <div className="absolute top-3 right-3 w-7 h-7 bg-[#002147] text-[#E2B254] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md transform scale-75 group-hover:scale-100">
+                      <Plus size={16} strokeWidth={3} />
+                    </div>
+                    
+                    <img 
+                      src={product.img} 
+                      alt={product.name} 
+                      className="w-20 h-20 object-contain p-2 rounded-xl mb-4 shadow-sm bg-gray-50 z-10 group-hover:scale-105 transition-transform duration-500 mix-blend-multiply" 
+                    />
+                    <div className="z-10 flex flex-col flex-grow justify-between w-full">
+                      <div>
+                        <h4 className="text-[13px] font-black leading-tight text-[#1A1A1A] mb-1">{product.name}</h4>
+                        <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">{product.size}</p>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-100/80">
+                        <span className="text-[#9e111a] font-black text-sm">NPR {product.price}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-10 items-start">
-            
-            {/* LEFT SIDE: Available Locations */}
-            <div className="lg:w-3/5 w-full flex flex-col gap-6">
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-2xl font-black text-[#002147] mb-2 flex items-center gap-3">
-                  <MapPin className="text-[#9e111a]" /> 1. Select Your Location
-                </h2>
-                <p className="text-gray-500 text-sm mb-6">
-                  Check if we deliver to your area. Please select your primary delivery location.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {AVAILABLE_LOCATIONS.map((loc, index) => {
-                    const isSelected = selectedLocation === loc; // <--- Check single selection
-                    return (
-                      <motion.div 
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => handleToggleLocation(loc)}
-                        className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all duration-300 ${
-                          isSelected 
-                            ? 'bg-[#9e111a]/5 border-[#9e111a] shadow-sm' 
-                            : 'bg-gray-50 border-transparent hover:border-gray-200'
-                        }`}
-                      >
-                        <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? 'bg-[#9e111a]' : 'bg-white border-2 border-gray-300'
-                        }`}>
-                          {isSelected && <Check size={14} strokeWidth={4} className="text-white" />}
-                        </div>
-                        <span className={`font-bold text-sm leading-tight ${isSelected ? 'text-[#9e111a]' : 'text-gray-700'}`}>
-                          {loc}
-                        </span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+          {/* ========================================== */}
+          {/* COLUMN 2: WEEKLY SCHEDULE */}
+          {/* ========================================== */}
+          <div className="lg:col-span-4 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
+            <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
+              <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
+                <CalendarDays size={20} />
               </div>
-
-              {/* Custom Route Box */}
-              <div 
-                onClick={() => setIsContactModalOpen(true)}
-                className="bg-gradient-to-br from-[#002147] to-[#00152e] p-8 rounded-3xl shadow-lg flex flex-col sm:flex-row items-center justify-between text-left border border-[#002147] cursor-pointer hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <Truck className="text-[#E2B254]" size={32} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[#E2B254] transition-colors">Not on the list?</h3>
-                    <p className="text-gray-300 text-sm max-w-sm">
-                      Planning a bulk or corporate order? Contact our dispatch team to arrange a special route.
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-6 sm:mt-0 px-6 py-3 bg-white/10 text-white rounded-full text-sm font-bold tracking-wider uppercase">
-                  Contact Us
-                </div>
+              <div>
+                <h2 className="text-lg font-black uppercase tracking-widest text-[#002147] leading-tight">
+                  2. Your Schedule
+                </h2>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Select a day below</p>
               </div>
             </div>
 
-            {/* RIGHT SIDE: Sticky Subscription Builder */}
-            <div className="lg:w-2/5 w-full sticky top-28">
-              
-              {/* Dynamic Promo Banner */}
-              <motion.div 
-                initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                className={`p-6 rounded-t-3xl shadow-md border-b-2 border-dashed flex gap-4 items-start transition-colors duration-500 ${
-                  isEligibleForFreeGhee 
-                    ? 'bg-gradient-to-r from-emerald-400 to-teal-400 border-white/40' 
-                    : 'bg-gradient-to-r from-[#E2B254] to-[#f4d081] border-white/40'
-                }`}
-              >
-                <div className="bg-white/20 p-3 rounded-full shrink-0">
-                  <Gift className={isEligibleForFreeGhee ? "text-white" : "text-[#002147]"} size={28} />
-                </div>
-                <div>
-                  <h3 className={`font-black text-lg uppercase tracking-wide ${isEligibleForFreeGhee ? "text-white" : "text-[#002147]"}`}>
-                    {isEligibleForFreeGhee ? 'Offer Unlocked! 🎉' : 'Monthly Offer!'}
-                  </h3>
-                  <p className={`text-sm font-bold leading-tight mt-1 ${isEligibleForFreeGhee ? "text-white/90" : "text-[#002147]/80"}`}>
-                    {isEligibleForFreeGhee 
-                      ? "Awesome! You've qualified for a complimentary 500ml Pure Ghee on your first delivery."
-                      : <>Subscribe <strong className="text-[#9e111a]">Monthly for 5+ days/week</strong> and receive a complimentary <strong className="text-[#9e111a]">500ml Pure Ghee</strong> on your first delivery!</>}
-                  </p>
-                </div>
-              </motion.div>
-
-              <div className="bg-white p-8 rounded-b-3xl shadow-xl border border-t-0 border-gray-100">
+            <div className="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-3">
+              {DAYS_OF_WEEK.map(dayObj => {
+                const isSelected = activeDay === dayObj.full;
                 
-                {/* Subscription Type Toggle */}
-                <h2 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-3">
-                  <CalendarDays className="text-[#9e111a]" /> 2. Choose Plan
-                </h2>
-                <div className="flex bg-gray-100 p-1.5 rounded-xl mb-8">
-                  <button 
-                    onClick={() => setSubscriptionType('weekly')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
-                      subscriptionType === 'weekly' ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-gray-500 hover:text-gray-800'
+                const dayProducts = products.map(p => ({
+                  ...p, qty: productSchedules[p.id]?.[dayObj.full] || 0
+                })).filter(p => p.qty > 0);
+
+                const hasItems = dayProducts.length > 0;
+
+                return (
+                  <div 
+                    key={dayObj.full}
+                    onClick={() => setActiveDay(dayObj.full)}
+                    className={`flex items-stretch border-2 rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden min-h-[85px] group ${
+                      isSelected 
+                        ? 'border-[#002147] shadow-[0_4px_15px_rgba(0,33,71,0.12)] -translate-y-0.5' 
+                        : 'border-gray-100 hover:border-gray-300'
                     }`}
                   >
-                    Weekly
-                  </button>
-                  <button 
-                    onClick={() => setSubscriptionType('monthly')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                      subscriptionType === 'monthly' ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    Monthly 
-                    {!isEligibleForFreeGhee && <span className="bg-[#E2B254] text-[#002147] text-[9px] px-1.5 py-0.5 rounded">FREE GHEE</span>}
-                  </button>
-                </div>
+                    {/* Day Label Strip */}
+                    <div className={`w-16 flex items-center justify-center shrink-0 transition-colors duration-300 ${
+                      isSelected ? 'bg-[#002147] text-white' : hasItems ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-gray-100'
+                    }`}>
+                      <span className="font-black text-sm tracking-widest">{dayObj.short}</span>
+                    </div>
 
-                {/* Days Selection */}
-                <div className="flex justify-between items-end mb-4">
-                  <h2 className="text-xl font-black text-[#002147]">
-                    3. Delivery Days
-                  </h2>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                    {selectedDays.length}/7 Selected
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-3 mb-8">
-                  {DAYS_OF_WEEK.map(day => {
-                    const isSelected = selectedDays.includes(day);
-                    return (
-                      <button
-                        key={day}
-                        onClick={() => handleToggleDay(day)}
-                        className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-2 ${
-                          isSelected 
-                            ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md transform -translate-y-0.5' 
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-[#9e111a]/40'
-                        }`}
-                      >
-                        {day.substring(0, 3)}
-                      </button>
-                    );
-                  })}
-                </div>
+                    {/* Day Content Area */}
+                    <div className={`flex-grow p-3 flex flex-wrap items-center gap-2.5 transition-colors ${isSelected ? 'bg-blue-50/40' : 'bg-white'}`}>
+                      {hasItems ? (
+                        dayProducts.map((p) => (
+                          <div key={p.id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm">
+                            <img src={p.img} alt={p.name} className="w-9 h-9 rounded-lg object-contain bg-gray-50 p-1 mix-blend-multiply" />
+                            <div className="flex flex-col items-center bg-gray-50 rounded-lg px-1">
+                              <button onClick={(e) => { e.stopPropagation(); handleUpdateProductDay(p.id, dayObj.full, 1); }} className="text-gray-400 hover:text-[#9e111a] py-0.5"><Plus size={12}/></button>
+                              <span className="text-[11px] font-black text-[#1A1A1A] leading-none py-0.5">{p.qty}</span>
+                              <button onClick={(e) => { e.stopPropagation(); handleUpdateProductDay(p.id, dayObj.full, -1); }} className="text-gray-400 hover:text-[#9e111a] py-0.5"><Minus size={12}/></button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full opacity-60">
+                          <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-[#002147]' : 'text-gray-400'}`}>
+                            {isSelected ? "Click products to add →" : "Empty"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-                {/* Time Selection */}
-                <h2 className="text-xl font-black text-[#002147] mb-4 flex items-center gap-3">
-                  <Clock className="text-[#9e111a]" /> 4. Delivery Time
-                </h2>
-                <div className="flex bg-gray-100 p-1.5 rounded-xl mb-8">
-                  <button 
-                    onClick={() => setDeliveryTime('morning')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold tracking-wider transition-all flex items-center justify-center gap-2 ${
-                      deliveryTime === 'morning' ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <Sun size={16} className={deliveryTime === 'morning' ? 'text-amber-500' : ''} /> 7:00 AM
-                  </button>
-                  <button 
-                    onClick={() => setDeliveryTime('evening')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-bold tracking-wider transition-all flex items-center justify-center gap-2 ${
-                      deliveryTime === 'evening' ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    <Moon size={16} className={deliveryTime === 'evening' ? 'text-indigo-500' : ''} /> 5:00 PM
-                  </button>
-                </div>
+          {/* ========================================== */}
+          {/* COLUMN 3: SUMMARY & PLAN */}
+          {/* ========================================== */}
+          <div className="lg:col-span-3 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
+            <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
+              <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
+                <Receipt size={20} />
+              </div>
+              <h2 className="text-lg font-black uppercase tracking-widest text-[#002147]">
+                3. Summary & Plan
+              </h2>
+            </div>
 
-                {/* Processing Note */}
-                <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-8 flex gap-3 items-start">
-                  <Info className="text-blue-500 shrink-0 mt-0.5" size={20} />
-                  <p className="text-sm text-blue-800 leading-relaxed">
-                    <strong>Note:</strong> We require an 18-24 hour processing window. Subscriptions confirmed today will begin receiving deliveries starting tomorrow.
-                  </p>
-                </div>
+            <div className="flex-grow overflow-y-auto custom-scrollbar p-6 flex flex-col">
+              
+              {/* Location Selector */}
+              <div className="mb-6 relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <select 
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full bg-white border-2 border-gray-100 text-sm font-bold text-[#1A1A1A] rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:border-[#002147] appearance-none cursor-pointer hover:border-gray-200 transition-colors"
+                >
+                  <option value="" disabled>Select Delivery Zone...</option>
+                  {AVAILABLE_LOCATIONS.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
 
-                {/* Validation & Submit */}
-                <button 
-                  onClick={handleSubmit}
-                  disabled={!selectedLocation || selectedDays.length === 0 || isSubmitting}
-                  className={`w-full py-4 rounded-xl font-black text-[15px] tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
-                    !selectedLocation || selectedDays.length === 0
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                      : 'bg-[#002147] hover:bg-[#00152e] text-white shadow-lg shadow-[#002147]/20 hover:shadow-xl hover:-translate-y-0.5'
+              {/* Receipt Style Item List */}
+              <div className="bg-[#FAF9F6] border border-gray-200 border-dashed rounded-2xl p-5 mb-6 flex-grow flex flex-col">
+                {summaryItems.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-60">
+                    <ShoppingBag size={32} className="mb-3" />
+                    <p className="text-xs uppercase tracking-widest font-bold">Basket is empty</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3 flex-grow">
+                      {summaryItems.map(item => (
+                        <div key={item.id} className="flex justify-between items-center text-sm font-bold border-b border-gray-50 pb-2">
+                          <span className="text-gray-600 truncate mr-2">{item.name} <span className="text-[10px] text-gray-400 font-normal">({item.size})</span></span>
+                          <span className="text-[#1A1A1A] whitespace-nowrap">x{item.totalQty}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t border-gray-200 border-dashed pt-4 mt-4">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Weekly Cost</span>
+                        <span className="text-2xl font-black text-[#9e111a] tracking-tight">NPR {weeklyTotalCost.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Subscription Toggles */}
+              <div className="space-y-3 mb-6">
+                <div 
+                  onClick={() => setSubscriptionType('weekly')}
+                  className={`p-4 rounded-2xl cursor-pointer transition-all border-2 flex items-center justify-between ${
+                    subscriptionType === 'weekly' ? 'bg-[#002147] border-[#002147] text-white shadow-lg' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
-                  {isSubmitting ? (
-                    <><Loader2 className="animate-spin" size={20} />Processing...</>
-                  ) : (
-                    "Subscribe Now"
-                  )}
-                </button>
+                  <div>
+                    <h4 className="font-black text-sm uppercase tracking-wide mb-0.5">Weekly Plan</h4>
+                    <p className={`text-[10px] font-bold ${subscriptionType === 'weekly' ? 'text-gray-300' : 'text-gray-400'}`}>Billed weekly</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${subscriptionType === 'weekly' ? 'border-[#E2B254]' : 'border-gray-300'}`}>
+                    {subscriptionType === 'weekly' && <div className="w-2.5 h-2.5 bg-[#E2B254] rounded-full"></div>}
+                  </div>
+                </div>
 
-                {!selectedLocation || selectedDays.length === 0 ? (
-                   <p className="text-gray-400 text-xs text-center mt-4 font-medium">
-                     Please select your location and at least one day to subscribe.
-                   </p>
-                ) : null}
+                <div 
+                  onClick={() => setSubscriptionType('monthly')}
+                  className={`p-4 rounded-2xl cursor-pointer transition-all border-2 flex items-center justify-between relative overflow-hidden ${
+                    subscriptionType === 'monthly' ? 'bg-[#002147] border-[#002147] text-white shadow-lg' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  {/* Decorative Banner */}
+                  <div className="absolute top-0 right-0 bg-[#E2B254] text-[#002147] text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">
+                    Free Ghee
+                  </div>
 
-                {submitStatus === 'success' && (
-                  <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-emerald-700 text-sm font-bold text-center mt-4 bg-emerald-50 border border-emerald-100 py-3 rounded-xl">
-                    Subscription confirmed successfully! We will contact you shortly.
-                  </motion.p>
-                )}
-                {submitStatus === 'error' && (
-                  <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-[#9e111a] text-sm font-bold text-center mt-4 bg-red-50 border border-red-100 py-3 rounded-xl">
-                    Connection failed. Please try again.
-                  </motion.p>
-                )}
-
+                  <div className="pr-4">
+                    <h4 className="font-black text-sm uppercase tracking-wide mb-0.5 mt-1">Monthly Plan</h4>
+                    <p className={`text-[10px] font-bold leading-tight ${subscriptionType === 'monthly' ? 'text-gray-300' : 'text-gray-400'}`}>
+                      Save 10% + Gift
+                    </p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${subscriptionType === 'monthly' ? 'border-[#E2B254]' : 'border-gray-300'}`}>
+                    {subscriptionType === 'monthly' && <div className="w-2.5 h-2.5 bg-[#E2B254] rounded-full"></div>}
+                  </div>
+                </div>
               </div>
-            </div>
 
+              {/* Submit Button */}
+              <button 
+                onClick={handleSubmit}
+                disabled={(!selectedLocation || summaryItems.length === 0 || isSubmitting) && isAuthenticated}
+                className={`w-full py-4 rounded-xl font-black text-sm tracking-widest uppercase transition-all mt-auto ${
+                  !isAuthenticated 
+                    ? 'bg-[#1A1A1A] text-white hover:bg-black shadow-lg hover:-translate-y-0.5'
+                    : (!selectedLocation || summaryItems.length === 0)
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                      : 'bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#002147] shadow-[0_4px_14px_rgba(226,178,84,0.4)] hover:shadow-lg hover:-translate-y-0.5'
+                }`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2"><Loader2 className="animate-spin" size={18} /> Processing...</span>
+                ) : !isAuthenticated ? (
+                  "Login to Subscribe"
+                ) : (
+                  "Confirm Subscription"
+                )}
+              </button>
+
+            </div>
           </div>
+
         </div>
       </div>
-      
-      {/* Modals */}
-      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
-    </>
+    </div>
   );
 }

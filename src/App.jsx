@@ -16,7 +16,8 @@ import ServicesPage from './pages/ServicesPage';
 import NoticesPage from './pages/NoticesPage';
 import MediaPage from './pages/MediaPage';         
 import AvailabilityPage from './pages/AvailabilityPage'; 
-import OutletsPage from './pages/OutletsPage';           
+import OutletsPage from './pages/OutletsPage';          
+import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage'; 
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -87,6 +88,7 @@ function App() {
         <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
         <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
         <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
+        <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
         
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> {/* <--- NEW ROUTE */}

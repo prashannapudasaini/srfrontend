@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, CalendarDays } from 'lucide-react'; // <-- Added CalendarDays
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
                 <div>
                   <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Shelf Life</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    For best results, store continuously under refrigeration below 4°C until 'Use by Date'.
+                     If the product price range extend 3000rs , you can palce a order without subscription'.
                   </p>
                 </div>
               </div>
@@ -227,6 +227,15 @@ export default function ProductDetailPage() {
                 <div className="mb-6">
                   <p className="text-4xl font-black text-[#1A1A1A]">NPR {currentPrice * quantity}</p>
                 </div>
+
+                {/* --- PREMIUM SUBSCRIBE BUTTON --- */}
+                <button 
+                  onClick={() => navigate('/availability')}
+                  className="w-full mb-4 h-12 rounded-xl bg-gradient-to-r from-[#002147] via-[#00152e] to-[#002147] text-[#E2B254] font-black tracking-widest uppercase shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 border border-[#E2B254]/30"
+                >
+                  <CalendarDays size={18} />
+                  Subscribe Now
+                </button>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   {/* Quantity Selector */}
