@@ -115,46 +115,6 @@ export default function AboutPage() {
           </motion.div>
         </div>
 
-{/* LEADING TRUST BANNER */}
-  <motion.div 
-    initial={{ scale: 0.95, opacity: 0 }}
-    whileInView={{ scale: 1, opacity: 1 }}
-    transition={{ duration: 0.6 }}
-    viewport={{ once: true }}
-    className="mb-28 text-center flex flex-col items-center justify-center"
-  >
-
-    {/* Featured Leading Image */}
-    <div className="relative flex justify-center mb-12">
-      {/* Glow Background */}
-      <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
-
-      <motion.img 
-        src="/leading.png" 
-        alt="Leading Trust Symbol" 
-        className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
-        initial={{ scale: 0.85, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        whileHover={{ scale: 1.05 }}
-      />
-    </div>
-
-    {/* Banner */}
-    <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
-      <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
-        Leading Trust Since 30 Years
-      </span>
-    </div>
-
-    {/* Subtext */}
-    <p className="text-[#9e111a] font-bold text-sm md:text-base uppercase tracking-[0.25em] mt-6">
-      Nepal's Most Trusted Dairy Brand
-    </p>
-
-  </motion.div>
-
-
         {/* MISSION & VISION SECTION (NEW) */}
         <motion.div 
           initial={{ y: 40, opacity: 0 }}
@@ -230,6 +190,45 @@ export default function AboutPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* LEADING TRUST BANNER */}
+  <motion.div 
+    initial={{ scale: 0.95, opacity: 0 }}
+    whileInView={{ scale: 1, opacity: 1 }}
+    transition={{ duration: 0.6 }}
+    viewport={{ once: true }}
+    className="mb-28 text-center flex flex-col items-center justify-center"
+  >
+
+    {/* Featured Leading Image */}
+    <div className="relative flex justify-center mb-12">
+      {/* Glow Background */}
+      <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
+
+      <motion.img 
+        src="/leading.png" 
+        alt="Leading Trust Symbol" 
+        className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
+        initial={{ scale: 0.85, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        whileHover={{ scale: 1.05 }}
+      />
+    </div>
+
+    {/* Banner */}
+    <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
+      <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
+        Leading Trust Since 30 Years
+      </span>
+    </div>
+
+    {/* Subtext */}
+    <p className="text-[#9e111a] font-bold text-sm md:text-base uppercase tracking-[0.25em] mt-6">
+      Nepal's Most Trusted Dairy Brand
+    </p>
+  </motion.div>
+
 
       </div>
     </main>

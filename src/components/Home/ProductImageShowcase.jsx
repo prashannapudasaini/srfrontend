@@ -1,6 +1,7 @@
 // frontend/src/components/Home/ProductImageShowcase.jsx
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ProductImageShowcase = () => {
   const showcaseItems = [
@@ -94,9 +95,13 @@ const ProductImageShowcase = () => {
                 </ul>
 
                 <div className="pt-6">
-                  <button className="border-2 border-dairyRed text-dairyRed px-8 py-3 rounded-full font-bold uppercase tracking-wider hover:bg-dairyRed hover:text-white transition-all duration-300">
+                  {/* Replaced button with Link */}
+                  <Link 
+                    to="/about"
+                    className="inline-block border-2 border-dairyRed text-dairyRed px-8 py-3 rounded-full font-bold uppercase tracking-wider hover:bg-dairyRed hover:text-white transition-all duration-300"
+                  >
                     Learn More
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
             </div>

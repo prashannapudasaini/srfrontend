@@ -1,6 +1,7 @@
 // frontend/src/components/Home/HeroProductGrid.jsx
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HeroProductGrid = () => {
   const products = [
@@ -15,7 +16,7 @@ const HeroProductGrid = () => {
     {
       id: 2,
       name: "HERITAGE GOLD",
-      title: "Bilona Desi Ghee",
+      title: "Bilona Local Ghee",
       description: "Crafted using the ancient slow-churned bilona method. Aromatic, nutrient-dense, and perfect for your family's health.",
       image: "/ghee.png",
       badge: "BESTSELLER",
@@ -120,10 +121,13 @@ const HeroProductGrid = () => {
                   </p>
                   
                   {/* Action Link */}
-                  <button className="text-[#7A0000] font-black text-sm uppercase tracking-widest hover:text-[#1A1A1A] transition-colors duration-300 inline-flex items-center gap-3 group/btn w-fit mt-auto relative z-10">
+                  <Link 
+                    to="/products"
+                    className="text-[#7A0000] font-black text-sm uppercase tracking-widest hover:text-[#1A1A1A] transition-colors duration-300 inline-flex items-center gap-3 group/btn w-fit mt-auto relative z-10"
+                  >
                     Explore Product 
                     <ArrowRight size={20} className="transform group-hover/btn:translate-x-2 transition-transform duration-300" />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </motion.div>
