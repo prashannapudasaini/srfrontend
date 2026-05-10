@@ -255,7 +255,7 @@ function YoutubeModal({ closeModal, refresh }) {
     await api.post('/admin/media/youtube.php', { title, youtube_id: videoId });
     refresh();
     closeModal();
-  };
+  }; 
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -279,4 +279,4 @@ function YoutubeModal({ closeModal, refresh }) {
       </div>
     </div>
   );
-}
+} 
