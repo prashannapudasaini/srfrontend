@@ -30,7 +30,7 @@ import RegisterPage from './pages/RegisterPage';
 
 // Admin Dashboard & Management (Nested Routes)
 import Dashboard from './admin/Dashboard';
-import Overview from './admin/Overview'; 
+import AdminOverview from './admin/AdminOverview'; 
 import ProductManagement from './admin/ProductManagement';
 import MilkStockManagement from './admin/MilkStockManagement'; 
 import OrderManagement from './admin/OrderManagement';
@@ -91,7 +91,7 @@ function App() {
         <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
         
         {/* === MEDIA & UPDATES === */}
-        <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> {/* <--- NEW ROUTE */}
+        <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
         
         {/* === NEWLY ADDED PAGES === */}
         <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
@@ -108,7 +108,8 @@ function App() {
 
         {/* === ADMIN PANEL (NESTED) === */}
         <Route path="/admin" element={<Dashboard />}>
-          <Route index element={<Overview />} /> 
+          {/* Only ONE index route and ONE products route */}
+          <Route index element={<AdminOverview />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="milk" element={<MilkStockManagement />} />
           <Route path="orders" element={<OrderManagement />} />

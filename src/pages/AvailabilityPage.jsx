@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin, Check, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; 
 import api from '../services/api';
-import ContactModal from '../components/ContactModal'; // <-- IMPORTED CONTACT MODAL
+import ContactModal from '../components/ContactModal';
 
 const AVAILABLE_LOCATIONS = [
   "Kathmandu Central", "Lalitpur Core", "Bhaktapur Area", 
@@ -35,7 +35,7 @@ export default function AvailabilityPage() {
   
   const [productSchedules, setProductSchedules] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false); // <-- NEW MODAL STATE
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   // Fetch Live Products
   useEffect(() => {
@@ -429,7 +429,7 @@ export default function AvailabilityPage() {
                     <div className="pr-4">
                       <h4 className="font-black text-sm uppercase tracking-wide mb-0.5 mt-1">Monthly Plan</h4>
                       <p className={`text-[10px] font-bold leading-tight ${subscriptionType === 'monthly' ? 'text-gray-300' : 'text-gray-400'}`}>
-                        Free 500ml Ghee + Gift
+                        Free 500ml Ghee
                       </p>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${subscriptionType === 'monthly' ? 'border-[#E2B254]' : 'border-gray-300'}`}>
