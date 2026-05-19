@@ -9,6 +9,11 @@ export default function SubscriptionManagement() {
   
   // Dynamic State for Database
   const [subscriptions, setSubscriptions] = useState([]);
+  const [dispatchRoutes, setDispatchRoutes] = useState([]);
+  const [dashboardMetrics, setDashboardMetrics] = useState({
+    activeSubs: 0, todaysDispatches: 0, pendingPayments: 0, pendingInvoices: 0, tomorrowsDemand: 0
+  });
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,7 +23,14 @@ export default function SubscriptionManagement() {
       try {
         const res = await api.get('/admin/subscriptions.php');
         if (res.data.status === 'success') {
-          setSubscriptions(res.data.data);
+          // Check if data is formatted properly (backward compatibility)
+          if (Array.isArray(res.data.data)) {
+            setSubscriptions(res.data.data);
+          } else {
+            setSubscriptions(res.data.data.subscriptions || []);
+            setDispatchRoutes(res.data.data.dispatchRoutes || []);
+            setDashboardMetrics(res.data.data.metrics || dashboardMetrics);
+          }
         } else {
           setError(res.data.message || 'Failed to load subscriptions.');
         }
@@ -32,7 +44,7 @@ export default function SubscriptionManagement() {
     fetchSubscriptions();
   }, []);
 
-  // --- Derived Calculations from Live Data ---
+  // --- Derived Calculations ---
   const filteredSubs = useMemo(() => {
     return subscriptions.filter(sub => {
       const query = searchQuery.toLowerCase();
@@ -44,19 +56,11 @@ export default function SubscriptionManagement() {
     });
   }, [subscriptions, searchQuery]);
 
-  const activeSubsCount = subscriptions.filter(s => s.status === 'Active').length;
-  
-  const pendingPaymentsAmount = subscriptions
-    .filter(s => s.payment === 'Pending' || s.payment === 'Overdue')
-    .reduce((sum, s) => sum + parseFloat(s.weekly_total_cost || 0), 0);
-    
-  const pendingInvoicesCount = subscriptions.filter(s => s.payment === 'Pending' || s.payment === 'Overdue').length;
-
   const metrics = [
-    { title: "Active Subs", value: activeSubsCount, trend: "Live Count", icon: Users, color: "text-[#002147]", bg: "bg-[#002147]/5", glow: "shadow-[#002147]/10" },
-    { title: "Today's Dispatches", value: "86", trend: "Morning & Evening", icon: Truck, color: "text-emerald-600", bg: "bg-emerald-50", glow: "shadow-emerald-500/10" },
-    { title: "Pending Payments", value: `NPR ${pendingPaymentsAmount.toLocaleString()}`, trend: `${pendingInvoicesCount} Invoices Due`, icon: CreditCard, color: "text-[#9e111a]", bg: "bg-[#9e111a]/5", glow: "shadow-[#9e111a]/10" },
-    { title: "Tomorrow's Demand", value: "124 L", trend: "Milk Inventory Needed", icon: Activity, color: "text-[#E2B254]", bg: "bg-[#E2B254]/10", glow: "shadow-[#E2B254]/20" },
+    { title: "Active Subs", value: dashboardMetrics.activeSubs, trend: "Live Count", icon: Users, color: "text-[#002147]", bg: "bg-[#002147]/5", glow: "shadow-[#002147]/10" },
+    { title: "Today's Dispatches", value: dashboardMetrics.todaysDispatches, trend: "Morning & Evening", icon: Truck, color: "text-emerald-600", bg: "bg-emerald-50", glow: "shadow-emerald-500/10" },
+    { title: "Pending Payments", value: `NPR ${dashboardMetrics.pendingPayments.toLocaleString()}`, trend: `${dashboardMetrics.pendingInvoices} Invoices Due`, icon: CreditCard, color: "text-[#9e111a]", bg: "bg-[#9e111a]/5", glow: "shadow-[#9e111a]/10" },
+    { title: "Tomorrow's Demand", value: `${dashboardMetrics.tomorrowsDemand} L`, trend: "Milk Inventory Needed", icon: Activity, color: "text-[#E2B254]", bg: "bg-[#E2B254]/10", glow: "shadow-[#E2B254]/20" },
   ];
 
   if (isLoading) {
@@ -237,7 +241,7 @@ export default function SubscriptionManagement() {
               </motion.div>
             )}
 
-            {/* TAB 2: DISPATCH TRACKING (Static Layout, Highly Polished) */}
+            {/* TAB 2: DISPATCH TRACKING (NOW FULLY DYNAMIC) */}
             {activeTab === 'dispatch' && (
               <motion.div key="dispatch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-8">
                 <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-100">
@@ -247,16 +251,12 @@ export default function SubscriptionManagement() {
                   </div>
                   <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    86 Deliveries Scheduled
+                    {dashboardMetrics.todaysDispatches} Deliveries Scheduled
                   </span>
                 </div>
                 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {[
-                    { route: "Route 1: Central (Thamel, Naxal)", time: "Morning (7:00 AM)", count: 42, status: "Out for Delivery", progress: 60 },
-                    { route: "Route 2: Lalitpur Core", time: "Morning (7:00 AM)", count: 28, status: "Completed", progress: 100 },
-                    { route: "Route 3: Ring Road East", time: "Evening (5:00 PM)", count: 16, status: "Preparing", progress: 0 },
-                  ].map((route, i) => (
+                  {dispatchRoutes.map((route, i) => (
                     <div key={i} className="border-2 border-gray-100 p-6 rounded-[2rem] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all bg-white relative overflow-hidden group">
                       
                       {/* Decorative Background Icon */}
@@ -269,7 +269,8 @@ export default function SubscriptionManagement() {
                         </div>
                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border ${
                           route.status === 'Completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                          route.status === 'Preparing' ? 'bg-gray-50 border-gray-200 text-gray-500' : 'bg-blue-50 border-blue-200 text-blue-700'
+                          route.status === 'Preparing' ? 'bg-gray-50 border-gray-200 text-gray-500' : 
+                          route.status === 'Standby' ? 'bg-gray-100 border-gray-200 text-gray-400' : 'bg-blue-50 border-blue-200 text-blue-700'
                         }`}>
                           {route.status}
                         </span>

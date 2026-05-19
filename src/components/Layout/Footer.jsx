@@ -1,13 +1,22 @@
 import React from "react";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom"; // Added for routing
 
 // --- Constants ---
 const MARQUEE_ITEMS = [
   "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART", "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART"
 ];
 
-const EXPLORE_LINKS = ["Home", "Products", "Our Story", "Services", "Notices"];
+// Added "Blog" to the list
+const EXPLORE_LINKS = [
+  { name: "Home", path: "/" },
+  { name: "Products", path: "/products" },
+  { name: "Our Story", path: "/about" },
+  { name: "Services", path: "/services" },
+  { name: "Notices", path: "/notices" },
+  { name: "Blog", path: "/blog" }
+];
 
 const SOCIAL_LINKS = [
   { icon: (s) => <Facebook s={s} />, label: "Facebook", href: "https://www.facebook.com/sitaramdairy" },
@@ -15,7 +24,6 @@ const SOCIAL_LINKS = [
   { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
 ];
 
-// --- Partner Logos (Using reliable URLs) ---
 const AVAILABLE_ON = [
   { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
   { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
@@ -60,7 +68,6 @@ const Footer = () => {
       {/* 2. Main Body Section */}
       <div className="relative bg-[#C8102E] text-white">
         
-        {/* Background Decorative Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="hidden lg:block absolute top-0 left-[40%] w-[250px] h-full z-10 translate-x-[-50%]">
              <svg viewBox="0 0 200 800" preserveAspectRatio="none" className="h-full w-full fill-white/5 opacity-30">
@@ -69,19 +76,13 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Content Container */}
         <div className="relative z-20 max-w-7xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
             
-            {/* BRAND COLUMN */}
             <div className="lg:col-span-4 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="bg-white p-1.5 rounded-xl shadow-lg">
-                  <img 
-                    src="/logo.png" 
-                    alt="Sita Ram Dairy Logo" 
-                    className="w-14 h-14 object-contain"
-                  />
+                  <img src="/logo.png" alt="Sita Ram Dairy Logo" className="w-14 h-14 object-contain" />
                 </div>
                 <div>
                   <h3 className="text-2xl font-serif font-bold tracking-tight">
@@ -90,31 +91,26 @@ const Footer = () => {
                   <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
                 </div>
               </div>
-              
               <p className="text-sm text-red-50 leading-relaxed pr-4">
                 Generations of pure goodness. Premium organic dairy and artisanal bakery products from Nepal's lush pastures.
               </p>
             </div>
 
-            {/* LINKS & PARTNERS GRID */}
             <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              
-              {/* Explore */}
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Explore</h4>
                 <ul className="space-y-2.5">
                   {EXPLORE_LINKS.map(link => (
-                    <li key={link}>
-                      <a href="#" className="text-red-100 hover:text-white transition-all flex items-center gap-2 group text-sm font-medium">
+                    <li key={link.name}>
+                      <Link to={link.path} className="text-red-100 hover:text-white transition-all flex items-center gap-2 group text-sm font-medium">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">▸</span>
-                        {link}
-                      </a>
+                        {link.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Support */}
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Support</h4>
                 <ul className="space-y-2.5 text-red-50 text-sm">
@@ -125,45 +121,23 @@ const Footer = () => {
                 </ul>
               </div>
 
-              {/* Follow Us */}
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Follow Us</h4>
                 <div className="flex gap-3">
                   {SOCIAL_LINKS.map(({ icon: Icon, label, href }) => (
-                    <a 
-                      key={label} 
-                      href={href} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-9 h-9 rounded-full bg-white text-red-700 flex items-center justify-center hover:bg-red-100 transition-colors shadow-md group" 
-                      aria-label={label}
-                    >
+                    <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white text-[#C8102E] flex items-center justify-center hover:bg-red-100 transition-colors shadow-md group">
                       <div className="group-hover:scale-110 transition-transform">{Icon(16)}</div>
                     </a>
                   ))}
                 </div>
-                
               </div>
 
-              {/* Available On Section */}
               <div className="space-y-4 w-full">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Available On</h4>
                 <div className="flex flex-wrap gap-2.5 mt-2">
                   {AVAILABLE_ON.map((partner, index) => (
-                    <div 
-                      key={index} 
-                      className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center group border border-red-900/20 p-1 shrink-0 transition-transform hover:-translate-y-1"
-                    >
-                      <img 
-                        src={partner.url} 
-                        alt={partner.name} 
-                        title={partner.name}
-                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 bg-white"
-                        onError={(e) => {
-                          e.target.onerror = null; 
-                          e.target.src = `https://placehold.co/150x150/ffffff/C8102E?text=${partner.initials}&font=Montserrat`;
-                        }}
-                      />
+                    <div key={index} className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center group border border-red-900/20 p-1 shrink-0 transition-transform hover:-translate-y-1">
+                      <img src={partner.url} alt={partner.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 bg-white" />
                     </div>
                   ))}
                 </div>

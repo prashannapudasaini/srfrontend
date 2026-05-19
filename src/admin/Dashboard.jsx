@@ -22,7 +22,7 @@ export default function Dashboard() {
     { name: 'Subscriptions', path: '/admin/subscriptions', icon: CalendarDays }, // <-- NEW SUBSCRIPTIONS LINK
     { name: 'Banners', path: '/admin/banners', icon: ImageIcon },
     { name: 'Media Center', path: '/admin/media', icon: Video },
-    { name: 'Staff & Admins', path: '/admin/users', icon: Users },
+    { name: 'Users', path: '/admin/users', icon: Users },
   ];
 
   return (

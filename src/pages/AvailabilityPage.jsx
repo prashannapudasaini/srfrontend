@@ -125,6 +125,7 @@ export default function AvailabilityPage() {
     });
   };
 
+  // --- UPDATED SUBMIT HANDLER WITH PAYMENT GATEWAY INTEGRATION ---
   const handleSubmit = async () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -153,22 +154,32 @@ export default function AvailabilityPage() {
 
     const orderPayload = {
       subscriptionDetails: { type: subscriptionType, location: selectedLocation, qualifiesForFreeGhee: subscriptionType === 'monthly', weeklyTotalCost: finalCost },
-      weeklySchedule: cleanWeeklySchedule
+      weeklySchedule: cleanWeeklySchedule,
+      // Added payment gateway specific fields
+      amount: finalCost,
+      purchase_id: `SUB_${Date.now()}`,
+      purchase_name: `${subscriptionType.charAt(0).toUpperCase() + subscriptionType.slice(1)} Routine Delivery`
     };
 
     try {
-      const response = await fetch('/api/user/delivery-schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload),
-      });
+      // Send payload to backend to initialize order and generate payment link
+      const response = await api.post('/orders/verify.php', orderPayload);
       
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-      
-      navigate('/subscription-success', { 
-        state: { orderData: orderPayload, itemCount: summaryItems.reduce((acc, curr) => acc + curr.totalQty, 0) } 
-      });
+      if (response.data.payment_url) {
+        // Redirect user to Khalti/eSewa Payment Gateway
+        window.location.href = response.data.payment_url;
+      } else if (response.data.status === 'success') {
+        // Fallback: If testing mode is on and no gateway URL is returned, proceed to success
+        navigate('/subscription-success', { 
+          state: { orderData: orderPayload, itemCount: summaryItems.reduce((acc, curr) => acc + curr.totalQty, 0) } 
+        });
+      } else {
+        alert(response.data.message || "Payment initialization failed.");
+        setIsSubmitting(false);
+      }
     } catch (error) {
+      console.error(error);
+      alert("Error connecting to the payment server. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -333,7 +344,6 @@ export default function AvailabilityPage() {
                 
                 {/* Location Selector */}
                 <div className="mb-6 relative">
-                  {/* --- NEW CONTACT BLOCK --- */}
                   <div className="flex justify-between items-end mb-2">
                     <label className="text-xs font-black uppercase tracking-widest text-[#002147]">Delivery Zone</label>
                     <button 

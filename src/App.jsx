@@ -2,6 +2,8 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 
+import DeliveryDashboard from './delivery/DeliveryDashboard';
+
 // Global Layout Components
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
@@ -18,6 +20,8 @@ import MediaPage from './pages/MediaPage';
 import AvailabilityPage from './pages/AvailabilityPage'; 
 import OutletsPage from './pages/OutletsPage';          
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage'; 
+import BlogPage from './pages/BlogPage';
+import BlogPostDetail from './pages/BlogPostDetail';
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -89,9 +93,12 @@ function App() {
         <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
         <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
         <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
+        <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
+        <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
         
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
+        <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
         
         {/* === NEWLY ADDED PAGES === */}
         <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
