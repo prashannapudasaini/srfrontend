@@ -6,7 +6,7 @@ import { Store, MapPin, Phone, Clock, ArrowRight, RefreshCw } from 'lucide-react
 const REGION_DATA = {
   "Bagmati": {
     cities: {
-      "Kathmandu": ["Tokha Headquarters", "Chabahil Outlet", "Koteshwor Bhatbhateni"],
+      "Kathmandu": ["Kuleshwor", "Jyatha"],
       "Bhaktapur": ["Suryabinayak Fresh Outlet"],
       "Lalitpur": ["Jhamsikhel Heritage Branch"]
     }
@@ -16,35 +16,27 @@ const REGION_DATA = {
 // All physical outlets mapped with state, city, and Real Google Map Embed URLs
 const ALL_OUTLETS = [
   {
-    name: "Tokha Headquarters",
+    name: "Jyatha",
     state: "Bagmati",
     city: "Kathmandu",
-    address: "Bhutkhel, Tokha, Kathmandu 44600",
-    phone: "+977 1-438xxxx",
+    address: "Jyatha Thamel",
+    phone: "015213049",
     hours: "5:00 AM - 7:00 PM (Daily)",
     isMain: true,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Bhutkhel,+Tokha,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
+    mapUrl: "     "
   },
+ 
   {
-    name: "Chabahil Outlet",
+    name: "Kuleshwor",
     state: "Bagmati",
     city: "Kathmandu",
-    address: "Chabahil Chowk, Kathmandu",
-    phone: "+977 980-xxxxxxx",
-    hours: "6:30 AM - 8:00 PM (Daily)",
-    isMain: false,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Chabahil+Chowk,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
-  },
-  {
-    name: "Koteshwor Bhatbhateni",
-    state: "Bagmati",
-    city: "Kathmandu",
-    address: "Koteshwor, Kathmandu",
-    phone: "+977 1-412xxxx",
+    address: "Kuleshwor, Kathmandu",
+    phone: "015213049",
     hours: "7:00 AM - 8:00 PM (Daily)",
     isMain: false,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Bhatbhateni+Supermarket,+Koteshwor,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
+    mapUrl: "   "
   },
+
   {
     name: "Jhamsikhel Heritage Branch",
     state: "Bagmati",

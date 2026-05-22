@@ -123,9 +123,9 @@ const Footer = () => {
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Support</h4>
                 <ul className="space-y-2.5 text-red-50 text-sm">
-                  <li className="flex gap-3 items-center"><MapPin className="shrink-0 w-4 h-4 text-red-300" /> <span>Sanepa, KTM</span></li>
-                  <li className="flex gap-3 items-center"><Phone className="shrink-0 w-4 h-4 text-red-300" /> <span>01-00000000</span></li>
-                  <li className="flex gap-3 items-center"><Mail className="shrink-0 w-4 h-4 text-red-300" /> <span>pure@sitaram.com</span></li>
+                  <li className="flex gap-3 items-center"><MapPin className="shrink-0 w-4 h-4 text-red-300" /> <span> Kuleshwor and Jyatha (Factory outlets)</span></li>
+                  <li className="flex gap-3 items-center"><Phone className="shrink-0 w-4 h-4 text-red-300" /> <span>015213049</span></li>
+                  <li className="flex gap-3 items-center"><Mail className="shrink-0 w-4 h-4 text-red-300" /> <span>sgokulmilks1@gmail.com </span></li>
                   <li className="flex gap-3 items-center"><Clock className="shrink-0 w-4 h-4 text-red-300" /> <span>6 AM - 8 PM</span></li>
                 </ul>
               </div>
