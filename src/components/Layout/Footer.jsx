@@ -1,14 +1,17 @@
 import React from "react";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { 
+  MapPin, Phone, Mail, Clock, Award, Shield, Leaf, Truck, Globe, 
+  Map as MapIcon,
+  Plane 
+} from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"; // Added for routing
+import { Link } from "react-router-dom";
 
 // --- Constants ---
 const MARQUEE_ITEMS = [
-  "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART", "BHAT BHATENI", "SALESBERRY", "BIG MART", "KK MART"
+  "BHAT BHATENI", "SALESBERRY", "BIG MART", "KC STORE", "METRO MARKET", "SMILE MART", "BIG MART", "HORIZONS MART","GAUTAM GENERAL","BIGMART","DARAZ"
 ];
 
-// Added "Blog" to the list
 const EXPLORE_LINKS = [
   { name: "Home", path: "/" },
   { name: "Products", path: "/products" },
@@ -27,8 +30,13 @@ const SOCIAL_LINKS = [
 const AVAILABLE_ON = [
   { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
   { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
-  { name: "KK Mart", url: "https://tse1.mm.bing.net/th/id/OIP.U4blkqB6U0pgmqLdPialjgHaCL?rs=1&pid=ImgDetMain&o=7&rm=3", initials: "KK" },
-  { name: "Big Mart", url: "https://storage.googleapis.com/kaggle-datasets-images/1593544/2621633/648c031d1be543da31ca46572025c7be/dataset-card.jpg?t=2021-09-16-17-28-12", initials: "BM" }
+  { name: "KC Store", url: "https://th.bing.com/th/id/OIP.9yGdHBXGFANKK_2jUuPQjwHaEK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3", initials: "KC" },
+  { name: "Metro Market", url: "https://tse3.mm.bing.net/th/id/OIP.vsu0auvIW65maaK8jLkQKwHaE-?rs=1&pid=ImgDetMain&o=7&rm=3", initials: "MM" },
+  { name: "Smile Mart", url: "https://tse4.mm.bing.net/th/id/OIP.zATwtSs0W5D_O7nfwhkVbwHaD4?rs=1&pid=ImgDetMain&o=7&rm=3", initials: "SM" },
+  { name: "Horizons Mart", url: "https://tse1.mm.bing.net/th/id/OIP.yipbJBLhT5Z1ivfh_y127AHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", initials: "HM" },
+  { name: "Gautam General", url: "https://www.vacancies.ae/files/company/68/m_5a6432d05141b.jpg", initials: "GG" },
+  { name: "Big Mart", url: "https://storage.googleapis.com/kaggle-datasets-images/1593544/2621633/648c031d1be543da31ca46572025c7be/dataset-card.jpg?t=2021-09-16-17-28-12", initials: "BM" },
+  { name: "Daraz", url: "https://www.shutterstock.com/image-vector/daraz-logo-typically-features-distinctive-600nw-2383185843.jpg", initials: "DZ" }
 ];
 
 // --- Custom Icons ---
@@ -79,13 +87,14 @@ const Footer = () => {
         <div className="relative z-20 max-w-7xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
             
+            {/* Logo Section */}
             <div className="lg:col-span-4 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="bg-white p-1.5 rounded-xl shadow-lg">
-                  <img src="/logo.png" alt="Sita Ram Dairy Logo" className="w-14 h-14 object-contain" />
+                  <img src="/logo.png" alt="Sita Ram Dairy Logo" className="w-16 h-16 md:w-20 md:h-20 object-contain" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif font-bold tracking-tight">
+                  <h3 className="text-xl md:text-2xl font-serif font-bold tracking-tight">
                     Sita Ram <span className="text-red-200">Gokul Milk</span>
                   </h3>
                   <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
@@ -132,27 +141,89 @@ const Footer = () => {
                 </div>
               </div>
 
-              <div className="space-y-4 w-full">
-                <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Available On</h4>
-                <div className="flex flex-wrap gap-2.5 mt-2">
-                  {AVAILABLE_ON.map((partner, index) => (
-                    <div key={index} className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center group border border-red-900/20 p-1 shrink-0 transition-transform hover:-translate-y-1">
-                      <img src={partner.url} alt={partner.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 bg-white" />
-                    </div>
-                  ))}
-                </div>
+              {/* Why Choose Us */}
+              <div className="space-y-4">
+                <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Why Choose Us</h4>
+                <ul className="space-y-2.5 text-red-50 text-sm">
+                  <li className="flex gap-3 items-center"><Award className="shrink-0 w-4 h-4 text-red-300" /> <span>Premium Quality</span></li>
+                  <li className="flex gap-3 items-center"><Leaf className="shrink-0 w-4 h-4 text-red-300" /> <span>100% Organic</span></li>
+                  <li className="flex gap-3 items-center"><Shield className="shrink-0 w-4 h-4 text-red-300" /> <span>Trusted Since 1985</span></li>
+                  <li className="flex gap-3 items-center"><Truck className="shrink-0 w-4 h-4 text-red-300" /> <span>Fast Delivery</span></li>
+                </ul>
               </div>
-
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Bottom Bar */}
+      {/* 3. New Availability Info Section */}
+      <div className="bg-white py-8 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            {/* Online Availability */}
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+                <Globe className="w-5 h-5 text-[#C8102E]" />
+                <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase">Online Availability</h4>
+              </div>
+              <p className="text-gray-600 text-sm">Available on <span className="font-semibold text-[#C8102E]">Daraz</span></p>
+            </div>
+
+            {/* Nationally - Using MapIcon instead of Map */}
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+                <MapIcon className="w-5 h-5 text-[#C8102E]" />
+                <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase">Nationally</h4>
+              </div>
+              <p className="text-gray-600 text-sm">
+                <span className="font-semibold text-[#C8102E]">Biratnagar</span> • 
+                <span className="font-semibold text-[#C8102E]"> Birgunj</span> • 
+                <span className="font-semibold text-[#C8102E]"> Pokhara</span>
+              </p>
+            </div>
+
+            {/* International */}
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+                <Plane className="w-5 h-5 text-[#C8102E]" />
+                <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase">International</h4>
+              </div>
+              <div className="space-y-1 text-sm text-gray-600">
+                <p><span className="font-semibold text-[#C8102E]">Dubai</span> • <span className="font-semibold text-[#C8102E]">Japan</span></p>
+                <p className="text-xs text-gray-500">In Japan: Tokyo, Okinawa</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Available On Section - Partner Stores with smaller logos in a single horizontal line */}
+      <div className="bg-gray-50 py-6 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col items-center text-center">
+            <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase border-b border-gray-200 pb-2 mb-5 inline-block">Our Partner Stores</h4>
+            <div className="flex flex-wrap justify-center items-center gap-4">
+              {AVAILABLE_ON.map((partner, index) => (
+                <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-2 transition-transform hover:-translate-y-1 hover:shadow-md">
+                  <img 
+                    src={partner.url} 
+                    alt={partner.name} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.target.src = `https://placehold.co/80x80?text=${partner.initials}`; }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Bottom Bar */}
       <div className="bg-white py-4 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
           <p>© 2026 Sita Ram Dairy. All rights reserved.</p>
-          <p>© 2026 Designed and Developed by MotionAge.</p>
+          <p>Designed and Developed by MotionAge.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-red-600 transition-colors">Privacy</a>
             <a href="#" className="hover:text-red-600 transition-colors">Terms</a>

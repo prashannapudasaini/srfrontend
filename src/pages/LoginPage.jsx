@@ -137,7 +137,7 @@ export default function LoginPage() {
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          placeholder="e.g. Ram Bahadur"
+                          placeholder="Enter Your Name"
                           className="w-full pl-12 pr-4 py-4 bg-[#FDF8E7]/50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-[#9e111a]/30 focus:bg-white transition-colors text-sm font-bold text-[#1A1A1A]"
                           required={!isLogin}
                         />
@@ -158,7 +158,7 @@ export default function LoginPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="you@example.com"
+                    placeholder="Enter Your Email"
                     className="w-full pl-12 pr-4 py-4 bg-[#FDF8E7]/50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-[#9e111a]/30 focus:bg-white transition-colors text-sm font-bold text-[#1A1A1A]"
                     required
                   />
@@ -183,7 +183,7 @@ export default function LoginPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="••••••••••••"
+                    placeholder="Enter your password"
                     className="w-full pl-12 pr-12 py-4 bg-[#FDF8E7]/50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-[#9e111a]/30 focus:bg-white transition-colors text-sm font-bold text-[#1A1A1A]"
                     required
                   />
