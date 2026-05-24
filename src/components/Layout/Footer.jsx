@@ -198,26 +198,57 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* 4. Available On Section - Partner Stores with smaller logos in a single horizontal line */}
-      <div className="bg-gray-50 py-6 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col items-center text-center">
-            <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase border-b border-gray-200 pb-2 mb-5 inline-block">Our Partner Stores</h4>
-            <div className="flex flex-wrap justify-center items-center gap-4">
-              {AVAILABLE_ON.map((partner, index) => (
-                <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-2 transition-transform hover:-translate-y-1 hover:shadow-md">
-                  <img 
-                    src={partner.url} 
-                    alt={partner.name} 
-                    className="w-full h-full object-contain"
-                    onError={(e) => { e.target.src = `https://placehold.co/80x80?text=${partner.initials}`; }}
-                  />
-                </div>
-              ))}
-            </div>
+     {/* 4. Available On Section - Partner Stores */}
+<div className="bg-gray-50 py-10 border-t border-gray-200">
+  <div className="max-w-7xl mx-auto px-6">
+
+    {/* Heading */}
+    <div className="text-center mb-8">
+      <h4 className="text-2xl font-bold tracking-wide text-gray-800 uppercase">
+        Our Partner Stores
+      </h4>
+
+      <div className="w-24 h-1 bg-[#C8102E] mx-auto mt-3 rounded-full"></div>
+    </div>
+
+    {/* Logos Container */}
+    <div className="w-full overflow-x-auto scrollbar-hide">
+      <div className="flex justify-center items-center gap-6 min-w-max py-3">
+
+        {AVAILABLE_ON.map((partner, index) => (
+          <div
+            key={index}
+            className="
+              w-[120px]
+              h-[120px]
+              bg-white
+              rounded-2xl
+              shadow-md
+              border border-gray-200
+              flex items-center justify-center
+              p-4
+              transition-all duration-300
+              hover:-translate-y-2
+              hover:shadow-2xl
+              hover:border-[#C8102E]
+            "
+          >
+            <img
+              src={partner.url}
+              alt={partner.name}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.target.src = `https://placehold.co/120x120?text=${partner.initials}`;
+              }}
+            />
           </div>
-        </div>
+        ))}
+
       </div>
+    </div>
+
+  </div>
+</div>
 
       {/* 5. Bottom Bar */}
       <div className="bg-white py-4 border-t border-gray-100">

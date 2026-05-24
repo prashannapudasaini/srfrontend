@@ -34,7 +34,7 @@ const ALL_OUTLETS = [
     phone: "015213049",
     hours: "7:00 AM - 8:00 PM (Daily)",
     isMain: false,
-    mapUrl: "   "
+    mapUrl: "https://maps.app.goo.gl/Hjnb9P1y4jGAGPkQ9"
   },
 
   {
