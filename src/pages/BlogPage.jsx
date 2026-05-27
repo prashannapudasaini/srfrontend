@@ -7,9 +7,9 @@ export const BLOG_POSTS = [
   {
     id: 1,
     title: "Why Sita Ram Gokul Milk is Kathmandu’s Top Choice for Purity",
-    excerpt: "Sourced from the lush pastures of Nepal, our Gokul Milk represents generations of dairy excellence and farm-to-table freshness.",
-    fullContent: "Every drop of Sita Ram Gokul Milk undergoes a rigorous 28-point quality check. In the bustling heart of Kathmandu, finding <b>pure cow milk</b> can be a challenge. We bridge that gap by sourcing directly from local farmers who share our commitment to organic practices. Our pasteurization process preserves essential vitamins like B12 and Vitamin D, making it the perfect choice for growing children and health-conscious adults alike.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQULMeao9FhiteaPDcoy3rmUyh22m2plSOZhQ&s",
+    excerpt: "Sourced directly from the lush, green pastures of Nepal, our Gokul Milk represents generations of dairy excellence, unmatched farm-to-table freshness, and a steadfast commitment to your family's health.",
+    fullContent: "Every drop of Sita Ram Gokul Milk undergoes a rigorous 28-point quality check before it reaches your home. In the bustling heart of Kathmandu, finding <b>pure, unadulterated cow milk</b> can be a significant challenge. We bridge that gap by sourcing directly from local cooperative farmers who share our deep commitment to ethical and organic farming practices.<br/><br/>Our state-of-the-art pasteurization process preserves essential nutrients—like Vitamin B12, Calcium, and Vitamin D—while completely eliminating harmful bacteria. Furthermore, our milk is carefully homogenized to ensure a consistent, creamy texture in every single sip. Whether you are boiling it for your robust morning <i>chia</i>, pouring it over cereal for growing children, or enjoying a warm glass before bed, Sita Ram Gokul Milk is the perfect choice for health-conscious individuals who refuse to compromise on quality and taste.",
+    image: "/milk.png",
     date: "May 10, 2026",
     category: "Fresh Milk",
     keywords: ["Fresh milk Kathmandu", "Sita Ram Gokul Milk", "Pasteurized milk Nepal"]
@@ -17,9 +17,9 @@ export const BLOG_POSTS = [
   {
     id: 2,
     title: "The Golden Superfood: Ayurvedic Benefits of Pure Cow Ghee",
-    excerpt: "More than just a cooking ingredient, Sita Ram Pure Cow Ghee is a legacy of wellness used in Nepali households for decades.",
-    fullContent: "Our <b>Danedar Ghee</b> is prepared using the traditional bilona-inspired method. This ensures a rich aroma and granular texture that factory-processed ghees lack. Rich in butyric acid, it aids digestion and helps in maintaining a healthy gut. Whether you are using it for your daily <i>Dal-Bhat</i> or for sacred rituals, our ghee promises 100% purity with no added preservatives or colors.",
-    image: "https://img.drz.lazcdn.com/static/np/p/778a8817afb12b1df0d8c84c97ff6f97.jpg_720x720q80.jpg",
+    excerpt: "Far more than just a kitchen staple, Sita Ram Pure Cow Ghee is a legacy of wellness, known for its rich aroma, granular texture, and incredible healing properties in Nepali households.",
+    fullContent: "Our <b>Danedar Ghee</b> is meticulously prepared using methods inspired by the traditional bilona process. This time-honored technique ensures a rich, nutty aroma and a perfect granular texture that mass-produced, factory-processed ghees simply cannot replicate. <br/><br/>Rich in beneficial short-chain fatty acids like butyric acid, our ghee actively aids digestion, reduces inflammation, and helps in maintaining a healthy gut microbiome. In Ayurveda, pure cow ghee is considered a 'medhya rasayana'—a food that nourishes the brain and nervous system. It has a high smoke point, making it exceptionally safe for deep frying and sautéing. Whether you are tempering your daily <i>Dal-Bhat</i>, using it for sacred puja rituals, or applying it topically for skin health, our ghee promises 100% purity with absolutely no added preservatives, artificial flavors, or colors.",
+    image: "/ghee.png",
     date: "May 08, 2026",
     category: "Superfoods",
     keywords: ["Pure cow ghee Nepal", "Traditional ghee benefits", "Best Ghee Kathmandu"]
@@ -27,9 +27,9 @@ export const BLOG_POSTS = [
   {
     id: 3,
     title: "The Probiotic Power of Sita Ram Dahi: A Gut-Health Revolution",
-    excerpt: "Naturally fermented and 'Shuddha Dudh Bata Baneko', our Dahi is the creamy, cooling companion your meals deserve.",
-    fullContent: "Sita Ram Dahi is celebrated for its thick, velvety consistency. As a natural <b>probiotic</b>, it contains live cultures that strengthen your immune system. In the summer heat of Nepal, a bowl of fresh curd is essential for hydration and balancing body temperature. We use only high-fat whole milk to ensure that every scoop is as nutritious as it is delicious.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRD6_jMD_hq0ndTGsrDqmbyX0ee-3Igbt29Mg&s",
+    excerpt: "Naturally fermented and proudly 'Shuddha Dudh Bata Baneko', our Dahi is the creamy, cooling, and gut-friendly companion your everyday spicy meals truly deserve.",
+    fullContent: "Sita Ram Dahi is universally celebrated across the valley for its thick, velvety consistency and perfectly balanced tartness. As a potent, natural <b>probiotic</b>, it contains billions of active, live cultures that actively populate your digestive tract, helping to break down food and significantly strengthen your immune system.<br/><br/>In the intense summer heat of Nepal, a bowl of fresh curd is not just a side dish; it is essential for hydration and balancing your body's internal temperature. We use only high-fat, premium whole milk to ensure that every scoop is as nutritionally dense as it is delicious. It serves as the perfect base for marinades, a cooling complement to spicy curries, or a healthy dessert when mixed with fresh fruits. Regular consumption of our Dahi improves bone density and keeps acidity at bay.",
+    image: "/dahi.png",
     date: "May 06, 2026",
     category: "Probiotics",
     keywords: ["Best dahi in Nepal", "Fresh curd Kathmandu", "Probiotic benefits"]
@@ -37,9 +37,9 @@ export const BLOG_POSTS = [
   {
     id: 4,
     title: "Soft & Nutritious: How to Cook with Sita Ram Fresh Paneer",
-    excerpt: "Our vacuum-packed paneer stays incredibly soft, making it the ultimate high-protein choice for vegetarian diets.",
-    fullContent: "Finding <b>soft paneer in Nepal</b> can be difficult, as many store-bought options become rubbery when cooked. Sita Ram Fresh Paneer is different. Because we use high-quality milk and immediate vacuum sealing, our paneer retains its moisture and delicate flavor. It is an excellent source of protein and calcium, making it a staple for fitness enthusiasts and traditional Nepali kitchens.",
-    image: "https://sewapoint.com/image-1684483772616-paneer200gm.jpg",
+    excerpt: "Discover why our vacuum-packed fresh paneer stays incredibly soft and moist, making it the ultimate high-protein, versatile choice for vegetarian diets and rich curries.",
+    fullContent: "Finding genuinely <b>soft paneer in Nepal</b> can often be a frustrating experience, as many store-bought options become rubbery, dry, and chewy the moment they are cooked. Sita Ram Fresh Paneer completely changes the game. Because we use only the highest-quality whole milk and employ an immediate vacuum-sealing process, our paneer retains its natural moisture, delicate flavor, and spongy texture.<br/><br/>Paneer is a powerhouse of vegetarian nutrition. It is an excellent source of high-quality protein, calcium, and conjugated linoleic acid—a fatty acid associated with fat loss. Because it absorbs flavors beautifully, it is perfect for everything from a rich, creamy <i>Palak Paneer</i> to grilled Paneer Tikka. We never use artificial softeners or chemical preservatives, ensuring that your family gets pure, farm-fresh cottage cheese every time.",
+    image: "/paneer.png",
     date: "May 04, 2026",
     category: "Vegetarian Protein",
     keywords: ["Soft paneer Nepal", "High protein paneer", "Fresh cottage cheese"]
@@ -47,9 +47,9 @@ export const BLOG_POSTS = [
   {
     id: 5,
     title: "Start Your Morning with Sita Ram Processed Butter",
-    excerpt: "Swastha ra Swadilo. Our creamy table butter is crafted for families who refuse to compromise on breakfast quality.",
-    fullContent: "Nothing beats the taste of <b>Sita Ram Butter</b> melting over a hot <i>Sel Roti</i> or toasted bread. Crafted from farm-fresh cream, our butter has a subtle saltiness and rich mouthfeel. It is processed in a state-of-the-art facility to ensure zero contamination, making it a safe and tasty choice for your children's tiffin boxes every single day.",
-    image: "https://storage.googleapis.com/takeapp/media/cm3a8hpv200020cl583sl8cfj.jpeg",
+    excerpt: "Swastha ra Swadilo. Crafted for families who refuse to compromise, our creamy, perfectly salted table butter makes every breakfast special.",
+    fullContent: "Nothing quite beats the nostalgic taste of <b>Sita Ram Butter</b> melting beautifully over a hot, crispy <i>Sel Roti</i>, a warm paratha, or freshly toasted bread. Crafted exclusively from farm-fresh cream, our butter boasts a subtle, perfectly balanced saltiness and a rich, luxurious mouthfeel that elevates the simplest of foods.<br/><br/>Unlike highly processed margarines, our butter is naturally rich in fat-soluble vitamins like A, E, and K2. It is churned and processed in a state-of-the-art facility utilizing strict cold-chain logistics to ensure absolute zero contamination. Free from harmful trans fats and synthetic additives, it is a remarkably safe, energy-dense, and tasty choice for your children's tiffin boxes every single day. Baking, cooking, or spreading—Sita Ram butter delivers golden perfection.",
+    image: "/butter.png",
     date: "May 02, 2026",
     category: "Dairy Essentials",
     keywords: ["Best butter in Nepal", "Creamy table butter", "Salted butter"]
@@ -57,9 +57,9 @@ export const BLOG_POSTS = [
   {
     id: 6,
     title: "Keshar Milk: The Ultimate Energy Drink for the Modern Lifestyle",
-    excerpt: "Combine the healing properties of pure Saffron (Keshar) with low-fat milk for a refreshing, antioxidant-rich boost.",
-    fullContent: "Sita Ram Energy Fresh Keshar Milk is a premium flavored milk designed for people on the move. Saffron is known in Ayurveda for improving skin glow and boosting mood. By blending it with our <b>energy-rich low-fat milk</b>, we've created a drink that satisfies your sweet cravings while providing a steady stream of nutrition without the crash of sugary sodas.",
-    image: "https://img.drz.lazcdn.com/static/np/p/efa59a0d1df5e7025b7f47220bbf5410.jpg_960x960q80.jpg_.webp",
+    excerpt: "Experience the perfect fusion of health and taste by combining the ancient healing properties of pure Saffron with our premium low-fat milk for an antioxidant-rich boost.",
+    fullContent: "Sita Ram Energy Fresh Keshar Milk is a meticulously crafted premium flavored milk designed specifically for busy people constantly on the move. Saffron (Keshar) has been revered for centuries in Ayurveda for its remarkable ability to improve skin glow, boost memory, and elevate mood through natural antioxidants.<br/><br/>By expertly blending pure saffron extracts with our <b>energy-rich, easily digestible low-fat milk</b>, we've created a rejuvenating drink that completely satisfies your sweet cravings while providing a steady, sustainable stream of nutrition. Unlike highly caffeinated energy drinks or sugary sodas that lead to a sudden energy crash, our Keshar milk offers sustained vitality, essential proteins, and bone-building calcium. Serve it chilled on a hot afternoon or gently warmed before bed for a restful sleep.",
+    image: "/keshar-milk.png",
     date: "April 30, 2026",
     category: "Wellness Drinks",
     keywords: ["Saffron milk benefits Nepal", "Keshar milk", "Healthy flavored milk"]
@@ -67,9 +67,9 @@ export const BLOG_POSTS = [
   {
     id: 7,
     title: "Traditional Lassi: Beating the Kathmandu Heat Naturally",
-    excerpt: "Experience the authentic taste of Nepali Lassi, packed with calcium and chilled to perfection for instant refreshment.",
-    fullContent: "Our traditional Lassi is a tribute to the street-side flavors of old Kathmandu but made with the hygiene standards of a world-class dairy. It is the perfect <b>refreshing summer drink</b>. Unlike carbonated beverages, our Lassi provides protein and helps in neutralizing stomach acidity, making it the healthiest way to cool down after a long day.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeCSTgVxX2OOv7WVjONsrHOJFZtKmMlJ67Vg&s",
+    excerpt: "Relive the authentic, nostalgic taste of classic Nepali Lassi, packed with calcium, beneficial probiotics, and chilled to absolute perfection for instant summer refreshment.",
+    fullContent: "Our traditional Lassi is a heartfelt tribute to the iconic street-side flavors of old Kathmandu, but reimagined and crafted with the uncompromising hygiene standards of a modern, world-class dairy. It is unequivocally the perfect <b>refreshing summer drink</b> for Nepal's sweltering months.<br/><br/>While carbonated beverages strip your body of hydration and introduce empty calories, our rich, yogurt-based Lassi provides a substantial dose of protein, calcium, and B vitamins. The natural probiotics aid heavily in neutralizing stomach acidity after a spicy meal, making it the healthiest way to cool down, rehydrate, and settle your digestion after a long, exhausting day in the city. Thick, creamy, and mildly sweetened, it’s a guilt-free indulgence for all ages.",
+    image: "/lassi.png",
     date: "April 28, 2026",
     category: "Refreshments",
     keywords: ["Best lassi in Kathmandu", "Healthy summer drinks", "Sita Ram Lassi"]
@@ -77,9 +77,9 @@ export const BLOG_POSTS = [
   {
     id: 8,
     title: "Fruity Delight: Why Kids Love Sita Ram Strawberry Lassi",
-    excerpt: "A vibrant twist on our classic favorite, combining the probiotic goodness of yogurt with natural strawberry flavors.",
-    fullContent: "Getting kids to eat yogurt can be a struggle, but they can't resist the <b>Strawberry Lassi from Sita Ram</b>. We use natural fruit extracts to give it that pink glow and berry taste. It's a great way to ensure your children get their daily dose of calcium while enjoying a treat that feels like a dessert but acts like a health supplement.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeCSTgVxX2OOv7WVjONsrHOJFZtKmMlJ67Vg&s",
+    excerpt: "A vibrant, fruity twist on our classic favorite that masterfully combines the potent probiotic goodness of fresh yogurt with irresistible, natural strawberry flavors.",
+    fullContent: "Getting energetic kids to sit down and eat plain yogurt can often be a daily struggle for parents, but they simply cannot resist the vibrant and tasty <b>Strawberry Lassi from Sita Ram</b>. We purposefully use natural fruit extracts to give it that highly appealing pink glow and authentic, sweet berry taste.<br/><br/>This drink is a brilliant way to sneak essential nutrients into your child's diet. It ensures your children eagerly get their vital daily dose of calcium and gut-friendly bacteria while thoroughly enjoying a sweet treat that feels just like a dessert but acts like a potent health supplement. Packaged conveniently for on-the-go consumption, it is the ultimate healthy lunchbox addition that parents trust and kids actually ask for.",
+    image: "/strawberry-lassi.png",
     date: "April 26, 2026",
     category: "Kids Nutrition",
     keywords: ["Strawberry lassi benefits", "Fruit yogurt drink Nepal", "Healthy snacks for kids"]
@@ -87,9 +87,9 @@ export const BLOG_POSTS = [
   {
     id: 9,
     title: "Inside Our Farm: The Journey of Purity",
-    excerpt: "Explore how Sita Ram maintains the highest standards of animal welfare and hygiene to bring you 'Generations of Pure Goodness'.",
-    fullContent: "Purity starts at the source. At <b>Sita Ram Farms</b>, our cows are fed a natural, nutrient-rich diet with no hormonal injections. We believe that happy cows produce better milk. Our facility in Sanepa uses closed-circuit systems to ensure the milk never touches human hands until you open the packet in your kitchen. This is the secret behind the consistency and safety of our entire product range.",
-    image: "https://newbusinessage.prixacdn.net/img/news/20220801061710_1659346297.jpg",
+    excerpt: "Take an exclusive look behind the scenes at how Sita Ram maintains the highest global standards of animal welfare, sustainability, and hygiene.",
+    fullContent: "Absolute purity must always start at the source. At <b>Sita Ram Farms</b>, the well-being of our cattle is our highest priority. Our cows are free-roaming and are fed a carefully formulated, natural, and nutrient-rich diet with absolutely no artificial growth hormones or preventive antibiotics. We firmly believe that healthy, happy cows naturally produce significantly better, richer milk.<br/><br/>Our flagship facility in Sanepa utilizes advanced, fully automated closed-circuit milking systems. This incredible technology ensures that the milk is extracted, pasteurized, and packaged without ever touching human hands or being exposed to open air until you open the packet in your own kitchen. We also employ eco-friendly waste management practices to ensure our dairy footprint is as green as the pastures our cows graze on.",
+    image: "/farm.png",
     date: "April 24, 2026",
     category: "Farm Life",
     keywords: ["Organic dairy farming Nepal", "Sita Ram Farm", "Dairy hygiene standards"]
@@ -97,9 +97,9 @@ export const BLOG_POSTS = [
   {
     id: 10,
     title: "Milk Subscriptions: Never Run Out of Freshness Again",
-    excerpt: "Learn how our automated subscription service ensures that fresh Gokul milk reaches your doorstep every single morning.",
-    fullContent: "Imagine waking up to fresh milk at your door without ever having to call a shop. Our <b>Dairy Subscription Service</b> is designed for the modern Kathmandu family. You can customize your delivery days, pause when you are on vacation, and pay easily through Khalti or FonePay. It's the most convenient way to keep your family healthy and hydrated without the morning hassle.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5G_JqA-Qr8Yyrj-ZBesD6or-xeFWI_fF9ug&s", // Using a placeholder dashboard-style image for service
+    excerpt: "Discover the ultimate convenience with our automated doorstep subscription service, ensuring fresh Gokul milk and dairy essentials reach your home every morning.",
+    fullContent: "Imagine waking up every single day to fresh, chilled milk waiting right at your door, without ever having to rush to the local shop or worry about them running out of stock. Our innovative <b>Dairy Subscription Service</b> is specifically designed for the busy, modern Kathmandu family that values both quality and convenience.<br/><br/>Through our seamless digital platform, you have total control. You can easily customize your weekly delivery days, add extra items like paneer or dahi for the weekends, and even pause deliveries with a single click when you go on vacation. Payments are completely hassle-free with secure integrations for local wallets like Khalti, eSewa, and FonePay. Powered by our dedicated cold-chain delivery fleet, we guarantee that the milk you receive at 6 AM is as fresh as when it left our farm.",
+    image: "/subscription.png", 
     date: "April 22, 2026",
     category: "Services",
     keywords: ["Milk delivery Kathmandu", "Online dairy subscription", "Fresh milk doorstep"]

@@ -7,8 +7,6 @@ const REGION_DATA = {
   "Bagmati": {
     cities: {
       "Kathmandu": ["Kuleshwor", "Jyatha"],
-      "Bhaktapur": ["Suryabinayak Fresh Outlet"],
-      "Lalitpur": ["Jhamsikhel Heritage Branch"]
     }
   }
 };
@@ -34,6 +32,7 @@ const ALL_OUTLETS = [
     phone: "015213049",
     hours: "7:00 AM - 8:00 PM (Daily)",
     isMain: false,
+
     mapUrl: "https://maps.app.goo.gl/Hjnb9P1y4jGAGPkQ9"
   },
 
@@ -55,8 +54,11 @@ const ALL_OUTLETS = [
     phone: "+977 1-661xxxx",
     hours: "6:00 AM - 7:00 PM (Daily)",
     isMain: false,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Suryabinayak+Chowk,+Bhaktapur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
+    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Suryabinayak+Chowk,+Bhaktapur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed",
+    mapUrl: "   "
+
   }
+  
 ];
 
 export default function OutletsPage() {

@@ -27,6 +27,14 @@ const SOCIAL_LINKS = [
   { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
 ];
 
+const BIGGEST_CLIENTS = [
+  { name: "Soaltee Hotel", url: "https://www.soalteehotel.com/uploads/images1/20250115110040.png" },
+  { name: "Mercure Hotel", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Mercure_Hotels_Logo_2013.svg/3840px-Mercure_Hotels_Logo_2013.svg.png" },
+  { name: "Client 3", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+3" },
+  { name: "Client 4", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+4" },
+  { name: "Client 5", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+5" }
+];
+
 const AVAILABLE_ON = [
   { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
   { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
@@ -179,7 +187,8 @@ const Footer = () => {
               <p className="text-gray-600 text-sm">
                 <span className="font-semibold text-[#C8102E]">Biratnagar</span> • 
                 <span className="font-semibold text-[#C8102E]"> Birgunj</span> • 
-                <span className="font-semibold text-[#C8102E]"> Pokhara</span>
+                <span className="font-semibold text-[#C8102E]"> Pokhara</span> • 
+                <span className="font-semibold text-[#C8102E]"> Janakpur (Upcoming)</span>
               </p>
             </div>
 
@@ -198,57 +207,46 @@ const Footer = () => {
         </div>
       </div>
 
-     {/* 4. Available On Section - Partner Stores */}
-<div className="bg-gray-50 py-10 border-t border-gray-200">
-  <div className="max-w-7xl mx-auto px-6">
-
-    {/* Heading */}
-    <div className="text-center mb-8">
-      <h4 className="text-2xl font-bold tracking-wide text-gray-800 uppercase">
-        Our Partner Stores
-      </h4>
-
-      <div className="w-24 h-1 bg-[#C8102E] mx-auto mt-3 rounded-full"></div>
-    </div>
-
-    {/* Logos Container */}
-    <div className="w-full overflow-x-auto scrollbar-hide">
-      <div className="flex justify-center items-center gap-6 min-w-max py-3">
-
-        {AVAILABLE_ON.map((partner, index) => (
-          <div
-            key={index}
-            className="
-              w-[120px]
-              h-[120px]
-              bg-white
-              rounded-2xl
-              shadow-md
-              border border-gray-200
-              flex items-center justify-center
-              p-4
-              transition-all duration-300
-              hover:-translate-y-2
-              hover:shadow-2xl
-              hover:border-[#C8102E]
-            "
-          >
-            <img
-              src={partner.url}
-              alt={partner.name}
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                e.target.src = `https://placehold.co/120x120?text=${partner.initials}`;
-              }}
-            />
+      {/* NEW: Our Biggest Clients Section */}
+      <div className="bg-white py-6 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col items-center text-center">
+            <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase border-b border-gray-200 pb-2 mb-5 inline-block">Our Biggest Clients</h4>
+            <div className="flex flex-wrap justify-center items-center gap-6">
+              {BIGGEST_CLIENTS.map((client, index) => (
+                <div key={index} className="w-24 h-24 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-3 transition-transform hover:-translate-y-1 hover:shadow-md">
+                  <img 
+                    src={client.url} 
+                    alt={client.name} 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-
+        </div>
       </div>
-    </div>
 
-  </div>
-</div>
+      {/* 4. Available On Section - Partner Stores with smaller logos in a single horizontal line */}
+      <div className="bg-gray-50 py-6 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col items-center text-center">
+            <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase border-b border-gray-200 pb-2 mb-5 inline-block">Products Availability</h4>
+            <div className="flex flex-wrap justify-center items-center gap-4">
+              {AVAILABLE_ON.map((partner, index) => (
+                <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-2 transition-transform hover:-translate-y-1 hover:shadow-md">
+                  <img 
+                    src={partner.url} 
+                    alt={partner.name} 
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.target.src = `https://placehold.co/80x80?text=${partner.initials}`; }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 5. Bottom Bar */}
       <div className="bg-white py-4 border-t border-gray-100">

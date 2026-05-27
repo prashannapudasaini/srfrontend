@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, CalendarDays } from 'lucide-react'; // <-- Added CalendarDays
+import { ShoppingCart, CalendarDays } from 'lucide-react'; 
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
@@ -228,8 +228,10 @@ export default function ProductDetailPage() {
                   <p className="text-4xl font-black text-[#1A1A1A]">NPR {currentPrice * quantity}</p>
                 </div>
 
-                {/* --- PREMIUM SUBSCRIBE BUTTON --- */}
-                <button 
+                {/* ========================================================= */}
+                {/* 🛑 SUBSCRIBE AND ADD TO CART BUTTONS COMMENTED OUT BELOW 🛑 */}
+                {/* ========================================================= */}
+                {/* <button 
                   onClick={() => navigate('/availability')}
                   className="w-full mb-4 h-12 rounded-xl bg-gradient-to-r from-[#002147] via-[#00152e] to-[#002147] text-[#E2B254] font-black tracking-widest uppercase shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 border border-[#E2B254]/30"
                 >
@@ -238,14 +240,12 @@ export default function ProductDetailPage() {
                 </button>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  {/* Quantity Selector */}
                   <div className="flex items-center border border-gray-200 bg-white h-12 w-full sm:w-auto shrink-0">
                     <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-5 text-gray-500 hover:text-[#E41E26] font-bold text-xl transition-colors">-</button>
                     <span className="w-10 text-center font-bold text-[#1A1A1A]">{quantity}</span>
                     <button onClick={() => setQuantity(Math.min(currentStock || 10, quantity + 1))} className="px-5 text-gray-500 hover:text-[#E41E26] font-bold text-xl transition-colors">+</button>
                   </div>
 
-                  {/* Add to Cart Button */}
                   <button 
                     onClick={handleAddToCart} disabled={currentStock === 0}
                     className={`flex-1 h-12 w-full flex items-center justify-center gap-2 font-bold uppercase tracking-widest transition-colors ${
@@ -257,6 +257,8 @@ export default function ProductDetailPage() {
                     <ShoppingCart size={18} /> {currentStock > 0 ? 'Add to Cart' : 'Out of Stock'}
                   </button>
                 </div>
+                */}
+
               </div>
             </div>
           </div>

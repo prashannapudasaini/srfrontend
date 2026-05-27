@@ -30,7 +30,6 @@ import OrderHistoryPage from './pages/OrderHistoryPage';
 
 // Authentication Pages
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 
 // Admin Dashboard & Management (Nested Routes)
 import Dashboard from './admin/Dashboard';
@@ -106,7 +105,6 @@ function App() {
         
         {/* === AUTHENTICATION === */}
         <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
-        <Route path="/register" element={<PublicLayout><RegisterPage /></PublicLayout>} />
 
         {/* === SHOPPING FLOW === */}
         <Route path="/cart" element={<PublicLayout><CartPage /></PublicLayout>} />

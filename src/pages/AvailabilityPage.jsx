@@ -7,9 +7,7 @@ import api from '../services/api';
 import ContactModal from '../components/ContactModal';
 
 const AVAILABLE_LOCATIONS = [
-  "Kathmandu Central", "Lalitpur Core", "Bhaktapur Area", 
-  "Ring Road East", "Kathmandu North", "Kathmandu West", 
-  "Kathmandu South", "Lalitpur Outskirts"
+  "Kathmandu", "Lalitpur", "Bhaktapur"
 ];
 
 const DAYS_OF_WEEK = [

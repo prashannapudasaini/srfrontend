@@ -1,15 +1,11 @@
-// frontend/src/context/AuthContext.jsx
+// context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  loginUser as apiLoginUser, 
-  logoutUser as apiLogoutUser,
-  registerUser as apiRegisterUser
-} from '../services/auth';
+import { loginUser, logoutUser, registerUser } from '../services/auth';
 
-// 1. FIXED: Added 'export' so useAuth.js can find it
+// Create context (exported for useAuth hook)
 export const AuthContext = createContext();
 
-// 2. Custom Hook for easy access
+// Custom hook for easy access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -18,12 +14,12 @@ export const useAuth = () => {
   return context;
 };
 
-// 3. Provider Component
+// Provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // --- HYDRATION: Check for active session on page load ---
+  // Hydrate auth state from localStorage on mount
   useEffect(() => {
     const hydrateAuth = () => {
       try {
@@ -34,95 +30,63 @@ export const AuthProvider = ({ children }) => {
           setUser(JSON.parse(savedUser));
         }
       } catch (error) {
-        console.error("Failed to parse user from local storage", error);
+        console.error('Failed to restore auth state:', error);
         localStorage.removeItem('sitaRamUser');
         localStorage.removeItem('sitaRamToken');
       } finally {
         setLoading(false);
       }
     };
-
     hydrateAuth();
   }, []);
 
-  // --- LOGIN LOGIC ---
-  const login = async (email, password) => {
-    try {
-      // 1. EXCLUSIVE ADMIN OVERRIDE
-      if (email === 'adminsitaram@gmail.com' && password === 'adminPASSWORD@') {
-        const adminUser = { 
-          id: 999, 
-          name: 'Super Admin', 
-          role: 'admin', 
-          email: email 
-        };
-        const adminToken = 'admin-secure-token-999';
-        
-        localStorage.setItem('sitaRamUser', JSON.stringify(adminUser));
-        localStorage.setItem('sitaRamToken', adminToken);
-        
-        setUser(adminUser);
-        return { success: true, role: 'admin' };
-      }
-
-      // 2. STANDARD CUSTOMER LOGIN
-      const data = await apiLoginUser({ email, password });
-      
-      if (data?.success && data?.user) {
-        localStorage.setItem('sitaRamUser', JSON.stringify(data.user));
-        if (data.token) {
-          localStorage.setItem('sitaRamToken', data.token);
-        }
-        
-        setUser(data.user);
-        return { success: true, role: data.user.role };
-      }
-      
-      return { 
-        success: false, 
-        error: data?.error || 'Invalid email or password' 
+  // --- LOGIN ---
+  const login = async (loginId, password) => {
+    // Admin hardcoded override (matches your original)
+    if (loginId === 'adminsitaram@gmail.com' && password === 'adminPASSWORD@') {
+      const adminUser = {
+        id: 999,
+        name: 'Super Admin',
+        role: 'admin',
+        email: loginId
       };
-      
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Login failed. Please check your credentials.' 
-      };
+      const adminToken = 'admin-secure-token-999';
+      localStorage.setItem('sitaRamUser', JSON.stringify(adminUser));
+      localStorage.setItem('sitaRamToken', adminToken);
+      setUser(adminUser);
+      return { success: true, role: 'admin' };
     }
+
+    // Regular login via API
+    const result = await loginUser({ email: loginId, password });
+    if (result.success && result.user) {
+      localStorage.setItem('sitaRamUser', JSON.stringify(result.user));
+      if (result.token) localStorage.setItem('sitaRamToken', result.token);
+      setUser(result.user);
+      return { success: true, role: result.user.role };
+    }
+    return { success: false, error: result.error };
   };
 
-  // --- REGISTRATION LOGIC ---
+  // --- REGISTER ---
   const register = async (userData) => {
-    try {
-      return await apiRegisterUser(userData);
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Registration failed. Please try again.' 
-      };
-    }
+    // userData should contain: name, email, phone, address, password
+    const result = await registerUser(userData);
+    return result; // already has success, error, fieldErrors, etc.
   };
 
-  // --- LOGOUT LOGIC ---
+  // --- LOGOUT ---
   const logout = async () => {
-    try {
-      await apiLogoutUser();
-    } catch (e) {
-      console.warn("Backend logout failed, forcing local logout.");
-    } finally {
-      setUser(null);
-      localStorage.removeItem('sitaRamUser');
-      localStorage.removeItem('sitaRamToken');
-      localStorage.removeItem('sitaRamCart');
-      localStorage.removeItem('cartItems');
-    }
+    await logoutUser();
+    setUser(null);
+    // localStorage cleared inside logoutUser
   };
 
   const value = {
     user,
     login,
-    logout,
     register,
+    logout,
     loading,
     isAuthenticated: !!user
   };
