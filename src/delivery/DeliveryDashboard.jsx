@@ -23,7 +23,7 @@ export default function DeliveryDashboard() {
     } catch (error) {
       console.error("Failed to load delivery tasks", error);
     } finally {
-      setLoading(false);
+      setLoading(false);    
     }
   };
 
