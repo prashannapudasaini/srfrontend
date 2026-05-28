@@ -7,6 +7,8 @@ const REGION_DATA = {
   "Bagmati": {
     cities: {
       "Kathmandu": ["Kuleshwor", "Jyatha"],
+       "Bhaktapur": [],
+        "Lalitpur": [],
     }
   }
 };
