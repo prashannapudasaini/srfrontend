@@ -141,7 +141,8 @@ export default function ProductDetail({
           </div>
         </div>
         
-        <button 
+        {/* COMMENTED OUT SUBSCRIBE NOW AND ADD TO CART BUTTONS FOR NOW */}
+        {/* <button 
           onClick={handleAddToCart} disabled={currentStock === 0}
           className={`w-full h-14 px-8 text-lg font-black flex items-center justify-center gap-3 rounded-xl shadow-lg transition-colors ${
             currentStock > 0 
@@ -150,7 +151,7 @@ export default function ProductDetail({
           }`}
         >
           <ShoppingCart size={20} /> {currentStock > 0 ? 'Add to Order' : 'Out of Stock'}
-        </button>
+        </button> */}
 
         <div className="pt-6 mt-8 border-t border-gray-100 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">

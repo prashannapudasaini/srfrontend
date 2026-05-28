@@ -13,7 +13,7 @@ const FeaturedCarousel = () => {
 
   return (
     /* Background set to the Deepest Red (#7A0000) for maximum gold contrast */
-    <div className="overflow-hidden py-6 bg-[#7A0000] border-y-2 border-[#E2B254]/20 shadow-2xl relative z-20">
+    <div className="overflow-hidden py-4 bg-[#7A0000] border-y-2 border-[#E2B254]/20 shadow-2xl relative z-20">
       
       {/* Edge Gradients: Fading from Deep Red to Transparent */}
       <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-[#7A0000] to-transparent z-10" />

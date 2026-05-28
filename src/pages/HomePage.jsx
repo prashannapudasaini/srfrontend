@@ -43,7 +43,7 @@ export default function HomePage() {
       <DetailedProductCards products={essentialProducts} loading={loading} />
       
       <FloatingTypography />
-      <FeaturedCarousel />
+    
     </main>
   );
 }

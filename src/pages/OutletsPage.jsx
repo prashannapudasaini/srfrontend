@@ -7,8 +7,6 @@ const REGION_DATA = {
   "Bagmati": {
     cities: {
       "Kathmandu": ["Kuleshwor", "Jyatha"],
-      "Bhaktapur": ["Suryabinayak Fresh Outlet"],
-      "Lalitpur": ["Jhamsikhel Heritage Branch"]
     }
   }
 };
@@ -22,8 +20,7 @@ const ALL_OUTLETS = [
     address: "Jyatha Thamel",
     phone: "015213049",
     hours: "5:00 AM - 7:00 PM (Daily)",
-    isMain: true,
-    mapUrl: "     "
+    isMain: true
   },
  
   {
@@ -33,30 +30,11 @@ const ALL_OUTLETS = [
     address: "Kuleshwor, Kathmandu",
     phone: "015213049",
     hours: "7:00 AM - 8:00 PM (Daily)",
-    isMain: false,
-    mapUrl: "https://maps.app.goo.gl/Hjnb9P1y4jGAGPkQ9"
-  },
-
-  {
-    name: "Jhamsikhel Heritage Branch",
-    state: "Bagmati",
-    city: "Lalitpur",
-    address: "Jhamsikhel Road, Lalitpur",
-    phone: "+977 981-xxxxxxx",
-    hours: "6:30 AM - 7:30 PM (Daily)",
-    isMain: false,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Jhamsikhel,+Lalitpur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
-  },
-  {
-    name: "Suryabinayak Fresh Outlet",
-    state: "Bagmati",
-    city: "Bhaktapur",
-    address: "Suryabinayak Chowk, Bhaktapur",
-    phone: "+977 1-661xxxx",
-    hours: "6:00 AM - 7:00 PM (Daily)",
-    isMain: false,
-    mapUrl: "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Suryabinayak+Chowk,+Bhaktapur,+Nepal&t=&z=15&ie=UTF8&iwloc=B&output=embed"
+    isMain: false
   }
+
+ 
+  
 ];
 
 export default function OutletsPage() {

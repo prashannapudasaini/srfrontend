@@ -43,26 +43,27 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // 4. Update Quantity (The '+' and '-' buttons)
-  const updateQuantity = (identifier, newQuantity) => {
-    if (newQuantity < 1) return; // Prevent going below 1 (use delete button instead)
-    
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        (item.cartItemId === identifier || item.id === identifier)
-          ? { ...item, quantity: newQuantity } 
-          : item
-      )
-    );
-  };
+  // 4. Update Quantity
+const updateQuantity = (identifier, newQuantity) => {
+  if (newQuantity < 1) return;
 
-  // 5. Remove from Cart (The Trash Can button)
-  const removeFromCart = (identifier) => {
-    setCartItems(prevItems => 
-      prevItems.filter(item => (item.cartItemId !== identifier && item.id !== identifier))
-    );
-  };
+  setCartItems(prevItems =>
+    prevItems.map(item =>
+      ((item.cartItemId || item.id) === identifier)
+        ? { ...item, quantity: newQuantity }
+        : item
+    )
+  );
+};
 
+// 5. Remove from Cart
+const removeFromCart = (identifier) => {
+  setCartItems(prevItems =>
+    prevItems.filter(
+      item => ((item.cartItemId || item.id) !== identifier)
+    )
+  );
+};
   // 6. Clear Cart (Used after successful checkout)
   const clearCart = () => {
     setCartItems([]);
