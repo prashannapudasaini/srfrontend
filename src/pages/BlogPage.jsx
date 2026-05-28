@@ -79,7 +79,7 @@ export const BLOG_POSTS = [
     title: "Fruity Delight: Why Kids Love Sita Ram Strawberry Lassi",
     excerpt: "A vibrant, fruity twist on our classic favorite that masterfully combines the potent probiotic goodness of fresh yogurt with irresistible, natural strawberry flavors.",
     fullContent: "Getting energetic kids to sit down and eat plain yogurt can often be a daily struggle for parents, but they simply cannot resist the vibrant and tasty <b>Strawberry Lassi from Sita Ram</b>. We purposefully use natural fruit extracts to give it that highly appealing pink glow and authentic, sweet berry taste.<br/><br/>This drink is a brilliant way to sneak essential nutrients into your child's diet. It ensures your children eagerly get their vital daily dose of calcium and gut-friendly bacteria while thoroughly enjoying a sweet treat that feels just like a dessert but acts like a potent health supplement. Packaged conveniently for on-the-go consumption, it is the ultimate healthy lunchbox addition that parents trust and kids actually ask for.",
-    image: "/strawberry-lassi.png",
+    image: "/strawberrylassi.png",
     date: "April 26, 2026",
     category: "Kids Nutrition",
     keywords: ["Strawberry lassi benefits", "Fruit yogurt drink Nepal", "Healthy snacks for kids"]
