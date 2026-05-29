@@ -127,13 +127,18 @@ const Footer = () => {
       </div>
 
       {/* 4. Available On Section - Partner Stores with smaller logos in a single horizontal line */}
-      <div className="bg-gray-50 py-6 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
+      <div className="bg-gray-50 py-8 border-t border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex flex-col items-center text-center">
-            <h4 className="text-sm font-bold tracking-wide text-gray-800 uppercase border-b border-gray-200 pb-2 mb-5 inline-block">Products Availability</h4>
-            <div className="flex flex-wrap justify-center items-center gap-4">
+            <h4 className="text-sm font-bold tracking-wide text-[#002147] uppercase border-b border-[#002147]/20 pb-2 mb-6 inline-block">Products Availability</h4>
+            
+            {/* MODIFICATION: Increased gap from gap-4 to gap-5. 
+              Increased container size from w-16 h-16 to w-20 h-20 (md:w-24 md:h-24 on medium screens and up). 
+              Increased padding slightly from p-2 to p-3 to give the logos room to breathe inside the larger box.
+            */}
+            <div className="flex flex-wrap justify-center items-center gap-5">
               {AVAILABLE_ON.map((partner, index) => (
-                <div key={index} className="w-16 h-16 bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-2 transition-transform hover:-translate-y-1 hover:shadow-md">
+                <div key={index} className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-3 transition-transform hover:-translate-y-1 hover:shadow-md">
                   <img 
                     src={partner.url} 
                     alt={partner.name} 
@@ -143,6 +148,7 @@ const Footer = () => {
                 </div>
               ))}
             </div>
+
           </div>
         </div>
       </div>

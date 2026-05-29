@@ -1,3 +1,8 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Calendar, ArrowRight, BookOpen, Clock, TrendingUp, Eye, Heart, Share2, Bookmark, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 export const BLOG_POSTS = [
   {
     id: 1,
@@ -10,252 +15,634 @@ export const BLOG_POSTS = [
 <h2>The Science Behind Our Purity</h2>
 <p>We employ HTST (High Temperature Short Time) pasteurization at 72°C for 15 seconds, which eliminates pathogens while retaining beneficial enzymes. Our milk is tested for antibiotics, aflatoxins, and adulterants like urea, starch, and formalin. Each batch carries a unique QR code for complete traceability—scan it to know which farm your milk came from, the date of collection, and the quality parameters met.</p>
 
-<p><strong>What makes HTST better than UHT pasteurization?</strong> Unlike Ultra-High Temperature processing which heats milk to 135°C and gives it a cooked flavor, our HTST method preserves the natural sweetness and fresh taste of milk while still ensuring complete safety. The beneficial whey proteins and B vitamins remain intact, giving you maximum nutritional benefit.</p>
-
 <h2>Why Local Matters</h2>
 <p>By choosing Sita Ram, you're supporting over 2,500 small family farms across the Kathmandu Valley. We pay fair prices that allow farmers to invest in better animal husbandry, creating a virtuous cycle of quality. Our milk travels less than 50km from farm to your doorstep, reducing carbon footprint and ensuring maximum freshness.</p>
 
-<p><strong>Our Farmer Partnership Model:</strong> Each farmer receives free veterinary care, nutritious cattle feed at subsidized rates, and monthly training on modern milking hygiene. We've helped over 1,200 families increase their income by 40% while improving animal welfare standards.</p>
-
-<h2>The A2 Milk Difference</h2>
-<p>Our indigenous Pahadi cows naturally produce A2 beta-casein protein, unlike the A1 protein found in most commercial Western breeds. A2 milk is easier to digest and has been linked to reduced inflammation and better gut health. Many people who experience discomfort with regular milk find they can enjoy our A2 Gokul Milk without any issues.</p>
-
-<h2>Complete Nutritional Breakdown</h2>
-<p><strong>Per 240ml serving (1 cup):</strong></p>
+<h3>Nutritional Profile (per 240ml serving)</h3>
 <ul>
-<li>Calories: 150 | Protein: 8g (16% DV) | Total Fat: 8g (12% DV)</li>
-<li>Saturated Fat: 5g (25% DV) | Carbohydrates: 12g (4% DV)</li>
-<li>Calcium: 300mg (30% DV) | Vitamin D: 2.5mcg (25% DV)</li>
-<li>Vitamin B12: 1.2mcg (50% DV) | Phosphorus: 200mg (20% DV)</li>
-<li>Potassium: 380mg (8% DV) | Vitamin A: 150mcg (15% DV)</li>
-<li>Riboflavin (B2): 0.4mg (30% DV) | Zinc: 1mg (10% DV)</li>
+<li>Calories: 150 | Protein: 8g | Fat: 8g | Calcium: 30% DV</li>
+<li>Vitamin D: 25% DV | Vitamin B12: 50% DV | Phosphorus: 20% DV</li>
 </ul>
 
-<h2>How to Choose the Right Milk for Your Family</h2>
-<p><strong>Full Cream Milk (4.5% fat):</strong> Best for growing children, pregnant women, and anyone needing extra energy. The higher fat content aids absorption of fat-soluble vitamins A, D, E, and K. Perfect for making yogurt, paneer, and creamy desserts.</p>
-<p><strong>Standardized Milk (3% fat):</strong> Ideal for daily tea, coffee, and cereal. A balanced choice for most adults and teenagers. Works well for general cooking and baking.</p>
-<p><strong>Toned Milk (1.5% fat):</strong> Suitable for weight-watchers and those monitoring cholesterol. Contains all the protein and calcium but with reduced calories. Great for smoothies and protein shakes.</p>
-
-<h2>Farm Freshness Guarantee</h2>
-<p>Our milk reaches your doorstep within 12 hours of milking. We maintain a strict cold chain from 4°C at the farm, during transport, and until delivery. Each delivery vehicle is equipped with temperature loggers and GPS tracking. If your milk ever arrives above 6°C, you get a full refund automatically.</p>
-
-<h2>Traditional Recipe: Golden Turmeric Latte (Haldi Doodh)</h2>
-<p><strong>Ingredients:</strong></p>
-<ul>
-<li>2 cups Sita Ram Gokul Milk (full cream recommended)</li>
-<li>1 teaspoon fresh turmeric root (grated) or ½ teaspoon turmeric powder</li>
-<li>¼ teaspoon black pepper (essential for curcumin absorption)</li>
-<li>½ teaspoon fresh ginger (grated)</li>
-<li>1 tablespoon raw honey or jaggery</li>
-<li>¼ teaspoon cinnamon powder</li>
-<li>Pinch of cardamom powder</li>
-<li>1 teaspoon Sita Ram Ghee (optional)</li>
-</ul>
-<p><strong>Instructions:</strong> Warm milk in a saucepan over medium heat until steaming. Add turmeric, ginger, black pepper, cinnamon, and cardamom. Whisk continuously for 3-4 minutes. Add ghee if using. Remove from heat, cool for 1 minute, then stir in honey. Strain and serve warm. This golden milk combines turmeric's anti-inflammatory properties with black pepper which increases curcumin absorption by up to 2000%.</p>
-
-<h2>Health Benefits at a Glance</h2>
-<ul>
-<li><strong>Stronger Bones:</strong> 30% daily calcium needs in one glass, essential for children's growth and preventing osteoporosis in adults</li>
-<li><strong>Better Sleep:</strong> Contains tryptophan, an amino acid that the body converts to serotonin and melatonin, improving sleep quality</li>
-<li><strong>Muscle Recovery:</strong> 8g of high-quality complete protein per serving, containing all nine essential amino acids</li>
-<li><strong>Immune Support:</strong> Vitamin B12, zinc, and vitamin D work together to strengthen your body's natural defense system</li>
-<li><strong>Heart Health:</strong> Potassium helps regulate blood pressure, while conjugated linoleic acid supports healthy cholesterol levels</li>
-</ul>
-
-<h2>Frequently Asked Questions</h2>
-<p><strong>Q: Is Sita Ram Gokul Milk pasteurized?</strong><br/>
-A: Yes, we use HTST pasteurization at 72°C for 15 seconds, which kills harmful bacteria while preserving nutrients and flavor. Our milk is NOT ultra-pasteurized, so it retains more of its natural enzymes.</p>
-<p><strong>Q: Does the milk contain any preservatives?</strong><br/>
-A: Absolutely not. Our Gokul Milk is 100% pure cow milk with no preservatives, additives, artificial colors, or flavors. The ingredient list says only 'Pure Cow Milk'.</p>
-<p><strong>Q: What is the fat content of your milk?</strong><br/>
-A: Full cream has 4.5% milk fat, standardized has 3%, and toned has 1.5%. Each variety is clearly labeled on the package.</p>
-<p><strong>Q: How long does the milk stay fresh after opening?</strong><br/>
-A: Once opened, consume within 3 days for best quality. Always keep refrigerated at 4°C or below and tightly sealed.</p>
-<p><strong>Q: Is your milk suitable for people with lactose intolerance?</strong><br/>
-A: While not lactose-free, our A2 milk is often better tolerated by those with mild lactose sensitivity. We also offer lactose-free options. Start with a small amount (50ml) to test your tolerance.</p>
-<p><strong>Q: Can I freeze the milk?</strong><br/>
-A: Yes, milk can be frozen for up to 3 months. Thaw in the refrigerator overnight and shake well before using. The texture may be slightly different but it's perfectly safe and nutritious.</p>
-
-<h2>Storage & Shelf Life Guide</h2>
-<ul>
-<li><strong>Refrigerated (4°C), unopened:</strong> 5-7 days from packaging date</li>
-<li><strong>Refrigerated (4°C), opened:</strong> 2-3 days</li>
-<li><strong>Frozen (-18°C):</strong> Up to 3 months</li>
-<li><strong>Room temperature:</strong> Maximum 2 hours (discard if left out longer)</li>
-</ul>
-
-<p><strong>📌 Most Searched Keywords:</strong> fresh milk Kathmandu, pure cow milk Nepal, organic milk delivery, pasteurized milk benefits, A2 milk Nepal, full cream milk price, daily milk subscription, best milk brand in Nepal, chemical-free milk, farm fresh milk near me, A2 cow milk benefits, milk home delivery Kathmandu.</p>`,
+<p><strong>📍 Most Searched Keywords:</strong> fresh milk Kathmandu, pure cow milk Nepal, organic milk delivery, pasteurized milk benefits, A2 milk Nepal, full cream milk price, daily milk subscription, best milk brand in Nepal, chemical-free milk, farm fresh milk near me.</p>`,
     image: "/milk.png",
     date: "May 10, 2026",
     category: "Fresh Milk",
-    keywords: ["Fresh milk Kathmandu", "pure cow milk Nepal", "organic milk delivery", "A2 milk Nepal", "best milk brand in Nepal", "farm fresh milk near me", "milk home delivery", "full cream milk", "pasteurized milk", "chemical-free milk"],
+    keywords: ["Fresh milk Kathmandu", "pure cow milk Nepal", "organic milk delivery", "A2 milk Nepal", "best milk brand in Nepal", "farm fresh milk near me"],
     readTime: "12 min read",
     highSearchVolume: true
   },
   {
     id: 2,
     title: "The Golden Superfood: Ayurvedic Benefits of Pure Cow Ghee",
-    excerpt: "Far more than just a kitchen staple, Sita Ram Pure Cow Ghee is a legacy of wellness, known for its rich aroma, granular texture, and incredible healing properties in Nepali households.",
-    fullContent: `<p>Our <strong>Danedar Ghee</strong> is meticulously prepared using methods inspired by the traditional bilona process. This time-honored technique ensures a rich, nutty aroma and a perfect granular texture that mass-produced ghees simply cannot replicate. For centuries, ghee has been revered in Ayurveda as a rasayana—a substance that promotes longevity, vitality, and overall health.</p>
+    excerpt: "Far more than just a kitchen staple, Sita Ram Pure Cow Ghee is a legacy of wellness, known for its rich aroma, granular texture, and incredible healing properties.",
+    fullContent: `<p>Our <strong>Danedar Ghee</strong> is meticulously prepared using methods inspired by the traditional bilona process. This time-honored technique ensures a rich, nutty aroma and a perfect granular texture that mass-produced ghees cannot replicate.</p>
 
 <h2>The Traditional Bilona Method</h2>
-<p>Our ghee begins with curd made from A2 milk of indigenous Pahadi cows. This curd is churned using a wooden churner to separate butter—a process that takes 45-60 minutes of continuous churning. The butter is then slow-simmered for 4-6 hours until the milk solids caramelize, creating that signature nutty aroma and granular 'danedar' texture that connoisseurs prize.</p>
-<p><strong>Why the bilona method is superior:</strong> The slow churning and simmering process preserves the short-chain fatty acids and butyrate that make ghee so beneficial. Unlike commercial ghee made by direct cream separation and high-heat processing, our traditional method retains the delicate flavor compounds and therapeutic properties.</p>
+<p>Our ghee begins with curd made from A2 milk of indigenous cows. This curd is churned using a wooden churner to separate butter. The butter is then slow-simmered for 4-6 hours until the milk solids caramelize, creating that signature nutty aroma.</p>
 
-<h2>Health Benefits Backed by Modern Science</h2>
-<p><strong>Butyric Acid for Gut Health:</strong> Ghee is one of the richest natural sources of butyrate, a short-chain fatty acid that nourishes colon cells, reduces inflammation in the digestive tract, and has been shown to help manage conditions like IBS and Crohn's disease.</p>
-<p><strong>Conjugated Linoleic Acid (CLA):</strong> Our grass-fed cows produce milk with naturally high levels of CLA, a fatty acid that studies have linked to reduced body fat, improved immune function, and lower risk of heart disease and certain cancers.</p>
-<p><strong>Vitamin K2 for Heart & Bones:</strong> Ghee contains vitamin K2, which works synergistically with vitamin D to direct calcium to your bones and teeth rather than depositing it in your arteries. This reduces the risk of both osteoporosis and arterial calcification.</p>
-<p><strong>Medium-Chain Triglycerides (MCTs):</strong> Unlike long-chain fats, MCTs are absorbed directly from the gut to the liver, where they are rapidly converted into energy rather than stored as fat. This makes ghee an excellent source of quick, sustained energy.</p>
-
-<h2>Ayurvedic Perspective</h2>
-<p>In Ayurveda, ghee is considered a 'medhya rasayana'—a substance that nourishes the brain and nervous system. It is said to enhance memory, intellect, and concentration. Ghee is used as an anupana (carrier substance) that helps deliver the benefits of herbs deep into the body's tissues. It balances both Vata and Pitta doshas while being safe for Kapha in moderation.</p>
-
-<h2>Complete Nutritional Profile (per tablespoon/14g)</h2>
+<h2>Health Benefits Backed by Science</h2>
 <ul>
-<li>Calories: 120 | Total Fat: 14g (22% DV)</li>
-<li>Saturated Fat: 9g (45% DV) | Monounsaturated Fat: 4g</li>
-<li>Polyunsaturated Fat: 0.5g | Cholesterol: 35mg (12% DV)</li>
-<li>Vitamin A: 400 IU (8% DV) | Vitamin E: 0.4mg (2% DV)</li>
-<li>Vitamin K2: 1.5mcg | Butyrate: 140mg</li>
-<li>CLA: 80mg | MCTs: 2.5g</li>
+<li>Butyric acid supports colon health and reduces inflammation</li>
+<li>Conjugated Linoleic Acid (CLA) aids in fat metabolism</li>
+<li>Vitamin K2 works for bone and cardiovascular health</li>
+<li>Medium-chain triglycerides (MCTs) provide quick energy</li>
 </ul>
 
-<h2>How to Use Ghee in Daily Life</h2>
-<p><strong>Cooking:</strong> Ghee has a smoke point of 485°F (252°C), making it safe for high-heat cooking, frying, and sautéing. Unlike vegetable oils, it doesn't form harmful free radicals when heated.</p>
-<p><strong>Bulletproof Coffee:</strong> Add 1 tablespoon of ghee to your morning coffee and blend. The fats provide sustained mental energy and help you feel full until lunch.</p>
-<p><strong>On Empty Stomach:</strong> Taking 1 teaspoon of ghee first thing in the morning lubricates the digestive tract, stimulates bile production, and supports regularity.</p>
-<p><strong>On Bread or Roti:</strong> Spread ghee on warm rotis, parathas, or toast as a healthier alternative to butter or margarine.</p>
-<p><strong>For Skin Care:</strong> Apply a thin layer of ghee to dry skin, chapped lips, or minor burns. Its anti-inflammatory and moisturizing properties accelerate healing.</p>
-
-<h2>Traditional Recipe: Ghee Roasted Masala Vegetables</h2>
-<p><strong>Ingredients:</strong></p>
-<ul>
-<li>2 tablespoons Sita Ram Danedar Ghee</li>
-<li>2 cups mixed vegetables (cauliflower, carrots, bell peppers, broccoli)</li>
-<li>1 teaspoon cumin seeds</li>
-<li>1 teaspoon turmeric powder</li>
-<li>1 teaspoon coriander powder</li>
-<li>½ teaspoon red chili powder</li>
-<li>½ teaspoon amchur (dry mango powder) or lemon juice</li>
-<li>Salt to taste</li>
-<li>Fresh coriander for garnish</li>
-</ul>
-<p><strong>Instructions:</strong> Preheat oven to 200°C (400°F). Melt ghee in a large bowl. Add all spices to melted ghee and mix. Toss vegetables until coated. Spread on baking sheet in single layer. Roast for 20-25 minutes, stirring halfway. Finish with lemon juice and coriander.</p>
-
-<h2>Storage & Shelf Life</h2>
-<ul>
-<li><strong>Room temperature (airtight container):</strong> Up to 12 months</li>
-<li><strong>Refrigerated:</strong> Up to 2 years</li>
-<li><strong>Do not refrigerate if you want spreadable consistency</strong> - ghee hardens in cold temperatures</li>
-<li><strong>Keep away from moisture</strong> - using dry spoons prevents bacterial growth</li>
-</ul>
-
-<h2>Frequently Asked Questions</h2>
-<p><strong>Q: What makes Danedar Ghee different from regular ghee?</strong><br/>
-A: Danedar ghee has a characteristic granular texture that forms when the milk solids caramelize properly during slow cooking. This texture indicates traditional preparation and superior flavor.</p>
-<p><strong>Q: Is ghee lactose-free?</strong><br/>
-A: Yes, during the clarification process, milk solids (which contain lactose and casein) are removed. Most people with dairy sensitivities can safely consume pure ghee.</p>
-<p><strong>Q: How much ghee should I consume daily?</strong><br/>
-A: For general health, 1-2 tablespoons per day is recommended. Start with 1 teaspoon if you're new to ghee and gradually increase.</p>
-<p><strong>Q: Can ghee help with weight loss?</strong><br/>
-A: The MCTs in ghee support metabolism and fat burning. When used in moderation as part of a balanced diet, ghee can actually support weight management.</p>
-
-<p><strong>📌 Most Searched Keywords:</strong> pure cow ghee Nepal, bilona ghee benefits, danedar ghee price, A2 cow ghee Kathmandu, organic ghee for babies, ghee for weight loss, best ghee brand Nepal, homemade ghee vs commercial, ghee for skin glow, traditional ghee Ayurveda, grass-fed ghee, ghee for hair growth.</p>`,
+<p><strong>📍 Most Searched Keywords:</strong> pure cow ghee Nepal, bilona ghee benefits, danedar ghee price, A2 cow ghee Kathmandu, organic ghee for babies, ghee for weight loss, best ghee brand Nepal.</p>`,
     image: "/ghee.png",
     date: "May 08, 2026",
     category: "Superfoods",
-    keywords: ["Pure cow ghee Nepal", "bilona ghee", "danedar ghee price", "A2 cow ghee", "organic ghee for babies", "ghee for weight loss", "best ghee brand Nepal", "grass-fed ghee", "Ayurvedic ghee benefits"],
+    keywords: ["Pure cow ghee Nepal", "bilona ghee", "danedar ghee price", "A2 cow ghee", "organic ghee for babies", "ghee for weight loss", "best ghee brand Nepal"],
     readTime: "14 min read",
     highSearchVolume: true
   },
   {
     id: 3,
     title: "The Probiotic Power of Sita Ram Dahi: A Gut-Health Revolution",
-    excerpt: "Naturally fermented and proudly 'Shuddha Dudh Bata Baneko', our Dahi is the creamy, cooling, and gut-friendly companion your everyday spicy meals truly deserve.",
-    fullContent: `<p>Sita Ram Dahi is universally celebrated across the valley for its thick, velvety consistency and perfectly balanced tartness. As a potent, natural <strong>probiotic</strong>, it contains billions of active, live cultures that actively populate your digestive tract, helping to break down food and significantly strengthen your immune system.</p>
-
-<p>In the intense summer heat of Nepal, a bowl of fresh curd is not just a side dish; it is essential for hydration and balancing your body's internal temperature. We use only high-fat, premium whole milk to ensure that every scoop is as nutritionally dense as it is delicious. It serves as the perfect base for marinades, a cooling complement to spicy curries, or a healthy dessert when mixed with fresh fruits. Regular consumption of our Dahi improves bone density and keeps acidity at bay.</p>
+    excerpt: "Naturally fermented and proudly 'Shuddha Dudh Bata Baneko', our Dahi is the creamy, cooling, and gut-friendly companion your everyday meals deserve.",
+    fullContent: `<p>Sita Ram Dahi is celebrated across the valley for its thick, velvety consistency and perfectly balanced tartness. As a potent <strong>probiotic</strong>, it contains billions of active, live cultures that populate your digestive tract.</p>
 
 <h2>The Fermentation Science</h2>
-<p>Our dahi uses specific strains of Lactobacillus bulgaricus and Streptococcus thermophilus. These bacteria work symbiotically: S. thermophilus creates the initial acidic environment, allowing L. bulgaricus to thrive and produce the characteristic thick texture and tangy flavor. A single 150g serving contains over 100 billion live probiotic cultures—more than most supplement capsules.</p>
-<p><strong>Why our fermentation process is unique:</strong> We allow our dahi to ferment for 8-10 hours at a controlled temperature of 42°C. This slow fermentation develops the perfect balance of flavor and allows the probiotic bacteria to multiply to optimal levels. The result is a dahi that is neither too sour nor too mild, with a clean, fresh taste.</p>
+<p>Our dahi uses specific strains of Lactobacillus bulgaricus and Streptococcus thermophilus. A single 150g serving contains over 100 billion live probiotic cultures—more than most supplement capsules.</p>
 
 <h2>Gut Health Benefits</h2>
 <ul>
-<li><strong>Improves lactose digestion:</strong> The bacteria produce lactase enzyme, which breaks down lactose, making dahi more digestible than milk for those with mild intolerance.</li>
-<li><strong>Produces short-chain fatty acids:</strong> These heal and seal the gut lining, reducing intestinal permeability (leaky gut syndrome).</li>
-<li><strong>Competes with pathogenic bacteria:</strong> Beneficial probiotics crowd out harmful bacteria like H. pylori and E. coli, reducing the risk of infections.</li>
-<li><strong>Enhances mineral absorption:</strong> The acidic environment and bacterial activity increase absorption of calcium, magnesium, and iron by up to 50%.</li>
-<li><strong>Supports immune function:</strong> Approximately 70% of your immune cells reside in your gut. Probiotics stimulate their activity, reducing the frequency and severity of common infections.</li>
-<li><strong>Reduces inflammation:</strong> Regular consumption of probiotic dahi has been shown to lower markers of systemic inflammation, benefiting conditions like arthritis and allergies.</li>
+<li>Improves lactose digestion</li>
+<li>Produces short-chain fatty acids that heal the gut lining</li>
+<li>Competes with pathogenic bacteria like H. pylori</li>
+<li>Enhances mineral absorption</li>
+<li>Supports immune function</li>
 </ul>
 
-<h2>Complete Nutritional Profile (per 150g serving)</h2>
-<ul>
-<li>Calories: 120 | Protein: 8g (16% DV)</li>
-<li>Total Fat: 6g (9% DV) | Saturated Fat: 4g (20% DV)</li>
-<li>Carbohydrates: 10g (3% DV) | Sugar (natural lactose): 8g</li>
-<li>Calcium: 250mg (25% DV) | Phosphorus: 180mg (18% DV)</li>
-<li>Vitamin B12: 0.8mcg (33% DV) | Riboflavin (B2): 0.3mg (23% DV)</li>
-<li>Potassium: 200mg (4% DV) | Magnesium: 20mg (5% DV)</li>
-<li>Probiotic cultures: 100+ billion CFU</li>
-</ul>
-
-<h2>Traditional Uses in Nepali Cuisine</h2>
-<p><strong>With Chiura (Beaten Rice):</strong> The quintessential Nepali breakfast—chiura mixed with fresh dahi, a pinch of salt, and sometimes jaggery or sugar. Simple, satisfying, and gut-friendly.</p>
-<p><strong>As a Marinade:</strong> The natural acids in dahi tenderize meats while the probiotics add depth of flavor. Yogurt-marinated chicken is the secret to authentic chicken tikka and biryani.</p>
-<p><strong>In Religious Ceremonies:</strong> Dahi is offered in pujas as a symbol of prosperity and purity. It is one of the five sacred foods (panchamrit) used in Hindu rituals.</p>
-
-<h2>Recipe: Cucumber Raita with Roasted Cumin</h2>
-<p><strong>Ingredients:</strong></p>
-<ul>
-<li>2 cups Sita Ram Fresh Dahi</li>
-<li>1 large cucumber, finely grated</li>
-<li>¼ cup fresh mint leaves, finely chopped</li>
-<li>¼ cup fresh coriander, finely chopped</li>
-<li>1 teaspoon roasted cumin powder (bhuteko jira)</li>
-<li>½ teaspoon black salt (kala namak) or regular salt</li>
-<li>¼ teaspoon black pepper</li>
-<li>Pinch of red chili powder (for garnish)</li>
-</ul>
-<p><strong>Instructions:</strong> Place a strainer over a bowl and line with cheesecloth. Pour dahi into the strainer and let excess whey drain for 15-20 minutes for thicker raita. Grate cucumber and squeeze out excess water. In a bowl, whisk the strained dahi until smooth. Add cucumber, mint, coriander, roasted cumin powder, salt, and pepper. Mix gently. Chill for 30 minutes. Before serving, garnish with chili powder.</p>
-
-<h2>How to Make Dahi at Home (Using Sita Ram Milk)</h2>
-<p><strong>Step-by-step:</strong></p>
-<ol>
-<li>Boil 1 liter of Sita Ram Gokul Milk and let it cool until it reaches lukewarm temperature (about 110°F/43°C)—it should feel warm but not hot on your wrist</li>
-<li>Add 2 tablespoons of existing dahi (starter culture) and whisk gently</li>
-<li>Pour into a clean ceramic or glass container</li>
-<li>Cover and place in a warm spot (like an oven with the light on or a insulated container) for 6-8 hours</li>
-<li>Refrigerate for 2 hours before serving</li>
-</ol>
-
-<h2>Storage & Shelf Life</h2>
-<ul>
-<li><strong>Refrigerated (4°C):</strong> 5-7 days from production date</li>
-<li><strong>Do not freeze</strong> - freezing destroys the probiotic cultures and damages the texture</li>
-<li><strong>Do not stir vigorously</strong> - this can cause whey separation and make the dahi watery</li>
-<li><strong>Keep covered</strong> - dahi absorbs odors from other foods in the refrigerator</li>
-</ul>
-
-<h2>Frequently Asked Questions</h2>
-<p><strong>Q: Why is my dahi sometimes sour?</strong><br/>
-A: Dahi becomes more sour when fermented for longer periods or at warmer temperatures. Our dahi is fermented for a specific time to achieve the perfect balance of tanginess.</p>
-<p><strong>Q: Can I eat dahi if I'm on antibiotics?</strong><br/>
-A: Yes, and you absolutely should! Antibiotics kill beneficial gut bacteria along with harmful ones. Eating probiotic-rich dahi helps replenish your gut microbiome. Take antibiotics and dahi at least 2 hours apart.</p>
-<p><strong>Q: Is dahi good for weight loss?</strong><br/>
-A: Yes, the protein and probiotics in dahi promote satiety and support metabolism. Choose plain dahi over sweetened versions for weight management.</p>
-<p><strong>Q: Can diabetics eat dahi?</strong><br/>
-A: Yes, plain unsweetened dahi has a low glycemic index and the protein helps stabilize blood sugar. Avoid fruit-flavored dahi which contains added sugar.</p>
-
-<p><strong>📌 Most Searched Keywords:</strong> best dahi in Nepal, fresh curd Kathmandu, probiotic yogurt benefits, homemade dahi vs market, thick curd delivery, dahi for weight loss, gut health foods Nepal, traditional Nepali yogurt, curd for hair mask, probiotic drink benefits, fermented foods Nepal.</p>`,
+<p><strong>📍 Most Searched Keywords:</strong> best dahi in Nepal, fresh curd Kathmandu, probiotic yogurt benefits, thick curd delivery, dahi for weight loss, gut health foods Nepal.</p>`,
     image: "/dahi.png",
     date: "May 06, 2026",
     category: "Probiotics",
-    keywords: ["Best dahi in Nepal", "Fresh curd Kathmandu", "probiotic yogurt", "thick curd delivery", "dahi for weight loss", "gut health foods Nepal", "traditional Nepali yogurt", "curd for hair", "probiotic drink benefits"],
+    keywords: ["Best dahi in Nepal", "Fresh curd Kathmandu", "probiotic yogurt", "thick curd delivery", "dahi for weight loss", "gut health foods Nepal"],
     readTime: "13 min read",
     highSearchVolume: true
+  },
+  {
+    id: 4,
+    title: "Soft & Nutritious: How to Cook with Sita Ram Fresh Paneer",
+    excerpt: "Discover why our vacuum-packed fresh paneer stays incredibly soft and moist, making it the ultimate high-protein choice for vegetarian diets.",
+    fullContent: `<p>Finding genuinely <strong>soft paneer in Nepal</strong> can be frustrating. Sita Ram Fresh Paneer changes the game. Using only high-quality whole milk and vacuum-sealing, our paneer retains natural moisture, delicate flavor, and spongy texture.</p>
+
+<h2>Why Our Paneer Stays Soft</h2>
+<ul>
+<li>Fat content of 25% creates tenderness</li>
+<li>No calcium chloride or preservatives</li>
+<li>Vacuum sealing prevents moisture loss</li>
+<li>Freshness guaranteed within 5 days</li>
+</ul>
+
+<h2>Cooking Tips</h2>
+<ul>
+<li>For curries: soak in warm water for 10 minutes before adding</li>
+<li>For grilling: marinate for minimum 2 hours</li>
+<li>Never boil paneer for extended periods</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> soft paneer Nepal, high protein paneer, fresh cottage cheese delivery, homemade paneer recipe, paneer for weight loss, calcium rich foods.</p>`,
+    image: "/paneer.png",
+    date: "May 04, 2026",
+    category: "Vegetarian Protein",
+    keywords: ["Soft paneer Nepal", "High protein paneer", "fresh cottage cheese", "homemade paneer recipe", "paneer for weight loss", "calcium rich foods"],
+    readTime: "5 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 5,
+    title: "Start Your Morning with Sita Ram Processed Butter",
+    excerpt: "Swastha ra Swadilo. Crafted for families who refuse to compromise, our creamy, perfectly salted table butter makes every breakfast special.",
+    fullContent: `<p>Nothing beats the taste of <strong>Sita Ram Butter</strong> melting over hot Sel Roti, warm paratha, or freshly toasted bread. Crafted exclusively from farm-fresh cream, our butter has a perfectly balanced saltiness and rich mouthfeel.</p>
+
+<h2>From Cream to Butter</h2>
+<p>The journey begins with cream separated from our Gokul milk within 2 hours of milking. The cream is aged at 5°C for 12 hours, then churned slowly. The butter is washed three times with chilled water and finished with Himalayan rock salt.</p>
+
+<h2>Butter vs Margarine</h2>
+<ul>
+<li>Butter: natural dairy fat with vitamins A, D, E, K2; contains butyrate for gut health</li>
+<li>Margarine: processed vegetable oils; may contain trans fats; lacks fat-soluble vitamins</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> best butter in Nepal, creamy table butter, white butter vs yellow butter, homemade butter recipe, grass fed butter benefits.</p>`,
+    image: "/butter.png",
+    date: "May 02, 2026",
+    category: "Dairy Essentials",
+    keywords: ["Best butter in Nepal", "creamy table butter", "white butter", "homemade butter", "grass fed butter benefits"],
+    readTime: "5 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 6,
+    title: "Keshar Milk: The Ultimate Energy Drink for the Modern Lifestyle",
+    excerpt: "Experience the fusion of health and taste by combining pure Saffron with our premium low-fat milk for an antioxidant-rich boost.",
+    fullContent: `<p>Sita Ram Energy Fresh Keshar Milk blends pure saffron extracts with <strong>energy-rich, easily digestible low-fat milk</strong>. Saffron improves skin glow, boosts memory, and elevates mood through natural antioxidants.</p>
+
+<h2>The Science of Saffron</h2>
+<p>Saffron contains crocin, safranal, and picrocrocin. Research shows crocin acts as an antidepressant, safranal has anti-anxiety properties, and antioxidants protect retinal cells.</p>
+
+<h3>Nutritional Highlights (per 250ml)</h3>
+<ul>
+<li>Calories: 120 | Protein: 9g | Carbs: 14g</li>
+<li>Calcium: 35% DV | Vitamin D: 20% DV | Vitamin B12: 40% DV</li>
+<li>Saffron content: 15mg of pure Kashmir saffron per bottle</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> saffron milk benefits Nepal, keshar milk price, healthy flavored milk, kesar badam milk, traditional Nepali beverages.</p>`,
+    image: "/kesharmilk.png",
+    date: "April 30, 2026",
+    category: "Wellness Drinks",
+    keywords: ["Saffron milk benefits", "keshar milk", "healthy flavored milk", "kesar badam milk", "traditional Nepali beverages"],
+    readTime: "4 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 7,
+    title: "Traditional Lassi: Beating the Kathmandu Heat Naturally",
+    excerpt: "Relive the authentic taste of classic Nepali Lassi, packed with calcium, beneficial probiotics, and chilled to perfection.",
+    fullContent: `<p>Our traditional Lassi is a tribute to the street-side flavors of old Kathmandu. The rich, yogurt-based drink provides protein, calcium, and B vitamins while probiotics neutralize stomach acidity after spicy meals.</p>
+
+<h2>How We Make Lassi</h2>
+<p>Our recipe uses 3 parts Sita Ram Dahi to 1 part chilled water, blended until frothy. We add rose water and cardamom for the classic Nepali flavor profile.</p>
+
+<h2>Hydration Science</h2>
+<p>Lassi contains electrolytes (sodium, potassium, calcium, magnesium) that match what your body loses through sweat. A 300ml serving hydrates more effectively than 500ml of plain water.</p>
+
+<p><strong>📍 Most Searched Keywords:</strong> best lassi in Kathmandu, healthy summer drinks, sweet lassi vs salted lassi, mango lassi recipe, probiotic drink benefits.</p>`,
+    image: "/lassi.png",
+    date: "April 28, 2026",
+    category: "Refreshments",
+    keywords: ["Best lassi Kathmandu", "healthy summer drinks", "sweet lassi", "mango lassi recipe", "probiotic drink benefits"],
+    readTime: "4 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 8,
+    title: "Fruity Delight: Why Kids Love Sita Ram Strawberry Lassi",
+    excerpt: "A vibrant, fruity twist that combines probiotic goodness of fresh yogurt with natural strawberry flavors kids can't resist.",
+    fullContent: `<p>Kids can't resist the <strong>Strawberry Lassi from Sita Ram</strong>. We use natural fruit extracts for the pink glow and authentic berry taste.</p>
+
+<h2>Why Strawberries Are a Superfruit for Kids</h2>
+<ul>
+<li>100% of daily Vitamin C (more than an orange!)</li>
+<li>3g of fiber for growing digestive systems</li>
+<li>Manganese for bone development</li>
+<li>Folate for cell growth</li>
+<li>Anthocyanins that protect developing brains</li>
+</ul>
+
+<h2>Better Than Sugary Drinks</h2>
+<p>A typical juice box contains 20-25g of added sugar. Our Strawberry Lassi has 12g natural sugars plus 8g protein, 300mg calcium, and live probiotics.</p>
+
+<p><strong>📍 Most Searched Keywords:</strong> strawberry lassi benefits, fruit yogurt drink Nepal, healthy snacks for kids, calcium for children, probiotic for kids immunity.</p>`,
+    image: "/strawberrylassi.png",
+    date: "April 26, 2026",
+    category: "Kids Nutrition",
+    keywords: ["Strawberry lassi benefits", "fruit yogurt drink", "healthy snacks for kids", "calcium for children", "probiotic for kids"],
+    readTime: "4 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 9,
+    title: "Inside Our Farm: The Journey of Purity",
+    excerpt: "Take an exclusive look behind the scenes at how Sita Ram maintains global standards of animal welfare, sustainability, and hygiene.",
+    fullContent: `<p>At <strong>Sita Ram Farms</strong>, cow well-being is our highest priority. Our cows are free-roaming and fed natural diets with no artificial growth hormones or antibiotics.</p>
+
+<h2>Our Cattle: Heritage Breeds</h2>
+<p>We raise indigenous Nepali breeds: Pahadi and Achhami. These breeds produce A2 beta-casein milk—the traditional protein type that's easier to digest. Our herd of 850 cows are identified by name, not number.</p>
+
+<h2>Sustainable Practices</h2>
+<ul>
+<li>Biogas plant converts manure into cooking fuel</li>
+<li>Rainwater harvesting collects 2 million liters annually</li>
+<li>Solar panels provide 40% of electricity needs</li>
+<li>Delivery fleet reduced carbon emissions by 35%</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> organic dairy farming Nepal, A2 milk farms Kathmandu, ethical dairy practices, sustainable farming Nepal, grass fed cows.</p>`,
+    image: "/farm.png",
+    date: "April 24, 2026",
+    category: "Farm Life",
+    keywords: ["Organic dairy farming Nepal", "A2 milk farms", "ethical dairy practices", "sustainable farming Nepal", "grass fed cows"],
+    readTime: "8 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 10,
+    title: "Milk Subscriptions: Never Run Out of Freshness Again",
+    excerpt: "Discover the ultimate convenience with our automated doorstep subscription service for fresh Gokul milk and dairy essentials.",
+    fullContent: `<p>Our innovative <strong>Dairy Subscription Service</strong> is designed for the busy modern family. Customize delivery days, add extra items, and pause deliveries when on vacation.</p>
+
+<h2>How It Works</h2>
+<ol>
+<li>Choose products: milk (choose fat %), dahi, paneer, ghee, lassi</li>
+<li>Set delivery schedule: daily, alternate days, or specific days</li>
+<li>Choose delivery window: 5-7 AM or 7-9 AM</li>
+<li>Pay weekly/monthly or on delivery</li>
+<li>Receive in reusable glass bottles</li>
+</ol>
+
+<h2>Subscription Tiers & Savings</h2>
+<ul>
+<li>Basic: 500ml milk daily → Save 5%</li>
+<li>Family: 1L milk + dahi + paneer weekly → Save 12%</li>
+<li>Complete: 2L milk + dahi + paneer + ghee + lassi → Save 18%</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> milk delivery Kathmandu, online dairy subscription, fresh milk doorstep, daily milk home delivery, dairy app Nepal.</p>`,
+    image: "/subscription.png",
+    date: "April 22, 2026",
+    category: "Services",
+    keywords: ["Milk delivery Kathmandu", "online dairy subscription", "fresh milk doorstep", "daily milk home delivery", "dairy app Nepal"],
+    readTime: "5 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 11,
+    title: "Sita Ram Ice Cream: Creamy, Natural & Perfect for Every Season",
+    excerpt: "Made from farm-fresh milk and real fruits, our artisanal ice cream contains no artificial colors, no preservatives, and 100% natural ingredients.",
+    fullContent: `<p><strong>Sita Ram Ice Cream</strong> is crafted using premium Gokul Milk and fresh cream, churned slowly for the densest, creamiest texture. Our recipe uses only five ingredients: milk, cream, sugar, real fruit/nuts, and love.</p>
+
+<h2>Why Our Ice Cream Stands Out</h2>
+<ul>
+<li><strong>Farm-to-Freezer Freshness:</strong> Milk processed within 24 hours</li>
+<li><strong>High Butterfat Content:</strong> Minimum 14% (standard has 10%)</li>
+<li><strong>No Vegetable Oils:</strong> Never use palm oil instead of cream</li>
+<li><strong>Real Fruit, Not Syrups:</strong> Real Alphonso mango pulp</li>
+<li><strong>Lower Overrun:</strong> Less than 25% air (commercial has 100%+)</li>
+</ul>
+
+<h2>Our Flavors</h2>
+<ul>
+<li>🍦 Malai Kulfi Style - Cardamom and saffron</li>
+<li>🍦 Fresh Mango - Seasonal Alphonso mangoes</li>
+<li>🍦 Pure Chocolate - Belgian cocoa powder</li>
+<li>🍦 Rose & Pistachio - Gulab flavor with Iranian pistachios</li>
+<li>🍦 Kesar Pista - Premium saffron and pistachio</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> natural ice cream Nepal, best ice cream Kathmandu, homemade ice cream recipe, dairy ice cream vs frozen dessert, mango ice cream seasonal, kulfi near me.</p>`,
+    image: "/icecream.png",
+    date: "May 12, 2026",
+    category: "Ice Cream",
+    keywords: ["natural ice cream Nepal", "best ice cream Kathmandu", "homemade ice cream", "mango ice cream", "kulfi near me", "artisanal ice cream"],
+    readTime: "6 min read",
+    highSearchVolume: true
+  },
+  {
+    id: 12,
+    title: "Chillax with Sita Ram: Frozen Yogurt & Chilled Desserts",
+    excerpt: "When you want something cool and creamy but lighter than ice cream, our Chillax range of frozen yogurt is your perfect answer.",
+    fullContent: `<p><strong>Chillax by Sita Ram</strong> offers frozen yogurt made from probiotic-rich Sita Ram Dahi, churned into a soft-serve consistency with less fat and calories plus live probiotics.</p>
+
+<h2>What is Frozen Yogurt?</h2>
+<p>Frozen yogurt is made with yogurt instead of primarily cream. It contains live bacterial cultures even after freezing. The result is a tangier, lighter dessert with more protein and fewer calories.</p>
+
+<h2>Our Chillax Range</h2>
+<ul>
+<li>❄️ Plain Tart Froyo - Unsweetened, tangy</li>
+<li>❄️ Berry Blast Froyo - Strawberry and blueberry puree</li>
+<li>❄️ Mango Swirl Froyo - Real mango pulp</li>
+<li>❄️ Honey Almond Froyo - Himalayan honey, roasted almonds</li>
+<li>❄️ Choco Chip Froyo - For chocolate lovers</li>
+</ul>
+
+<h2>Chilled Desserts</h2>
+<ul>
+<li>🍮 Shrikhand - Traditional Gujarati dessert</li>
+<li>🍮 Mishti Doi - Bengali-style sweetened fermented yogurt</li>
+<li>🍮 Fruit & Granola Parfait - Layers of dahi, fruits, granola</li>
+<li>🍮 Kheer (Rice Pudding) - Slow-cooked rice in reduced milk</li>
+</ul>
+
+<h3>Nutritional Comparison (per 150g)</h3>
+<ul>
+<li>Frozen Yogurt: 120 calories, 6g protein, 3g fat, probiotics</li>
+<li>Regular Ice Cream: 270 calories, 4g protein, 15g fat</li>
+<li>Shrikhand: 180 calories, 8g protein, 6g fat</li>
+</ul>
+
+<p><strong>📍 Most Searched Keywords:</strong> frozen yogurt Nepal, froyo Kathmandu, healthy dessert options, shrikhand near me, mishti doi delivery, guilt free sweets.</p>`,
+    image: "/chillax.png",
+    date: "May 14, 2026",
+    category: "Chillax",
+    keywords: ["frozen yogurt Nepal", "froyo Kathmandu", "healthy dessert options", "shrikhand near me", "mishti doi delivery", "guilt free sweets"],
+    readTime: "7 min read",
+    highSearchVolume: true
   }
-  // ... continue with remaining 9 posts in same expanded format
 ];
+
+const BlogPage = () => {
+  const featuredPosts = BLOG_POSTS.slice(0, 3);
+  const recentPosts = BLOG_POSTS.slice(3, 9);
+  const iceCreamPosts = BLOG_POSTS.filter(p => p.category === "Ice Cream");
+  const chillaxPosts = BLOG_POSTS.filter(p => p.category === "Chillax");
+
+  return (
+    <div className="bg-[#FDF8E7] min-h-screen pt-28 pb-20">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        
+        {/* HERO SECTION */}
+        <header className="mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#9e111a] to-[#7a0d14] p-12 text-white"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+            <div className="relative z-10 max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-6">
+                <BookOpen size={16} /> 12 Articles
+              </div>
+              <h1 className="text-5xl lg:text-6xl font-serif font-bold mb-4">
+                Dairy Wellness <br/>Journal
+              </h1>
+              <p className="text-white/80 text-lg mb-8 max-w-xl">
+                Stories of purity, nutrition tips, and traditional recipes from the heart of Sita Ram Dairy.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm">#PureMilk</span>
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm">#TraditionalGhee</span>
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm">#FarmFresh</span>
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm">#NepaliDairy</span>
+              </div>
+            </div>
+          </motion.div>
+        </header>
+
+        {/* FEATURED POSTS */}
+        <section className="mb-20">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Featured Stories</h2>
+            <Link to="/blog/all" className="text-[#9e111a] text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
+              View all <ChevronRight size={16} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredPosts.map((post, idx) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="group cursor-pointer"
+                onClick={() => window.location.href = `/blog/${post.id}`}
+              >
+                <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full">
+                  <div className="h-56 overflow-hidden relative">
+                    <img 
+                      src={post.image} 
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-[#9e111a] text-white px-3 py-1 rounded-full text-xs font-bold">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
+                      <span className="flex items-center gap-1"><Calendar size={12} /> {post.date}</span>
+                      <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                    </div>
+                    <h3 className="text-xl font-serif font-bold text-[#1A1A1A] mb-2 group-hover:text-[#9e111a] transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm line-clamp-2 mb-4">{post.excerpt}</p>
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <span className="text-[#9e111a] text-sm font-medium flex items-center gap-1">
+                        Read More <ArrowRight size={14} />
+                      </span>
+                      <div className="flex items-center gap-3 text-gray-300">
+                        <Heart size={16} className="hover:text-red-500 cursor-pointer" />
+                        <Share2 size={16} className="hover:text-blue-500 cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ICE CREAM SECTION */}
+        {iceCreamPosts.length > 0 && (
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-8 bg-[#9e111a] rounded-full"></div>
+              <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">🍦 Ice Cream Collection</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {iceCreamPosts.map((post, idx) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group cursor-pointer bg-gradient-to-r from-amber-50 to-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all"
+                  onClick={() => window.location.href = `/blog/${post.id}`}
+                >
+                  <div className="flex flex-col md:flex-row">
+                    <div className="md:w-2/5 h-56 md:h-auto overflow-hidden">
+                      <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <div className="md:w-3/5 p-6">
+                      <span className="inline-flex items-center gap-1 text-amber-600 text-sm font-bold mb-2">🍨 Ice Cream</span>
+                      <h3 className="text-xl font-serif font-bold text-[#1A1A1A] mb-2 group-hover:text-[#9e111a] transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
+                      <span className="text-[#9e111a] text-sm font-medium flex items-center gap-1">
+                        Discover Flavor <ArrowRight size={14} />
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* CHILLAX SECTION */}
+        {chillaxPosts.length > 0 && (
+          <section className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-8 bg-[#9e111a] rounded-full"></div>
+              <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">❄️ Chillax - Guilt-Free Desserts</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {chillaxPosts.map((post, idx) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group cursor-pointer bg-gradient-to-r from-blue-50 to-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all"
+                  onClick={() => window.location.href = `/blog/${post.id}`}
+                >
+                  <div className="flex flex-col md:flex-row">
+                    <div className="md:w-2/5 h-56 md:h-auto overflow-hidden">
+                      <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <div className="md:w-3/5 p-6">
+                      <span className="inline-flex items-center gap-1 text-blue-600 text-sm font-bold mb-2">🥄 Frozen Yogurt</span>
+                      <h3 className="text-xl font-serif font-bold text-[#1A1A1A] mb-2 group-hover:text-[#9e111a] transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm line-clamp-2 mb-3">{post.excerpt}</p>
+                      <span className="text-[#9e111a] text-sm font-medium flex items-center gap-1">
+                        Explore Chillax <ArrowRight size={14} />
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* RECENT POSTS GRID */}
+        <section>
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-serif font-bold text-[#1A1A1A]">Latest Articles</h2>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <TrendingUp size={14} /> Most searched topics this week
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recentPosts.map((post, idx) => (
+              <motion.article 
+                key={post.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group cursor-pointer flex flex-col h-full"
+                onClick={() => window.location.href = `/blog/${post.id}`}
+              >
+                <div className="h-56 overflow-hidden relative">
+                  <img 
+                    src={post.image} 
+                    alt={post.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    <span className="bg-[#9e111a] text-white px-3 py-1 rounded-full text-[10px] font-bold">
+                      {post.category}
+                    </span>
+                    {post.highSearchVolume && (
+                      <span className="bg-amber-500 text-white px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                        <TrendingUp size={10} /> Popular
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="p-5 flex flex-col flex-grow">
+                  <div className="flex items-center gap-3 text-gray-400 text-xs mb-3">
+                    <span className="flex items-center gap-1"><Calendar size={12} /> {post.date}</span>
+                    <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                  </div>
+                  
+                  <h3 className="text-lg font-serif font-bold text-[#1A1A1A] mb-2 leading-tight group-hover:text-[#9e111a] transition-colors line-clamp-2">
+                    {post.title}
+                  </h3>
+                  
+                  <p className="text-gray-500 text-sm mb-4 leading-relaxed line-clamp-2">
+                    {post.excerpt}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {post.keywords.slice(0, 3).map((keyword, i) => (
+                      <span key={i} className="text-[8px] bg-gray-50 text-gray-400 px-2 py-1 rounded-full font-medium">
+                        {keyword.length > 20 ? keyword.slice(0, 18) + '…' : keyword}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-[#9e111a] text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read Full Story <ArrowRight size={12} />
+                    </span>
+                    <div className="flex items-center gap-2 text-gray-300">
+                      <Eye size={14} className="hover:text-gray-500 cursor-pointer" />
+                      <Bookmark size={14} className="hover:text-[#9e111a] cursor-pointer" />
+                    </div>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        {/* NEWSLETTER SECTION */}
+        <section className="mt-20 bg-[#1A1A1A] rounded-3xl p-10 text-center">
+          <h3 className="text-2xl font-serif font-bold text-white mb-2">Never Miss a Story</h3>
+          <p className="text-gray-400 mb-6">Get the latest dairy wellness articles delivered to your inbox.</p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Your email address" 
+              className="flex-1 px-5 py-3 rounded-full bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:outline-none focus:border-[#9e111a]"
+            />
+            <button className="bg-[#9e111a] text-white px-6 py-3 rounded-full font-bold hover:bg-[#7a0d14] transition-colors">
+              Subscribe
+            </button>
+          </div>
+        </section>
+
+        {/* SEO FOOTER */}
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-400">
+            <div>
+              <h4 className="font-bold text-gray-500 mb-2">Trending Searches</h4>
+              <ul className="space-y-1">
+                <li>fresh milk Kathmandu</li>
+                <li>pure cow ghee Nepal</li>
+                <li>best dahi in Nepal</li>
+                <li>soft paneer delivery</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-500 mb-2">Popular Products</h4>
+              <ul className="space-y-1">
+                <li>Gokul Milk</li>
+                <li>Danedar Ghee</li>
+                <li>Fresh Paneer</li>
+                <li>Traditional Lassi</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-500 mb-2">Ice Cream</h4>
+              <ul className="space-y-1">
+                <li>Malai Kulfi</li>
+                <li>Mango Ice Cream</li>
+                <li>Kesar Pista</li>
+                <li>Rose Pistachio</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-500 mb-2">Chillax Range</h4>
+              <ul className="space-y-1">
+                <li>Frozen Yogurt</li>
+                <li>Shrikhand</li>
+                <li>Mishti Doi</li>
+                <li>Fruit Parfait</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BlogPage;

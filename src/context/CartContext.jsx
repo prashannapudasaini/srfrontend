@@ -24,17 +24,21 @@ export const CartProvider = ({ children }) => {
   // 3. Add to Cart Logic
   const addToCart = (product, quantity = 1) => {
     setCartItems(prevItems => {
-      // Use cartItemId if available (for variants), otherwise fallback to id
-      const identifier = product.cartItemId || product.id;
+      // Prioritize composite key (for variants), fallback to standard id
+      const currentIdentifier = product.cartItemId || product.id;
       
-      const existingItemIndex = prevItems.findIndex(
-        item => (item.cartItemId || item.id) === identifier
-      );
+      const existingItemIndex = prevItems.findIndex(item => {
+        const itemIdentifier = item.cartItemId || item.id;
+        return itemIdentifier === currentIdentifier;
+      });
 
       if (existingItemIndex > -1) {
-        // Item exists, just increase quantity
+        // Item exists, just increase quantity safely mutation-free
         const newItems = [...prevItems];
-        newItems[existingItemIndex].quantity += quantity;
+        newItems[existingItemIndex] = {
+          ...newItems[existingItemIndex],
+          quantity: newItems[existingItemIndex].quantity + quantity
+        };
         return newItems;
       }
       
@@ -43,28 +47,31 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // 4. Update Quantity
-const updateQuantity = (identifier, newQuantity) => {
-  if (newQuantity < 1) return;
+  // 4. Update Quantity (Fixed strict identity resolution)
+  const updateQuantity = (identifier, newQuantity) => {
+    if (newQuantity < 1) return; 
+    
+    setCartItems(prevItems => 
+      prevItems.map(item => {
+        const itemIdentifier = item.cartItemId || item.id;
+        return itemIdentifier === identifier
+          ? { ...item, quantity: newQuantity } 
+          : item;
+      })
+    );
+  };
 
-  setCartItems(prevItems =>
-    prevItems.map(item =>
-      ((item.cartItemId || item.id) === identifier)
-        ? { ...item, quantity: newQuantity }
-        : item
-    )
-  );
-};
+  // 5. Remove from Cart (Fixed strict identity filter)
+  const removeFromCart = (identifier) => {
+    setCartItems(prevItems => 
+      prevItems.filter(item => {
+        const itemIdentifier = item.cartItemId || item.id;
+        return itemIdentifier !== identifier;
+      })
+    );
+  };
 
-// 5. Remove from Cart
-const removeFromCart = (identifier) => {
-  setCartItems(prevItems =>
-    prevItems.filter(
-      item => ((item.cartItemId || item.id) !== identifier)
-    )
-  );
-};
-  // 6. Clear Cart (Used after successful checkout)
+  // 6. Clear Cart
   const clearCart = () => {
     setCartItems([]);
   };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; 
-import { MapPin, Check, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt } from 'lucide-react';
+import { MapPin, Check, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; 
 import api from '../services/api';
 import ContactModal from '../components/ContactModal';
@@ -28,12 +28,20 @@ export default function AvailabilityPage() {
   const [loading, setLoading] = useState(true);
 
   const [selectedLocation, setSelectedLocation] = useState(''); 
-  const [subscriptionType, setSubscriptionType] = useState('weekly'); 
-  const [activeDay, setActiveDay] = useState('Monday'); 
   
+  // NEW: Updated Plan States based on the UI requested
+  const [subscriptionPlan, setSubscriptionPlan] = useState('one_time'); // one_time, daily, alternate, weekly
+  const [deliveryTiming, setDeliveryTiming] = useState('evening'); // morning, evening
+  
+  const [activeDay, setActiveDay] = useState('Monday'); 
   const [productSchedules, setProductSchedules] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Calculate Tomorrow's Date for the Delivery Notice
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowFormatted = tomorrow.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
   // Fetch Live Products
   useEffect(() => {
@@ -91,9 +99,21 @@ export default function AvailabilityPage() {
     return Object.values(summary);
   }, [productSchedules, products]);
 
-  const weeklyTotalCost = summaryItems.reduce((sum, item) => sum + (item.price * item.totalQty), 0);
-  const monthlyTotalCost = weeklyTotalCost * 4; 
-  const monthlyDiscount = monthlyTotalCost * 0.10; 
+  // Base cost of selected items
+  const baseCost = summaryItems.reduce((sum, item) => sum + (item.price * item.totalQty), 0);
+
+  // Dynamic Multiplier based on the selected plan
+  const calculateFinalCost = () => {
+    switch (subscriptionPlan) {
+      case 'daily': return baseCost * 30; // 30 deliveries
+      case 'alternate': return baseCost * 15; // 15 deliveries
+      case 'weekly': return baseCost * 4; // 4 deliveries
+      case 'one_time':
+      default: return baseCost; // 1 delivery
+    }
+  };
+
+  const finalCost = calculateFinalCost();
 
   // --- Handlers ---
   const handleAddProductToActiveDay = (product) => {
@@ -123,7 +143,6 @@ export default function AvailabilityPage() {
     });
   };
 
-  // --- UPDATED SUBMIT HANDLER WITH PAYMENT GATEWAY INTEGRATION ---
   const handleSubmit = async () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -148,26 +167,25 @@ export default function AvailabilityPage() {
       return { day, items: itemsForDay };
     });
 
-    const finalCost = subscriptionType === 'monthly' ? (monthlyTotalCost - monthlyDiscount) : weeklyTotalCost;
-
     const orderPayload = {
-      subscriptionDetails: { type: subscriptionType, location: selectedLocation, qualifiesForFreeGhee: subscriptionType === 'monthly', weeklyTotalCost: finalCost },
+      subscriptionDetails: { 
+        type: subscriptionPlan, 
+        timing: deliveryTiming,
+        location: selectedLocation, 
+        totalCost: finalCost 
+      },
       weeklySchedule: cleanWeeklySchedule,
-      // Added payment gateway specific fields
       amount: finalCost,
       purchase_id: `SUB_${Date.now()}`,
-      purchase_name: `${subscriptionType.charAt(0).toUpperCase() + subscriptionType.slice(1)} Routine Delivery`
+      purchase_name: `${subscriptionPlan.replace('_', ' ').toUpperCase()} Delivery`
     };
 
     try {
-      // Send payload to backend to initialize order and generate payment link
       const response = await api.post('/orders/verify.php', orderPayload);
       
       if (response.data.payment_url) {
-        // Redirect user to Khalti/eSewa Payment Gateway
         window.location.href = response.data.payment_url;
       } else if (response.data.status === 'success') {
-        // Fallback: If testing mode is on and no gateway URL is returned, proceed to success
         navigate('/subscription-success', { 
           state: { orderData: orderPayload, itemCount: summaryItems.reduce((acc, curr) => acc + curr.totalQty, 0) } 
         });
@@ -205,7 +223,7 @@ export default function AvailabilityPage() {
           </div>
 
           {/* 3-Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start h-auto lg:h-[calc(100vh-220px)] min-h-[750px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start h-auto lg:h-[calc(100vh-220px)] min-h-[850px]">
             
             {/* ========================================== */}
             {/* COLUMN 1: PRODUCT SELECTION */}
@@ -326,7 +344,7 @@ export default function AvailabilityPage() {
             </div>
 
             {/* ========================================== */}
-            {/* COLUMN 3: SUMMARY & PLAN */}
+            {/* COLUMN 3: SUMMARY & PLAN (UPDATED TO MATCH SCREENSHOT) */}
             {/* ========================================== */}
             <div className="lg:col-span-3 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
               <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
@@ -343,7 +361,7 @@ export default function AvailabilityPage() {
                 {/* Location Selector */}
                 <div className="mb-6 relative">
                   <div className="flex justify-between items-end mb-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-[#002147]">Delivery Zone</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-500">Delivery Zone</label>
                     <button 
                       onClick={() => setIsContactModalOpen(true)}
                       className="text-[10px] font-black text-[#9e111a] hover:text-[#002147] uppercase tracking-widest transition-colors flex items-center gap-1 bg-[#9e111a]/5 hover:bg-[#002147]/5 px-2 py-1 rounded"
@@ -357,9 +375,9 @@ export default function AvailabilityPage() {
                     <select 
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
-                      className="w-full bg-white border-2 border-gray-100 text-sm font-bold text-[#1A1A1A] rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:border-[#002147] appearance-none cursor-pointer hover:border-gray-200 transition-colors"
+                      className="w-full bg-white border border-gray-200 text-sm font-bold text-[#1A1A1A] rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-[#9e111a] appearance-none cursor-pointer hover:border-gray-300 transition-colors"
                     >
-                      <option value="" disabled>Select Delivery Zone...</option>
+                      <option value="" disabled>Select Zone...</option>
                       {AVAILABLE_LOCATIONS.map(loc => (
                         <option key={loc} value={loc}>{loc}</option>
                       ))}
@@ -367,105 +385,95 @@ export default function AvailabilityPage() {
                   </div>
                 </div>
 
-                {/* Receipt Style Item List */}
-                <div className="bg-[#FAF9F6] border border-gray-200 border-dashed rounded-2xl p-5 mb-6 flex-grow flex flex-col">
-                  {summaryItems.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-60">
-                      <ShoppingBag size={32} className="mb-3" />
-                      <p className="text-xs uppercase tracking-widest font-bold">Basket is empty</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="space-y-3 flex-grow">
-                        {summaryItems.map(item => (
-                          <div key={item.id} className="flex justify-between items-center text-sm font-bold border-b border-gray-50 pb-2">
-                            <span className="text-gray-600 truncate mr-2">{item.name} <span className="text-[10px] text-gray-400 font-normal">({item.size})</span></span>
-                            <span className="text-[#1A1A1A] whitespace-nowrap">x{item.totalQty}</span>
-                          </div>
-                        ))}
+                {/* --- NEW: PLAN CHOOSER GRID --- */}
+                <div className="mb-6">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-3 block">Choose Plan</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    
+                    {/* One Time */}
+                    <button onClick={() => setSubscriptionPlan('one_time')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'one_time' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                      <ShoppingBag size={18} className={subscriptionPlan === 'one_time' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
+                      <span className="text-xs font-bold">One Time Buy</span>
+                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'one_time' ? 'text-red-200' : 'text-gray-400'}`}>1 Delivery</span>
+                    </button>
+
+                    {/* Daily */}
+                    <button onClick={() => setSubscriptionPlan('daily')} className={`relative p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'daily' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                      <div className="absolute -top-2.5 -right-2 bg-green-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                        🎁 2L Free
                       </div>
-                      
-                      {/* --- UPDATED DYNAMIC COST SECTION --- */}
-                      <div className="border-t border-gray-200 border-dashed pt-4 mt-4">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 mt-2">
-                            {subscriptionType === 'monthly' ? 'Monthly Total' : 'Weekly Total'}
-                          </span>
-                          <div className="text-right">
-                            <span className="text-2xl font-black text-[#9e111a] tracking-tight">
-                              NPR {subscriptionType === 'monthly' ? (monthlyTotalCost - monthlyDiscount).toLocaleString() : weeklyTotalCost.toLocaleString()}
-                            </span>
-                            {/* Monthly Note */}
-                            {subscriptionType === 'monthly' && (
-                              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">(Monthly Based)</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                      <CalendarDays size={18} className={subscriptionPlan === 'daily' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
+                      <span className="text-xs font-bold">Daily</span>
+                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'daily' ? 'text-red-200' : 'text-gray-400'}`}>30 Deliveries/Mo</span>
+                    </button>
 
-                {/* Subscription Toggles */}
-                <div className="space-y-3 mb-6">
-                  <div 
-                    onClick={() => setSubscriptionType('weekly')}
-                    className={`p-4 rounded-2xl cursor-pointer transition-all border-2 flex items-center justify-between ${
-                      subscriptionType === 'weekly' ? 'bg-[#002147] border-[#002147] text-white shadow-lg' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    <div>
-                      <h4 className="font-black text-sm uppercase tracking-wide mb-0.5">Weekly Plan</h4>
-                      <p className={`text-[10px] font-bold ${subscriptionType === 'weekly' ? 'text-gray-300' : 'text-gray-400'}`}>Billed weekly</p>
-                    </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${subscriptionType === 'weekly' ? 'border-[#E2B254]' : 'border-gray-300'}`}>
-                      {subscriptionType === 'weekly' && <div className="w-2.5 h-2.5 bg-[#E2B254] rounded-full"></div>}
-                    </div>
-                  </div>
+                    {/* Alternate Days */}
+                    <button onClick={() => setSubscriptionPlan('alternate')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'alternate' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                      <Calendar size={18} className={subscriptionPlan === 'alternate' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
+                      <span className="text-xs font-bold leading-tight">Alternate Days</span>
+                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'alternate' ? 'text-red-200' : 'text-gray-400'}`}>15 Deliveries/Mo</span>
+                    </button>
 
-                  <div 
-                    onClick={() => setSubscriptionType('monthly')}
-                    className={`p-4 rounded-2xl cursor-pointer transition-all border-2 flex items-center justify-between relative overflow-hidden ${
-                      subscriptionType === 'monthly' ? 'bg-[#002147] border-[#002147] text-white shadow-lg' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    {/* Decorative Banner */}
-                    <div className="absolute top-0 right-0 bg-[#E2B254] text-[#002147] text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-lg">
-                      Free Ghee
-                    </div>
+                    {/* Weekly */}
+                    <button onClick={() => setSubscriptionPlan('weekly')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'weekly' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                      <CalendarDays size={18} className={subscriptionPlan === 'weekly' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
+                      <span className="text-xs font-bold">Weekly</span>
+                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'weekly' ? 'text-red-200' : 'text-gray-400'}`}>4 Deliveries/Mo</span>
+                    </button>
 
-                    <div className="pr-4">
-                      <h4 className="font-black text-sm uppercase tracking-wide mb-0.5 mt-1">Monthly Plan</h4>
-                      <p className={`text-[10px] font-bold leading-tight ${subscriptionType === 'monthly' ? 'text-gray-300' : 'text-gray-400'}`}>
-                        Free 500ml Ghee
-                      </p>
-                    </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${subscriptionType === 'monthly' ? 'border-[#E2B254]' : 'border-gray-300'}`}>
-                      {subscriptionType === 'monthly' && <div className="w-2.5 h-2.5 bg-[#E2B254] rounded-full"></div>}
-                    </div>
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button 
-                  onClick={handleSubmit}
-                  disabled={(!selectedLocation || summaryItems.length === 0 || isSubmitting) && isAuthenticated}
-                  className={`w-full py-4 rounded-xl font-black text-sm tracking-widest uppercase transition-all mt-auto ${
-                    !isAuthenticated 
-                      ? 'bg-[#1A1A1A] text-white hover:bg-black shadow-lg hover:-translate-y-0.5'
-                      : (!selectedLocation || summaryItems.length === 0)
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                        : 'bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#002147] shadow-[0_4px_14px_rgba(226,178,84,0.4)] hover:shadow-lg hover:-translate-y-0.5'
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center gap-2"><Loader2 className="animate-spin" size={18} /> Processing...</span>
-                  ) : !isAuthenticated ? (
-                    "Login to Subscribe"
-                  ) : (
-                    "Confirm Subscription"
-                  )}
-                </button>
+                {/* --- NEW: DELIVERY TIMING SECTION --- */}
+                <div className="mb-6">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Delivery Timing</label>
+                  
+                  {/* Notice Box */}
+                  <div className="bg-red-50 border border-red-100 text-[#9e111a] p-3 rounded-xl flex items-start gap-2 mb-3">
+                    <Info size={16} className="shrink-0 mt-0.5" />
+                    <p className="text-xs">Order before 8:00 PM for tomorrow's delivery. Your cycle begins: <strong className="font-black">{tomorrowFormatted}</strong></p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => setDeliveryTiming('morning')} className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${deliveryTiming === 'morning' ? 'border-[#9e111a] text-[#9e111a] bg-red-50/50 font-bold shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300 font-medium'}`}>
+                      <Sunrise size={16} className={deliveryTiming === 'morning' ? 'text-[#9e111a]' : 'text-gray-400'} />
+                      <span className="text-xs">Morning <span className="text-[10px] opacity-70">(7:00 AM)</span></span>
+                    </button>
+
+                    <button onClick={() => setDeliveryTiming('evening')} className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${deliveryTiming === 'evening' ? 'border-[#9e111a] text-[#9e111a] bg-red-50/50 font-bold shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300 font-medium'}`}>
+                      <Sunset size={16} className={deliveryTiming === 'evening' ? 'text-[#9e111a]' : 'text-gray-400'} />
+                      <span className="text-xs">Evening <span className="text-[10px] opacity-70">(5:00 PM)</span></span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Final Cost & Submit */}
+                <div className="mt-auto border-t border-gray-100 pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-xs font-black uppercase tracking-widest text-gray-500">Total Calculation</span>
+                    <span className="text-2xl font-black text-[#1A1A1A]">NPR {finalCost.toLocaleString()}</span>
+                  </div>
+
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={(!selectedLocation || summaryItems.length === 0 || isSubmitting) && isAuthenticated}
+                    className={`w-full py-4 rounded-xl font-black text-sm tracking-widest uppercase transition-all ${
+                      !isAuthenticated 
+                        ? 'bg-[#1A1A1A] text-white hover:bg-black shadow-lg hover:-translate-y-0.5'
+                        : (!selectedLocation || summaryItems.length === 0)
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                          : 'bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#002147] shadow-[0_4px_14px_rgba(226,178,84,0.4)] hover:shadow-lg hover:-translate-y-0.5'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2"><Loader2 className="animate-spin" size={18} /> Processing...</span>
+                    ) : !isAuthenticated ? (
+                      "Login to Continue"
+                    ) : (
+                      "Confirm Schedule"
+                    )}
+                  </button>
+                </div>
 
               </div>
             </div>
@@ -474,7 +482,6 @@ export default function AvailabilityPage() {
         </div>
       </div>
       
-      {/* Contact Modal (Triggered by "Not in your region?") */}
       <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </>
   );
