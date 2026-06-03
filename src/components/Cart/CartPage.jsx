@@ -1,4 +1,3 @@
-// frontend/src/components/Cart/CartPage.jsx
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Plus, Minus, ShieldCheck, ArrowRight, ShoppingBag } from 'lucide-react';
 
@@ -30,66 +29,78 @@ export default function CartComponent({ cartItems, cartTotal, updateQuantity, re
           Review Your Order
         </h2>
         <AnimatePresence>
-          {cartItems.map(item => (
-            <motion.div 
-              key={item.id} 
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row gap-6 items-center border border-gray-100 hover:shadow-[0_10px_20px_rgba(0,33,71,0.05)] transition-shadow"
-            >
-              {/* Product Image Stage */}
-              <div className="w-24 h-24 rounded-xl bg-[#F9F6F0] p-2 shrink-0 flex items-center justify-center overflow-hidden">
-                <img 
-                  src={item.image || item.image_url} 
-                  alt={item.name} 
-                  className="w-full h-full object-contain mix-blend-multiply" 
-                />
-              </div>
-              
-              {/* Product Details */}
-              <div className="flex-grow text-center sm:text-left">
-                <p className="text-[10px] font-bold text-[#E2B254] uppercase tracking-widest mb-1">
-                  {item.category || 'Premium Selection'}
-                </p>
-                <h3 className="font-serif font-bold text-xl text-[#002147]">{item.name}</h3>
-                <p className="text-gray-500 font-medium mt-1">Rs. {item.price_npr}</p>
-              </div>
-              
-              {/* Luxury Quantity Controls */}
-              <div className="flex items-center gap-4 bg-[#F9F6F0] p-1.5 rounded-full border border-gray-200">
-                <button 
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)} 
-                  className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#002147] hover:text-[#E2B254] transition-colors text-gray-600 shadow-sm"
-                >
-                  <Minus size={16} strokeWidth={2.5} />
-                </button>
-                <span className="w-6 text-center font-bold text-[#002147]">{item.quantity}</span>
-                <button 
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)} 
-                  className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#002147] hover:text-[#E2B254] transition-colors text-gray-600 shadow-sm"
-                >
-                  <Plus size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-              
-              {/* Price & Remove Action */}
-              <div className="text-right min-w-[100px] flex flex-col items-center sm:items-end gap-3">
-                <button 
-                  onClick={() => removeFromCart(item.id)} 
-                  className="text-gray-400 hover:text-red-500 transition-colors bg-red-50 p-2 rounded-lg" 
-                  title="Remove Item"
-                >
-                  <Trash2 size={18} />
-                </button>
-                <p className="font-bold text-xl text-[#002147]">
-                  Rs. {item.price_npr * item.quantity}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+          {cartItems.map(item => {
+            // FIX: Gracefully fallback to item.id if cartItemId wasn't passed down
+            const uniqueKey = item.cartItemId || item.id;
+
+            return (
+              <motion.div 
+                key={uniqueKey} 
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-2xl shadow-sm p-6 flex flex-col sm:flex-row gap-6 items-center border border-gray-100 hover:shadow-[0_10px_20px_rgba(0,33,71,0.05)] transition-shadow"
+              >
+                {/* Product Image Stage */}
+                <div className="w-24 h-24 rounded-xl bg-[#F9F6F0] p-2 shrink-0 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={item.image || item.image_url} 
+                    alt={item.name} 
+                    className="w-full h-full object-contain mix-blend-multiply" 
+                  />
+                </div>
+                
+                {/* Product Details */}
+                <div className="flex-grow text-center sm:text-left">
+                  <p className="text-[10px] font-bold text-[#E2B254] uppercase tracking-widest mb-1">
+                    {item.category || 'Premium Selection'}
+                  </p>
+                  <h3 className="font-serif font-bold text-xl text-[#002147]">
+                    {item.name}
+                    {item.selectedSize && (
+                      <span className="text-sm font-sans text-gray-400 font-bold ml-2">
+                        ({item.selectedSize})
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-gray-500 font-medium mt-1">Rs. {item.price_npr}</p>
+                </div>
+                
+                {/* Luxury Quantity Controls */}
+                <div className="flex items-center gap-4 bg-[#F9F6F0] p-1.5 rounded-full border border-gray-200">
+                  <button 
+                    onClick={() => updateQuantity(uniqueKey, item.quantity - 1)} 
+                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#002147] hover:text-[#E2B254] transition-colors text-gray-600 shadow-sm"
+                  >
+                    <Minus size={16} strokeWidth={2.5} />
+                  </button>
+                  <span className="w-6 text-center font-bold text-[#002147]">{item.quantity}</span>
+                  <button 
+                    onClick={() => updateQuantity(uniqueKey, item.quantity + 1)} 
+                    className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#002147] hover:text-[#E2B254] transition-colors text-gray-600 shadow-sm"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                  </button>
+                </div>
+                
+                {/* Price & Remove Action */}
+                <div className="text-right min-w-[100px] flex flex-col items-center sm:items-end gap-3">
+                  <button 
+                    onClick={() => removeFromCart(uniqueKey)} 
+                    className="text-gray-400 hover:text-red-500 transition-colors bg-red-50 p-2 rounded-lg" 
+                    title="Remove Item"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                  <p className="font-bold text-xl text-[#002147]">
+                    Rs. {item.price_npr * item.quantity}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </div>
 

@@ -9,6 +9,7 @@ import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import FloatingChat from './components/FloatingChat'; 
 
+
 // Public Facing Pages
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
@@ -22,6 +23,7 @@ import OutletsPage from './pages/OutletsPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage'; 
 import BlogPage from './pages/BlogPage';
 import BlogPostDetail from './pages/BlogPostDetail';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -94,6 +96,7 @@ function App() {
         <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
         <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
         <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
+        <Route path="/payment-success" element={<PaymentSuccess/>} />
         
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 

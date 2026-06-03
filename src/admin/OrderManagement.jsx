@@ -1,182 +1,144 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
-import { Truck, CheckCircle2, XCircle, Search, MapPin, ShoppingCart, Loader2, UserCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Truck, CheckCircle2, XCircle, Search, MapPin, ShoppingCart, Loader2, UserCheck, Smartphone, Globe, Info, Mail, Phone } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderManagement() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // New States for Modal
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
     try {
       const res = await api.get('/admin/orders/index.php');
-      if (res.data.status === 'success') {
-        setOrders(res.data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
+      if (res.data.status === 'success') setOrders(res.data.data);
+    } catch (error) { console.error("Failed to fetch orders"); }
+    finally { setLoading(false); }
   };
 
-  // Filter orders based on search
   const filteredOrders = useMemo(() => {
     return orders.filter(order => 
       order.id?.toString().includes(searchQuery) || 
-      order.registered_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.delivery_address?.toLowerCase().includes(searchQuery.toLowerCase())
+      order.registered_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [orders, searchQuery]);
 
-  // Dynamic Status Badge Handler
+  // --- HELPER COMPONENTS ---
+
   const StatusBadge = ({ status }) => {
-    const normalizedStatus = status?.toLowerCase() || 'on way';
-    
-    if (normalizedStatus === 'delivered' || normalizedStatus === 'completed' || normalizedStatus === 'paid') {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest border border-emerald-200">
-          <CheckCircle2 size={14} /> Delivered
-        </span>
-      );
-    }
-    if (normalizedStatus === 'cancelled' || normalizedStatus === 'failed') {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-700 text-[10px] font-black uppercase tracking-widest border border-red-200">
-          <XCircle size={14} /> Cancelled
-        </span>
-      );
-    }
-    // Default to 'On Way' for pending/processing orders
+    const normalized = status?.toLowerCase() || 'on way';
+    const styles = {
+      delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      cancelled: "bg-red-50 text-red-700 border-red-200"
+    };
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">
-        <Truck size={14} /> On Way
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${styles[normalized] || "bg-blue-50 text-blue-700 border-blue-200"}`}>
+        {normalized === 'delivered' ? <CheckCircle2 size={14} /> : normalized === 'cancelled' ? <XCircle size={14} /> : <Truck size={14} />} 
+        {normalized}
       </span>
     );
   };
 
+  // Badge for App vs Web
+  const SourceBadge = ({ source }) => (
+    <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-[9px] font-bold uppercase text-gray-600">
+      {source === 'app' ? <Smartphone size={12} /> : <Globe size={12} />}
+      {source || 'web'}
+    </span>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
-      
-      {/* Header & Search */}
+      {/* Header */}
       <div className="bg-[#1A1A1A] p-6 lg:p-8 rounded-[2rem] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#FDF8E7] rounded-2xl flex items-center justify-center text-[#002147] shadow-lg shrink-0">
-            <ShoppingCart size={24}/>
-          </div>
-          <div>
-            <h2 className="text-xl font-serif font-black text-white">Transaction Ledger</h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-              Monitor payments and fulfillment
-            </p>
-          </div>
+        <div>
+          <h2 className="text-xl font-serif font-black text-white">Transaction Ledger</h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Manage orders and customer details</p>
         </div>
-        
-        <div className="relative w-full md:w-80 group">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#E2B254] transition-colors" />
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text" 
-            placeholder="Search Order ID, Customer, Address..." 
+            placeholder="Search Orders..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold placeholder-gray-400 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#E2B254] transition-all" 
+            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-xl py-3 pl-10 pr-4 outline-none focus:border-[#E2B254]" 
           />
         </div>
       </div>
 
-      {/* Main Table */}
-      <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden min-h-[500px]">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left whitespace-nowrap">
-            <thead className="bg-gray-50/80 border-b border-gray-100 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-              <tr>
-                <th className="p-6">Order ID</th>
-                <th className="p-6">Customer Name</th>
-                <th className="p-6">Delivery Address</th>
-                <th className="p-6">Total Amount</th>
-                <th className="p-6">Status</th>
+      {/* Table */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-gray-50/80 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+            <tr>
+              <th className="p-6">Order ID</th>
+              <th className="p-6">Source</th>
+              <th className="p-6">Customer</th>
+              <th className="p-6">Amount</th>
+              <th className="p-6">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filteredOrders.map((order) => (
+              <tr 
+                key={order.id} 
+                onClick={() => setSelectedOrder(order)}
+                className="hover:bg-[#FDF8E7]/30 transition-colors cursor-pointer"
+              >
+                <td className="p-6 font-black text-sm text-[#002147]">#{order.id}</td>
+                <td className="p-6"><SourceBadge source={order.order_source} /></td>
+                <td className="p-6 font-bold text-sm">{order.registered_name}</td>
+                <td className="p-6 font-black text-sm">NPR {Number(order.total_amount).toLocaleString()}</td>
+                <td className="p-6"><StatusBadge status={order.payment_status} /></td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="p-16 text-center">
-                    <Loader2 className="mx-auto animate-spin text-[#002147] mb-3" size={32} />
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading secure ledger...</p>
-                  </td>
-                </tr>
-              ) : filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-16 text-center">
-                    <ShoppingCart className="mx-auto text-gray-200 mb-3" size={40} />
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No orders found.</p>
-                  </td>
-                </tr>
-              ) : filteredOrders.map((order, i) => (
-                <motion.tr 
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-                  key={order.id} 
-                  className="hover:bg-[#FDF8E7]/30 transition-colors group"
-                >
-                  
-                  {/* Column 1: Order ID */}
-                  <td className="p-6">
-                    <span className="text-[#002147] font-black bg-[#002147]/5 border border-[#002147]/10 px-3 py-1.5 rounded-lg text-sm uppercase tracking-widest">
-                      #{order.id}
-                    </span>
-                    <p className="text-[10px] font-bold text-gray-400 mt-2 uppercase tracking-widest">
-                      {new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </td>
-
-                  {/* Column 2: Customer Name */}
-                  <td className="p-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[#1A1A1A] font-black text-xs">
-                        {(order.registered_name || 'G').charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-black text-[#1A1A1A] text-sm mb-1">{order.registered_name || 'Guest User'}</p>
-                        {order.is_subscriber > 0 && (
-                          <span className="bg-[#E2B254]/20 text-[#9e111a] px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest flex items-center gap-1 w-max">
-                            <UserCheck size={10}/> Subscriber
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Column 3: Delivery Address */}
-                  <td className="p-6">
-                    <div className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-gray-50 border border-gray-100 px-3 py-2 rounded-xl w-max">
-                      <MapPin size={16} className="text-[#9e111a]" /> 
-                      {order.delivery_address || 'No address provided'}
-                    </div>
-                  </td>
-
-                  {/* Column 4: Total Amount */}
-                  <td className="p-6">
-                    <p className="text-[#1A1A1A] font-black text-lg tracking-tight">
-                      NPR {Number(order.total_amount).toLocaleString()}
-                    </p>
-                  </td>
-
-                  {/* Column 5: Status */}
-                  <td className="p-6">
-                    <StatusBadge status={order.payment_status} />
-                  </td>
-
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* DETAILS MODAL */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-serif font-black">Order Details #{selectedOrder.id}</h3>
+                <button onClick={() => setSelectedOrder(null)}><XCircle size={24} className="text-gray-400" /></button>
+              </div>
+
+              {/* User Info */}
+              <div className="bg-gray-50 p-4 rounded-xl mb-6 space-y-2">
+                <p className="font-bold text-sm flex items-center gap-2"><UserCheck size={16} /> {selectedOrder.registered_name}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-2"><Mail size={14} /> {selectedOrder.user_email || 'No email'}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-2"><Phone size={14} /> {selectedOrder.user_phone || 'No phone'}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-2"><MapPin size={14} /> {selectedOrder.delivery_address}</p>
+              </div>
+
+              {/* Items List */}
+              <div className="space-y-3 mb-6">
+                <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Ordered Items</h4>
+                {(selectedOrder.items || []).map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-sm py-2 border-b border-gray-100">
+                    <span>{item.name} <span className="text-gray-400 text-xs">(x{item.quantity})</span></span>
+                    <span className="font-bold">NPR {item.price * item.quantity}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-right border-t pt-4">
+                <p className="text-xs font-bold text-gray-400 uppercase">Grand Total</p>
+                <p className="text-2xl font-black text-[#800000]">NPR {Number(selectedOrder.total_amount).toLocaleString()}</p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,52 +1,78 @@
-// frontend/src/components/Checkout/CheckoutPage.jsx
-import { motion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import api from '../../services/api'; 
 
-export default function CheckoutComponent({ cartTotal, handleEsewaPayment, transactionUuid }) {
+export default function CheckoutComponent({ cartTotal, transactionUuid }) {
+  // 1. Add these states at the top of your component
+  const [esewaPayload, setEsewaPayload] = useState(null);
+  const [isEsewaLoading, setIsEsewaLoading] = useState(true);
+
+  // 2. Fetch the secure signature from your PHP backend
+  useEffect(() => {
+    const initializePayment = async () => {
+      try {
+        const response = await api.post('/orders/init_esewa.php', {
+          amount: cartTotal,
+          purchase_id: transactionUuid
+        });
+
+        if (response.data.status === 'success') {
+          setEsewaPayload(response.data.esewa_payload);
+        }
+      } catch (err) {
+        console.error("eSewa Init Error:", err);
+      } finally {
+        setIsEsewaLoading(false);
+      }
+    };
+
+    if (cartTotal > 0) {
+      initializePayment();
+    }
+  }, [cartTotal, transactionUuid]);
+
+  // 3. The function to trigger the hidden form
+  const handleEsewaPayment = (e) => {
+    e.preventDefault();
+    document.getElementById('esewa-form').submit();
+  };
+
   return (
-    <div className="w-full">
-      <div className="bg-[#F9F6F0] p-6 rounded-2xl mb-8 border border-gray-200 flex justify-between items-center">
-        <div>
-          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Amount Due</p>
-          <p className="text-3xl text-[#002147] font-bold">Rs. {cartTotal}</p>
-        </div>
-        <ShieldCheck size={40} className="text-[#E2B254]" />
-      </div>
+    <div>
+      {/* ... YOUR EXISTING CHECKOUT FORM FIELDS (Name, Address, etc.) GO HERE ... */}
 
-      <div className="mb-8 p-6 border border-gray-100 rounded-2xl">
-        <h3 className="font-bold text-[#002147] mb-4 text-lg">Transaction Information</h3>
-        <div className="flex justify-between items-center py-2 border-b border-gray-50">
-          <span className="text-gray-500">Order ID:</span>
-          <span className="font-mono font-bold text-[#002147]">{transactionUuid}</span>
-        </div>
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-500">Gateway:</span>
-          <span className="font-bold text-[#60bb46]">eSewa Digital Wallet</span>
-        </div>
-      </div>
+      {/* 4. The eSewa Button and Hidden Form (Put this at the bottom of your form) */}
+      <div className="mt-8 border-t border-gray-200 pt-6">
+        {isEsewaLoading ? (
+          <div className="flex justify-center items-center gap-2 text-gray-500 font-bold text-sm">
+            <Loader2 className="animate-spin" size={16} /> Connecting to eSewa...
+          </div>
+        ) : esewaPayload ? (
+          <form id="esewa-form" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
+            <input type="hidden" name="amount" value={esewaPayload.amount} />
+            <input type="hidden" name="tax_amount" value={esewaPayload.tax_amount} />
+            <input type="hidden" name="total_amount" value={esewaPayload.total_amount} />
+            <input type="hidden" name="transaction_uuid" value={esewaPayload.transaction_uuid} />
+            <input type="hidden" name="product_code" value={esewaPayload.product_code} />
+            <input type="hidden" name="product_service_charge" value={esewaPayload.product_service_charge} />
+            <input type="hidden" name="product_delivery_charge" value={esewaPayload.product_delivery_charge} />
+            <input type="hidden" name="success_url" value={esewaPayload.success_url} />
+            <input type="hidden" name="failure_url" value={esewaPayload.failure_url} />
+            <input type="hidden" name="signed_field_names" value={esewaPayload.signed_field_names} />
+            <input type="hidden" name="signature" value={esewaPayload.signature} />
 
-      {/* Hidden Form for eSewa Test Environment */}
-      <form id="esewa-form" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST">
-          <input type="hidden" id="amount" name="amount" value={cartTotal} required />
-          <input type="hidden" id="tax_amount" name="tax_amount" value="0" required />
-          <input type="hidden" id="total_amount" name="total_amount" value={cartTotal} required />
-          <input type="hidden" id="transaction_uuid" name="transaction_uuid" value={transactionUuid} required />
-          <input type="hidden" id="product_code" name="product_code" value="EPAYTEST" required />
-          <input type="hidden" id="product_delivery_charge" name="product_delivery_charge" value="0" required />
-          <input type="hidden" id="success_url" name="success_url" value="http://localhost:5173/checkout/success" required />
-          <input type="hidden" id="failure_url" name="failure_url" value="http://localhost:5173/checkout/failure" required />
-          <input type="hidden" id="signed_field_names" name="signed_field_names" value="total_amount,transaction_uuid,product_code" required />
-          <input type="hidden" id="signature" name="signature" value="SIMULATED_HMAC_SHA256_STRING" required />
-          
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleEsewaPayment}
-            className="w-full bg-[#60bb46] text-white font-bold text-lg py-5 rounded-xl hover:bg-[#509f39] transition-colors shadow-[0_10px_20px_rgba(96,187,70,0.3)] flex items-center justify-center gap-3"
-          >
-            Pay Securely with eSewa
-          </motion.button>
-      </form>
+            <button 
+              type="button" 
+              onClick={handleEsewaPayment} 
+              className="w-full bg-[#60A839] hover:bg-[#4d872d] text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg"
+            >
+              Pay NPR {cartTotal} with eSewa
+            </button>
+          </form>
+        ) : (
+          <p className="text-red-500 text-center font-bold">Payment gateway unavailable.</p>
+        )}
+      </div>
     </div>
   );
 }
