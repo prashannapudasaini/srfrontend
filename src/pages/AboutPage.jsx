@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, Droplets, Heart, Award, Leaf, Sun, Truck } from 'lucide-react';
+import { ShieldCheck, Droplets, Heart, Award, Leaf, Sun, Truck, Sparkles, MapPin, Milestone, GraduationCap } from 'lucide-react';
 import MilkDivider from '../components/Home/MilkDivider';
 
 export default function AboutPage() {
@@ -14,6 +14,11 @@ export default function AboutPage() {
     { icon: <Sun size={28} />, title: "1. Dawn Collection", desc: "Fresh milk is collected at sunrise from our free-grazing indigenous cows." },
     { icon: <ShieldCheck size={28} />, title: "2. Purity Testing", desc: "Rigorous laboratory testing ensures zero adulteration and optimal nutritional value." },
     { icon: <Truck size={28} />, title: "3. Cold-Chain Delivery", desc: "Dispatched immediately in temperature-controlled vehicles to preserve farm freshness." }
+  ];
+
+  const premiumProducts = [
+    "Fresh Milk", "Pure Ghee", "Yogurt", "Paneer", "Butter", 
+    "Ice Cream", "Cheese", "Flavored Milk", "Lassi", "Strawberry Lassi"
   ];
 
   return (
@@ -38,7 +43,7 @@ export default function AboutPage() {
             >
               <span className="w-12 h-[2px] bg-white"></span>
               <h2 className="text-white text-sm uppercase tracking-[0.4em] font-black">
-                ESTABLISHED 1985
+                ESTABLISHED 2052 B.S. (1995/1996 A.D.)
               </h2>
             </motion.div>
 
@@ -49,17 +54,16 @@ export default function AboutPage() {
               className="text-6xl md:text-8xl font-serif font-black mb-8 text-white leading-[1.1] tracking-tight"
             >
               The Heritage of <br /> 
-              <span className="text-white">Sita Ram</span>
+              <span className="text-white">Sitaram Gokul</span>
             </motion.h1>
 
             <motion.p 
               initial={{ y: 30, opacity: 0 }} 
               animate={{ y: 0, opacity: 1 }} 
               transition={{ delay: 0.2 }} 
-              className="text-xl md:text-2xl text-red-50 font-medium tracking-wide mb-12 max-w-xl opacity-90"
+              className="text-xl md:text-2xl text-red-50 font-medium tracking-wide mb-12 max-w-2xl opacity-90"
             >
-              Generations of pure organic goodness rooted in the heart of Nepal. 
-              Farm-fresh dairy delivered with uncompromising purity.
+              Continuous enterprise in processing, sales, and country-wide distribution. Pioneering Nepal’s private dairy industry with reputable standard tracking.
             </motion.p>
           </div>
         </div>
@@ -71,7 +75,7 @@ export default function AboutPage() {
       </div>
       
       {/* MAIN CONTENT CONTAINER */}
-<div className="max-w-7xl mx-auto px-6 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-12">
 
         {/* OUR LEGACY SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-32">
@@ -88,10 +92,10 @@ export default function AboutPage() {
               A Tradition of <span className="text-[#9e111a]">Purity</span>
             </h3>
             <p className="text-gray-600 leading-relaxed text-xl font-medium">
-              Sita Ram Dairy has been a trusted cornerstone in providing premium, organic dairy products to families across the Kathmandu Valley for over three decades.
+              Sitaram Gokul Milks Kathmandu Pvt. Ltd. has been a trusted cornerstone in providing premium, organic dairy products to families across the Kathmandu Valley for over three decades.
             </p>
             <p className="text-gray-500 leading-relaxed text-lg">
-              Starting as a small family farm in 1985, we have grown into a household name without ever compromising on our core values. Our cattle graze in the pristine environments of Tokha, never treated with synthetic hormones. We empower local farmers, practice sustainable agriculture, and believe that the finest dairy comes from happy animals.
+              Since its inception in 2052 B.S., the industry has expanded its core mission to directly improve the livelihood parameters of milk-producing farmers. By systematically routing urban income back to rural communities, we promote a sustainable cycle of domestic capital investment inside Nepal.
             </p>
             <div className="pt-4">
                <div className="h-1.5 w-24 bg-[#9e111a] rounded-full" />
@@ -115,7 +119,7 @@ export default function AboutPage() {
           </motion.div>
         </div>
 
-        {/* MISSION & VISION SECTION (NEW) */}
+        {/* MISSION & VISION SECTION */}
         <motion.div 
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -133,7 +137,80 @@ export default function AboutPage() {
           </p>
         </motion.div>
 
-        {/* FARM TO TABLE PROCESS (NEW) */}
+        {/* --- 🔥 NEW SECTION ADDED ACCORDING TO SCREENSHOT 2026-06-07 165000.PNG --- */}
+        <div className="mb-40 border-b border-gray-100 pb-24">
+          <div className="text-center mb-12">
+            <h2 className="text-[#9e111a] text-xs font-black uppercase tracking-[0.3em] mb-3">OUR CATALOG</h2>
+            <h3 className="text-5xl md:text-6xl font-serif font-black text-gray-900 tracking-tight mb-4">
+              Uncompromising Nutrition
+            </h3>
+            <p className="text-gray-500 font-medium text-lg max-w-2xl mx-auto">
+              Beyond fresh milk and ghee, discover our variety of high-quality dairy.
+            </p>
+          </div>
+
+          {/* Staggered fluid bubble pill dynamic array matrix component */}
+          <div className="flex flex-wrap justify-center items-center gap-4 max-w-5xl mx-auto px-4">
+            {premiumProducts.map((product, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                whileHover={{ scale: 1.04, borderColor: "#9e111a", backgroundColor: "#FAF8F5" }}
+                className="bg-white border border-gray-200/80 px-8 py-3.5 rounded-full flex items-center gap-3 shadow-sm shadow-gray-100 transition-all cursor-default"
+              >
+                <Sparkles size={15} className="text-gray-300 group-hover:text-[#9e111a] shrink-0" />
+                <span className="font-serif font-black text-gray-800 text-lg tracking-wide">{product}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* REGIONAL HARVEST PIPELINE & MACRO BIO-NUTRITION SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-40 items-start">
+          {/* Left Column: Logistical Network */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-xl shadow-gray-100/40 space-y-6"
+          >
+            <div className="w-12 h-12 bg-[#9e111a]/10 rounded-xl flex items-center justify-center text-[#9e111a]">
+              <MapPin size={24} />
+            </div>
+            <h3 className="text-3xl font-serif font-black text-gray-900">National Sourcing Framework</h3>
+            <p className="text-gray-500 font-medium leading-relaxed text-base">
+              To supply consistent purity, Sitaram Gokul Milks has successfully initialized <b>22 milk chilling centers</b> across the key districts of <b>Nawalparasi, Rupandehi, Chitwan, and Kavre</b>. 
+            </p>
+            <p className="text-gray-500 font-medium leading-relaxed text-base">
+              Through an interactive network grouping over <b>150 dairy producer cooperatives</b> and roughly <b>22 private dairy entrepreneurs</b>, raw milk undergoes thorough modernization pipelines under strict standard testing.
+            </p>
+          </motion.div>
+
+          {/* Right Column: Biochemical Sizing Matrix */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.15 }}
+            className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-xl shadow-gray-100/40 space-y-6"
+          >
+            <div className="w-12 h-12 bg-[#1A1A1A]/10 rounded-xl flex items-center justify-center text-[#1A1A1A]">
+              <Milestone size={24} />
+            </div>
+            <h3 className="text-3xl font-serif font-black text-gray-900">Nutritional Composition</h3>
+            <p className="text-gray-500 font-medium leading-relaxed text-base">
+              Milk and ghee are dense providers of essential elements required cleanly by the human system, containing complex groups of <b>proteins, lipids, calcium, and potassium</b>. 
+            </p>
+            <p className="text-gray-500 font-medium leading-relaxed text-base">
+              Valued fundamentally since ancient biological times for assisting physical development, these attributes are safely validated by modern clinical laboratory trials to promote optimal immune scaling.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* FARM TO TABLE PROCESS */}
         <div className="mb-32">
           <div className="text-center mb-16">
             <h2 className="text-[#9e111a] text-xs font-black uppercase tracking-[0.3em] mb-4">The Process</h2>
@@ -192,43 +269,41 @@ export default function AboutPage() {
         </div>
 
         {/* LEADING TRUST BANNER */}
-  <motion.div 
-    initial={{ scale: 0.95, opacity: 0 }}
-    whileInView={{ scale: 1, opacity: 1 }}
-    transition={{ duration: 0.6 }}
-    viewport={{ once: true }}
-    className="mb-28 text-center flex flex-col items-center justify-center"
-  >
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="mb-28 text-center flex flex-col items-center justify-center"
+        >
+          {/* Featured Leading Image */}
+          <div className="relative flex justify-center mb-12">
+            {/* Glow Background */}
+            <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
 
-    {/* Featured Leading Image */}
-    <div className="relative flex justify-center mb-12">
-      {/* Glow Background */}
-      <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
+            <motion.img 
+              src="/leading.png" 
+              alt="Leading Trust Symbol" 
+              className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
+              initial={{ scale: 0.85, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              whileHover={{ scale: 1.05 }}
+            />
+          </div>
 
-      <motion.img 
-        src="/leading.png" 
-        alt="Leading Trust Symbol" 
-        className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
-        initial={{ scale: 0.85, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        whileHover={{ scale: 1.05 }}
-      />
-    </div>
+          {/* Banner */}
+          <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
+            <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
+              Leading Trust Since 30 Years
+            </span>
+          </div>
 
-    {/* Banner */}
-    <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
-      <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
-        Leading Trust Since 30 Years
-      </span>
-    </div>
-
-    {/* Subtext */}
-    <p className="text-[#9e111a] font-bold text-sm md:text-base uppercase tracking-[0.25em] mt-6">
-      Nepal's Most Trusted Dairy Brand
-    </p>
-  </motion.div>
-
+          {/* Subtext */}
+          <p className="text-[#9e111a] font-bold text-sm md:text-base uppercase tracking-[0.25em] mt-6">
+            Nepal's Most Trusted Dairy Brand
+          </p>
+        </motion.div>
 
       </div>
     </main>
