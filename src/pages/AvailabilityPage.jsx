@@ -1,40 +1,39 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; 
-import { MapPin, Check, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset } from 'lucide-react';
+import { MapPin, CheckCircle2, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset, Copy, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; 
 import api from '../services/api';
 import ContactModal from '../components/ContactModal';
 
-const AVAILABLE_LOCATIONS = [
-  "Kathmandu", "Lalitpur", "Bhaktapur"
-];
+const AVAILABLE_LOCATIONS = ["Kathmandu", "Lalitpur", "Bhaktapur"];
 
-const DAYS_OF_WEEK = [
-  { full: 'Monday', short: 'MON' },
-  { full: 'Tuesday', short: 'TUE' },
-  { full: 'Wednesday', short: 'WED' },
-  { full: 'Thursday', short: 'THU' },
-  { full: 'Friday', short: 'FRI' },
-  { full: 'Saturday', short: 'SAT' },
-  { full: 'Sunday', short: 'SUN' }
-];
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const ALTERNATE_SETS = {
+  MWF: ['Monday', 'Wednesday', 'Friday'],
+  TTS: ['Tuesday', 'Thursday', 'Saturday']
+};
 
 export default function AvailabilityPage() {
   const navigate = useNavigate(); 
-  const { isAuthenticated } = useAuth(); 
+  const { isAuthenticated, user } = useAuth(); 
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedLocation, setSelectedLocation] = useState(''); 
+  // --- WIZARD STATES ---
+  const [step, setStep] = useState(1);
+  const [plan, setPlan] = useState(''); // 'daily', 'alternate', 'weekly', 'custom'
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [activeDayTab, setActiveDayTab] = useState('');
   
-  // NEW: Updated Plan States based on the UI requested
-  const [subscriptionPlan, setSubscriptionPlan] = useState('one_time'); // one_time, daily, alternate, weekly
-  const [deliveryTiming, setDeliveryTiming] = useState('evening'); // morning, evening
+  // Basket structure: { Monday: { prodId: qty }, Tuesday: { prodId: qty } }
+  const [basket, setBasket] = useState({});
   
-  const [activeDay, setActiveDay] = useState('Monday'); 
-  const [productSchedules, setProductSchedules] = useState({});
+  // Delivery States
+  const [location, setLocation] = useState(''); 
+  const [timing, setTiming] = useState(''); 
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
@@ -43,31 +42,26 @@ export default function AvailabilityPage() {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowFormatted = tomorrow.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-  // Fetch Live Products
+  // Fetch Products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await api.get('/products/index.php');
         if (res.data.status === 'success') {
           const formattedProducts = res.data.data.map(p => {
-            const lowestPrice = p.variants?.length > 0 
-              ? Math.min(...p.variants.map(v => parseFloat(v.price_npr) || 0)) 
-              : 0;
-            const displayImage = p.image || p.variants?.[0]?.image || '/logo.png';
-            const unit = p.variants?.[0]?.size || 'Standard';
-
+            const lowestPrice = p.variants?.length > 0 ? Math.min(...p.variants.map(v => parseFloat(v.price_npr) || 0)) : 0;
             return {
               id: p.id,
               name: p.name,
-              size: unit,
+              size: p.variants?.[0]?.size || 'Standard',
               price: lowestPrice,
-              img: displayImage
+              img: p.image || p.variants?.[0]?.image || '/logo.png'
             };
           });
           setProducts(formattedProducts);
         }
       } catch (error) {
-        console.error("Failed to load products for subscription", error);
+        console.error("Failed to load catalog", error);
       } finally {
         setLoading(false);
       }
@@ -75,406 +69,447 @@ export default function AvailabilityPage() {
     fetchProducts();
   }, []);
 
-  const activeDays = useMemo(() => {
-    const daysSet = new Set();
-    Object.values(productSchedules).forEach(dayData => {
-      Object.entries(dayData).forEach(([day, qty]) => {
-        if (qty > 0) daysSet.add(day);
-      });
-    });
-    return DAYS_OF_WEEK.map(d => d.full).filter(day => daysSet.has(day));
-  }, [productSchedules]);
-
-  const summaryItems = useMemo(() => {
-    const summary = {};
-    Object.entries(productSchedules).forEach(([productId, dayData]) => {
-      const totalQty = Object.values(dayData).reduce((sum, qty) => sum + qty, 0);
-      if (totalQty > 0) {
-        const product = products.find(p => String(p.id) === String(productId)); 
-        if (product) {
-          summary[productId] = { ...product, totalQty };
-        }
-      }
-    });
-    return Object.values(summary);
-  }, [productSchedules, products]);
-
-  // Base cost of selected items
-  const baseCost = summaryItems.reduce((sum, item) => sum + (item.price * item.totalQty), 0);
-
-  // Dynamic Multiplier based on the selected plan
-  const calculateFinalCost = () => {
-    switch (subscriptionPlan) {
-      case 'daily': return baseCost * 30; // 30 deliveries
-      case 'alternate': return baseCost * 15; // 15 deliveries
-      case 'weekly': return baseCost * 4; // 4 deliveries
-      case 'one_time':
-      default: return baseCost; // 1 delivery
+  // --- PLAN & DAY LOGIC ---
+  const handlePlanSelect = (selectedPlan) => {
+    setPlan(selectedPlan);
+    setBasket({}); // Reset basket when plan changes
+    
+    if (selectedPlan === 'daily') {
+      setSelectedDays(DAYS_OF_WEEK);
+      setActiveDayTab(DAYS_OF_WEEK[0]);
+      setStep(3); // Skip day selection for daily
+    } else if (selectedPlan === 'alternate') {
+      setSelectedDays(ALTERNATE_SETS.MWF);
+      setActiveDayTab(ALTERNATE_SETS.MWF[0]);
+      setStep(2);
+    } else if (selectedPlan === 'weekly') {
+      setSelectedDays(['Monday']);
+      setActiveDayTab('Monday');
+      setStep(2);
+    } else if (selectedPlan === 'custom') {
+      setSelectedDays([]);
+      setActiveDayTab('');
+      setStep(2);
     }
   };
 
-  const finalCost = calculateFinalCost();
-
-  // --- Handlers ---
-  const handleAddProductToActiveDay = (product) => {
-    if (!activeDay) return;
-    setProductSchedules(prev => {
-      const prodData = prev[product.id] || {};
-      const currentQty = prodData[activeDay] || 0;
-      return { ...prev, [product.id]: { ...prodData, [activeDay]: currentQty + 1 } };
-    });
+  const handleDayToggle = (day) => {
+    if (plan === 'weekly') {
+      setSelectedDays([day]);
+      setActiveDayTab(day);
+    } else if (plan === 'custom') {
+      let newDays = selectedDays.includes(day) 
+        ? selectedDays.filter(d => d !== day) 
+        : [...selectedDays, day];
+      
+      // Sort days chronologically
+      newDays = DAYS_OF_WEEK.filter(d => newDays.includes(d));
+      setSelectedDays(newDays);
+      if (!newDays.includes(activeDayTab)) setActiveDayTab(newDays[0] || '');
+    }
   };
 
-  const handleUpdateProductDay = (productId, day, delta) => {
-    setProductSchedules(prev => {
-      const prodData = prev[productId] || {};
-      const currentQty = prodData[day] || 0;
+  // --- BASKET LOGIC ---
+  const updateQuantity = (productId, delta) => {
+    setBasket(prev => {
+      const currentDayBasket = prev[activeDayTab] || {};
+      const currentQty = currentDayBasket[productId] || 0;
       const newQty = Math.max(0, currentQty + delta);
       
-      const newProdData = { ...prodData };
-      if (newQty === 0) delete newProdData[day];
-      else newProdData[day] = newQty;
+      const newDayBasket = { ...currentDayBasket };
+      if (newQty === 0) delete newDayBasket[productId];
+      else newDayBasket[productId] = newQty;
 
-      const newState = { ...prev };
-      if (Object.keys(newProdData).length === 0) delete newState[productId];
-      else newState[productId] = newProdData;
-      
-      return newState;
+      return { ...prev, [activeDayTab]: newDayBasket };
     });
   };
 
-  const handleSubmit = async () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+  const copyToAllDays = () => {
+    const currentDayBasket = basket[activeDayTab];
+    if (!currentDayBasket || Object.keys(currentDayBasket).length === 0) return alert("Add items to this day first!");
+    
+    const newBasket = { ...basket };
+    selectedDays.forEach(day => {
+      newBasket[day] = { ...currentDayBasket };
+    });
+    setBasket(newBasket);
+    alert("Basket copied to all selected days!");
+  };
 
-    if (!selectedLocation || summaryItems.length === 0) return;
-    setIsSubmitting(true);
-
-    const cleanWeeklySchedule = activeDays.map(day => {
-      const itemsForDay = [];
-      Object.entries(productSchedules).forEach(([productId, dayData]) => {
-        if (dayData[day] && dayData[day] > 0) {
-          const product = products.find(p => String(p.id) === String(productId));
-          if (product) {
-            itemsForDay.push({
-              productId: product.id, name: product.name, size: product.size, qty: dayData[day], price: product.price
-            });
-          }
-        }
+  // --- MATH & VALIDATION ---
+  const calculateTotals = () => {
+    let baseWeeklyCost = 0;
+    
+    // Sum up items across all selected days
+    selectedDays.forEach(day => {
+      const dayItems = basket[day] || {};
+      Object.entries(dayItems).forEach(([prodId, qty]) => {
+        const prod = products.find(p => String(p.id) === String(prodId));
+        if (prod) baseWeeklyCost += (prod.price * qty);
       });
-      return { day, items: itemsForDay };
     });
 
-    const orderPayload = {
-      subscriptionDetails: { 
-        type: subscriptionPlan, 
-        timing: deliveryTiming,
-        location: selectedLocation, 
-        totalCost: finalCost 
-      },
-      weeklySchedule: cleanWeeklySchedule,
-      amount: finalCost,
-      purchase_id: `SUB_${Date.now()}`,
-      purchase_name: `${subscriptionPlan.replace('_', ' ').toUpperCase()} Delivery`
-    };
+    // Monthly multiplier (4 weeks) vs Custom (1 week)
+    const multiplier = plan === 'custom' ? 1 : 4;
+    return { weeklyCost: baseWeeklyCost, finalCost: baseWeeklyCost * multiplier };
+  };
 
+  const { weeklyCost, finalCost } = calculateTotals();
+
+  const isBasketValid = useMemo(() => {
+    if (selectedDays.length === 0) return false;
+    // Check if EVERY selected day has at least 1 item
+    return selectedDays.every(day => {
+      const dayItems = basket[day] || {};
+      const totalItems = Object.values(dayItems).reduce((sum, qty) => sum + qty, 0);
+      return totalItems > 0;
+    });
+  }, [selectedDays, basket]);
+
+  // --- CHECKOUT & ESEWA ---
+  const handleEsewaCheckout = async () => {
+    if (!isAuthenticated) return navigate('/login');
+    if (!isBasketValid || !location || !timing) return alert("Please complete all fields.");
+    
+    setIsSubmitting(true);
+    
     try {
-      const response = await api.post('/orders/verify.php', orderPayload);
-      
-      if (response.data.payment_url) {
-        window.location.href = response.data.payment_url;
-      } else if (response.data.status === 'success') {
-        navigate('/subscription-success', { 
-          state: { orderData: orderPayload, itemCount: summaryItems.reduce((acc, curr) => acc + curr.totalQty, 0) } 
+      // 1. Format the schedule for the database
+      const cleanWeeklySchedule = selectedDays.map(day => {
+        const itemsForDay = [];
+        Object.entries(basket[day] || {}).forEach(([productId, qty]) => {
+          if (qty > 0) {
+            const product = products.find(p => String(p.id) === String(productId));
+            if (product) itemsForDay.push({ ...product, qty });
+          }
         });
+        return { day, items: itemsForDay };
+      });
+
+      // 2. CREATE SUBSCRIPTION IN DATABASE FIRST
+      const createRes = await api.post('/orders/create_sub.php', {
+        user_id: user.id,
+        plan_type: plan,
+        delivery_time: timing,
+        location: location,
+        weekly_total_cost: finalCost,
+        schedule: cleanWeeklySchedule
+      });
+
+      if (createRes.data.status !== 'success') {
+        alert("Failed to create subscription record.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // We capture the real DB ID (e.g., 15)
+      const subDbId = createRes.data.id;
+
+      // 3. INITIALIZE ESEWA WITH THE REAL DATABASE ID (e.g., SUB_15)
+      const res = await api.post('/orders/init_esewa.php', {
+        amount: finalCost,
+        purchase_id: `SUB_${subDbId}` 
+      });
+
+      if (res.data.status === 'success') {
+        // 4. Send to eSewa
+        const form = document.createElement("form");
+        form.setAttribute("method", "POST");
+        form.setAttribute("action", "https://rc-epay.esewa.com.np/api/epay/main/v2/form");
+
+        for (const key in res.data.esewa_payload) {
+          const hiddenField = document.createElement("input");
+          hiddenField.setAttribute("type", "hidden");
+          hiddenField.setAttribute("name", key);
+          hiddenField.setAttribute("value", res.data.esewa_payload[key]);
+          form.appendChild(hiddenField);
+        }
+        document.body.appendChild(form);
+        form.submit();
       } else {
-        alert(response.data.message || "Payment initialization failed.");
+        alert(res.data.message || "Failed to initialize eSewa.");
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error(error);
-      alert("Error connecting to the payment server. Please try again.");
+      alert("Payment gateway error.");
       setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FDF8E7] pt-40 flex flex-col justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9e111a] mb-4"></div>
-        <p className="text-[#002147] font-bold uppercase tracking-widest text-sm">Loading Catalog...</p>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8E7] pt-40 flex flex-col justify-center items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#002147] mb-4"></div>
+      <p className="text-[#002147] font-bold uppercase tracking-widest text-sm">Loading Farm Data...</p>
+    </div>
+  );
 
   return (
     <>
       <div className="bg-[#FAF9F6] min-h-screen pt-28 pb-20 font-sans text-[#1A1A1A]">
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-serif font-black text-[#002147] tracking-tight flex items-center justify-center gap-4">
-              <span className="text-[#E2B254]">✦</span> CURATE YOUR SUBSCRIPTION <span className="text-[#E2B254]">✦</span>
-            </h1>
-            <p className="text-gray-500 font-medium mt-4">Design your perfect routine. Select a day, add products, and choose your plan.</p>
+          <div className="text-center mb-10">
+            <h1 className="text-4xl md:text-5xl font-serif font-black text-[#002147] tracking-tight">Curate Your Plan</h1>
+            <p className="text-gray-500 font-medium mt-3 max-w-xl mx-auto">Build your recurring farm-fresh delivery schedule in three simple steps.</p>
           </div>
 
-          {/* 3-Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start h-auto lg:h-[calc(100vh-220px)] min-h-[850px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* ========================================== */}
-            {/* COLUMN 1: PRODUCT SELECTION */}
+            {/* LEFT SIDE: WIZARD FLOW */}
             {/* ========================================== */}
-            <div className="lg:col-span-5 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
-              <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
-                <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
-                  <ShoppingBag size={20} />
-                </div>
-                <h2 className="text-lg font-black uppercase tracking-widest text-[#002147]">
-                  1. Product Selection
-                </h2>
-              </div>
+            <div className="lg:col-span-8 space-y-6">
               
-              <div className="flex-grow overflow-y-auto custom-scrollbar p-6">
-                <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
-                  {products.map(product => (
-                    <button 
-                      key={product.id}
-                      onClick={() => handleAddProductToActiveDay(product)}
-                      className="group relative flex flex-col items-center p-4 rounded-2xl border border-gray-100 hover:border-[#002147]/30 hover:shadow-lg transition-all duration-300 bg-white hover:-translate-y-1 text-center h-full"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 rounded-2xl pointer-events-none"></div>
-                      
-                      {/* Hover Add Icon */}
-                      <div className="absolute top-3 right-3 w-7 h-7 bg-[#002147] text-[#E2B254] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md transform scale-75 group-hover:scale-100">
-                        <Plus size={16} strokeWidth={3} />
-                      </div>
-                      
-                      <img 
-                        src={product.img} 
-                        alt={product.name} 
-                        className="w-20 h-20 object-contain p-2 rounded-xl mb-4 shadow-sm bg-gray-50 z-10 group-hover:scale-105 transition-transform duration-500 mix-blend-multiply" 
-                      />
-                      <div className="z-10 flex flex-col flex-grow justify-between w-full">
-                        <div>
-                          <h4 className="text-[13px] font-black leading-tight text-[#1A1A1A] mb-1">{product.name}</h4>
-                          <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">{product.size}</p>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100/80">
-                          <span className="text-[#9e111a] font-black text-sm">NPR {product.price}</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ========================================== */}
-            {/* COLUMN 2: WEEKLY SCHEDULE */}
-            {/* ========================================== */}
-            <div className="lg:col-span-4 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
-              <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
-                <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
-                  <CalendarDays size={20} />
-                </div>
-                <div>
-                  <h2 className="text-lg font-black uppercase tracking-widest text-[#002147] leading-tight">
-                    2. Your Schedule
+              {/* STEP 1: CHOOSE PLAN */}
+              <div className={`relative bg-white rounded-[2rem] border transition-all duration-300 overflow-hidden ${step === 1 ? 'border-[#002147] shadow-xl' : 'border-gray-100 shadow-sm opacity-60'}`}>
+                <div className="p-6 bg-gray-50/50 flex justify-between items-center cursor-pointer" onClick={() => setStep(1)}>
+                  <h2 className="text-lg font-black uppercase tracking-widest flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full bg-[#002147] text-[#E2B254] flex items-center justify-center text-sm">1</span> Plan Type
                   </h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Select a day below</p>
+                  {step > 1 && <span className="text-xs font-bold text-[#9e111a] capitalize">{plan.replace('_', ' ')} Plan Selected</span>}
                 </div>
+                
+                <AnimatePresence>
+                  {step === 1 && (
+                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                      <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <div onClick={() => navigate('/products')} className="p-5 rounded-2xl border-2 border-gray-100 hover:border-[#002147] cursor-pointer transition-colors bg-white flex flex-col h-full group">
+                          <ShoppingBag className="text-gray-400 group-hover:text-[#002147] mb-3" size={24} />
+                          <h3 className="font-black text-lg text-[#1A1A1A]">One-Time Buy</h3>
+                          <p className="text-xs text-gray-500 mt-1 mb-4 flex-grow">Standard single delivery. Browse our shop and checkout instantly.</p>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#002147] bg-gray-50 py-1.5 px-3 rounded-lg w-max">Go to Shop →</span>
+                        </div>
+
+                        <div onClick={() => handlePlanSelect('daily')} className="p-5 rounded-2xl border-2 border-gray-100 hover:border-[#002147] cursor-pointer transition-colors bg-white flex flex-col h-full group relative">
+                          <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[9px] font-black uppercase px-2 py-1 rounded shadow-sm">🎁 Free 2L Included</div>
+                          <CalendarDays className="text-gray-400 group-hover:text-[#002147] mb-3" size={24} />
+                          <h3 className="font-black text-lg text-[#1A1A1A]">Daily (1 Month)</h3>
+                          <p className="text-xs text-gray-500 mt-1 mb-4 flex-grow">Requires items selected on all 7 days of the week.</p>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#002147] bg-blue-50 py-1.5 px-3 rounded-lg w-max">30 Deliveries</span>
+                        </div>
+
+                        <div onClick={() => handlePlanSelect('alternate')} className="p-5 rounded-2xl border-2 border-gray-100 hover:border-[#002147] cursor-pointer transition-colors bg-white flex flex-col h-full group">
+                          <Calendar className="text-gray-400 group-hover:text-[#002147] mb-3" size={24} />
+                          <h3 className="font-black text-lg text-[#1A1A1A]">Alternate Days</h3>
+                          <p className="text-xs text-gray-500 mt-1 mb-4 flex-grow">3 deliveries per week. Choose MWF or TTS.</p>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#002147] bg-blue-50 py-1.5 px-3 rounded-lg w-max">1 Month Cycle</span>
+                        </div>
+
+                        <div onClick={() => handlePlanSelect('weekly')} className="p-5 rounded-2xl border-2 border-gray-100 hover:border-[#002147] cursor-pointer transition-colors bg-white flex flex-col h-full group">
+                          <CalendarDays className="text-gray-400 group-hover:text-[#002147] mb-3" size={24} />
+                          <h3 className="font-black text-lg text-[#1A1A1A]">Weekly (1 Month)</h3>
+                          <p className="text-xs text-gray-500 mt-1 mb-4 flex-grow">Select exactly one day per week for bulk delivery.</p>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-[#002147] bg-blue-50 py-1.5 px-3 rounded-lg w-max">4 Deliveries</span>
+                        </div>
+
+                        <div onClick={() => handlePlanSelect('custom')} className="p-5 rounded-2xl border-2 border-gray-100 hover:border-[#E2B254] cursor-pointer transition-colors bg-gradient-to-br from-[#1A1A1A] to-black flex flex-col h-full sm:col-span-2">
+                          <h3 className="font-black text-lg text-[#E2B254]">Custom Flex (1 Week Only)</h3>
+                          <p className="text-xs text-gray-300 mt-1 mb-4">Pick any custom days. Valid for a single week only. Perfect for trial runs.</p>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-black bg-[#E2B254] py-1.5 px-3 rounded-lg w-max">Flexible Days</span>
+                        </div>
+
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <div className="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-3">
-                {DAYS_OF_WEEK.map(dayObj => {
-                  const isSelected = activeDay === dayObj.full;
-                  
-                  const dayProducts = products.map(p => ({
-                    ...p, qty: productSchedules[p.id]?.[dayObj.full] || 0
-                  })).filter(p => p.qty > 0);
+              {/* STEP 2: CHOOSE DAYS */}
+              <div className={`bg-white rounded-[2rem] border transition-all duration-300 overflow-hidden ${step === 2 ? 'border-[#002147] shadow-xl' : 'border-gray-100 shadow-sm opacity-60'}`}>
+                <div className={`p-6 flex justify-between items-center ${step > 1 ? 'cursor-pointer bg-gray-50/50' : 'bg-white'}`} onClick={() => step > 1 && setStep(2)}>
+                  <h2 className="text-lg font-black uppercase tracking-widest flex items-center gap-3">
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${step >= 2 ? 'bg-[#002147] text-[#E2B254]' : 'bg-gray-100 text-gray-400'}`}>2</span> Delivery Days
+                  </h2>
+                  {step > 2 && <span className="text-xs font-bold text-[#9e111a]">{selectedDays.length} Days Selected</span>}
+                </div>
 
-                  const hasItems = dayProducts.length > 0;
-
-                  return (
-                    <div 
-                      key={dayObj.full}
-                      onClick={() => setActiveDay(dayObj.full)}
-                      className={`flex items-stretch border-2 rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden min-h-[85px] group ${
-                        isSelected 
-                          ? 'border-[#002147] shadow-[0_4px_15px_rgba(0,33,71,0.12)] -translate-y-0.5' 
-                          : 'border-gray-100 hover:border-gray-300'
-                      }`}
-                    >
-                      {/* Day Label Strip */}
-                      <div className={`w-16 flex items-center justify-center shrink-0 transition-colors duration-300 ${
-                        isSelected ? 'bg-[#002147] text-white' : hasItems ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-400 group-hover:bg-gray-100'
-                      }`}>
-                        <span className="font-black text-sm tracking-widest">{dayObj.short}</span>
-                      </div>
-
-                      {/* Day Content Area */}
-                      <div className={`flex-grow p-3 flex flex-wrap items-center gap-2.5 transition-colors ${isSelected ? 'bg-blue-50/40' : 'bg-white'}`}>
-                        {hasItems ? (
-                          dayProducts.map((p) => (
-                            <div key={p.id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm">
-                              <img src={p.img} alt={p.name} className="w-9 h-9 rounded-lg object-contain bg-gray-50 p-1 mix-blend-multiply" />
-                              <div className="flex flex-col items-center bg-gray-50 rounded-lg px-1">
-                                <button onClick={(e) => { e.stopPropagation(); handleUpdateProductDay(p.id, dayObj.full, 1); }} className="text-gray-400 hover:text-[#9e111a] py-0.5"><Plus size={12}/></button>
-                                <span className="text-[11px] font-black text-[#1A1A1A] leading-none py-0.5">{p.qty}</span>
-                                <button onClick={(e) => { e.stopPropagation(); handleUpdateProductDay(p.id, dayObj.full, -1); }} className="text-gray-400 hover:text-[#9e111a] py-0.5"><Minus size={12}/></button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="flex items-center justify-center w-full h-full opacity-60">
-                            <span className={`text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-[#002147]' : 'text-gray-400'}`}>
-                              {isSelected ? "Click products to add →" : "Empty"}
-                            </span>
+                <AnimatePresence>
+                  {step === 2 && (
+                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                      <div className="p-6 pt-0">
+                        {plan === 'alternate' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <button onClick={() => { setSelectedDays(ALTERNATE_SETS.MWF); setActiveDayTab('Monday'); }} className={`p-4 rounded-xl border-2 font-black tracking-widest ${selectedDays.includes('Monday') ? 'border-[#002147] bg-blue-50 text-[#002147]' : 'border-gray-100 text-gray-500'}`}>
+                              Mon - Wed - Fri
+                            </button>
+                            <button onClick={() => { setSelectedDays(ALTERNATE_SETS.TTS); setActiveDayTab('Tuesday'); }} className={`p-4 rounded-xl border-2 font-black tracking-widest ${selectedDays.includes('Tuesday') ? 'border-[#002147] bg-blue-50 text-[#002147]' : 'border-gray-100 text-gray-500'}`}>
+                              Tue - Thu - Sat
+                            </button>
                           </div>
                         )}
+
+                        {(plan === 'weekly' || plan === 'custom') && (
+                          <div className="flex flex-wrap gap-3">
+                            {DAYS_OF_WEEK.map(day => (
+                              <button 
+                                key={day} onClick={() => handleDayToggle(day)}
+                                className={`px-4 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-colors ${selectedDays.includes(day) ? 'border-[#002147] bg-[#002147] text-[#E2B254]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                              >
+                                {day.substring(0,3)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-6 flex justify-end">
+                          <button onClick={() => {
+                            if (selectedDays.length > 0) setStep(3);
+                            else alert("Please select delivery days first.");
+                          }} className="bg-[#002147] text-[#E2B254] px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-colors">
+                            Continue to Basket
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {/* STEP 3: BUILD BASKET */}
+              <div className={`bg-white rounded-[2rem] border transition-all duration-300 overflow-hidden ${step === 3 ? 'border-[#002147] shadow-xl' : 'border-gray-100 shadow-sm opacity-60'}`}>
+                <div className={`p-6 flex justify-between items-center ${step > 2 ? 'bg-gray-50/50' : 'bg-white'}`}>
+                  <h2 className="text-lg font-black uppercase tracking-widest flex items-center gap-3">
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${step === 3 ? 'bg-[#002147] text-[#E2B254]' : 'bg-gray-100 text-gray-400'}`}>3</span> Build Basket
+                  </h2>
+                </div>
+
+                <AnimatePresence>
+                  {step === 3 && (
+                    <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden">
+                      <div className="p-6 pt-0">
+                        
+                        {/* Day Tabs */}
+                        <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-6">
+                          {selectedDays.map(day => {
+                            const hasItems = Object.keys(basket[day] || {}).length > 0;
+                            return (
+                              <button 
+                                key={day} onClick={() => setActiveDayTab(day)}
+                                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap border-2 flex items-center gap-2 ${activeDayTab === day ? 'border-[#002147] bg-[#002147] text-white' : hasItems ? 'border-green-200 bg-green-50 text-green-700' : 'border-gray-100 text-gray-400 hover:border-gray-300'}`}
+                              >
+                                {day} {hasItems && <CheckCircle2 size={14}/>}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Fast Actions */}
+                        <div className="flex justify-between items-center mb-4 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#002147]">Adding items for: <span className="text-[#9e111a]">{activeDayTab}</span></p>
+                          {selectedDays.length > 1 && (
+                            <button onClick={copyToAllDays} className="text-[10px] font-black uppercase tracking-widest text-[#002147] flex items-center gap-1 bg-white border border-[#002147]/20 px-3 py-1.5 rounded hover:bg-[#002147] hover:text-white transition-colors">
+                              <Copy size={12}/> Copy to All Days
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Product Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {products.map(product => {
+                            const qty = basket[activeDayTab]?.[product.id] || 0;
+                            return (
+                              <div key={product.id} className={`relative p-3 rounded-2xl border-2 transition-all flex flex-col items-center text-center ${qty > 0 ? 'border-[#9e111a] bg-red-50/30' : 'border-gray-100 hover:border-gray-300 bg-white'}`}>
+                                <img src={product.img} alt={product.name} className="w-16 h-16 object-contain mb-2 mix-blend-multiply" />
+                                <h4 className="text-[11px] font-black leading-tight text-[#1A1A1A]">{product.name}</h4>
+                                <span className="text-[10px] font-bold text-gray-500 mb-2">NPR {product.price}</span>
+                                
+                                {qty === 0 ? (
+                                  <button onClick={() => updateQuantity(product.id, 1)} className="mt-auto w-full py-2 bg-gray-50 hover:bg-[#002147] hover:text-white text-[#002147] text-[10px] font-black uppercase tracking-widest rounded-lg transition-colors">Add</button>
+                                ) : (
+                                  <div className="mt-auto w-full flex justify-between items-center bg-[#9e111a] text-white rounded-lg p-1">
+                                    <button onClick={() => updateQuantity(product.id, -1)} className="p-1 hover:bg-white/20 rounded"><Minus size={14}/></button>
+                                    <span className="font-black text-xs">{qty}</span>
+                                    <button onClick={() => updateQuantity(product.id, 1)} className="p-1 hover:bg-white/20 rounded"><Plus size={14}/></button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
             </div>
 
             {/* ========================================== */}
-            {/* COLUMN 3: SUMMARY & PLAN (UPDATED TO MATCH SCREENSHOT) */}
+            {/* RIGHT SIDE: CHECKOUT SUMMARY */}
             {/* ========================================== */}
-            <div className="lg:col-span-3 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col h-full overflow-hidden">
-              <div className="p-6 pb-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/30">
-                <div className="p-2 bg-[#002147]/5 text-[#002147] rounded-lg">
-                  <Receipt size={20} />
-                </div>
-                <h2 className="text-lg font-black uppercase tracking-widest text-[#002147]">
-                  3. Summary & Plan
-                </h2>
-              </div>
-
-              <div className="flex-grow overflow-y-auto custom-scrollbar p-6 flex flex-col">
-                
-                {/* Location Selector */}
-                <div className="mb-6 relative">
-                  <div className="flex justify-between items-end mb-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-500">Delivery Zone</label>
-                    <button 
-                      onClick={() => setIsContactModalOpen(true)}
-                      className="text-[10px] font-black text-[#9e111a] hover:text-[#002147] uppercase tracking-widest transition-colors flex items-center gap-1 bg-[#9e111a]/5 hover:bg-[#002147]/5 px-2 py-1 rounded"
-                    >
-                      Not in your region?
-                    </button>
-                  </div>
-                  
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <select 
-                      value={selectedLocation}
-                      onChange={(e) => setSelectedLocation(e.target.value)}
-                      className="w-full bg-white border border-gray-200 text-sm font-bold text-[#1A1A1A] rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-[#9e111a] appearance-none cursor-pointer hover:border-gray-300 transition-colors"
-                    >
-                      <option value="" disabled>Select Zone...</option>
-                      {AVAILABLE_LOCATIONS.map(loc => (
-                        <option key={loc} value={loc}>{loc}</option>
-                      ))}
-                    </select>
-                  </div>
+            <div className="lg:col-span-4 sticky top-28 space-y-6">
+              <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 bg-[#002147] text-white">
+                  <h2 className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                    <Receipt size={20} className="text-[#E2B254]"/> Order Summary
+                  </h2>
                 </div>
 
-                {/* --- NEW: PLAN CHOOSER GRID --- */}
-                <div className="mb-6">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-3 block">Choose Plan</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    
-                    {/* One Time */}
-                    <button onClick={() => setSubscriptionPlan('one_time')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'one_time' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                      <ShoppingBag size={18} className={subscriptionPlan === 'one_time' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
-                      <span className="text-xs font-bold">One Time Buy</span>
-                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'one_time' ? 'text-red-200' : 'text-gray-400'}`}>1 Delivery</span>
-                    </button>
+                <div className="p-6 space-y-6">
+                  {/* Validation Warning */}
+                  {!isBasketValid && step === 3 && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex gap-2 text-xs font-bold">
+                      <ShieldAlert size={16} className="shrink-0"/>
+                      <p>You must select at least one product for every active day in your plan to checkout.</p>
+                    </div>
+                  )}
 
-                    {/* Daily */}
-                    <button onClick={() => setSubscriptionPlan('daily')} className={`relative p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'daily' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                      <div className="absolute -top-2.5 -right-2 bg-green-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
-                        🎁 2L Free
+                  {/* Settings */}
+                  <div className="space-y-4">
+                    {/* Notice Box */}
+                    <div className="bg-red-50 border border-red-100 text-[#9e111a] p-3 rounded-xl flex items-start gap-2 mb-3">
+                      <Info size={16} className="shrink-0 mt-0.5" />
+                      <p className="text-[10px] font-bold">Order before 8:00 PM for tomorrow's delivery. Your cycle begins: <strong className="font-black">{tomorrowFormatted}</strong></p>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Delivery Zone</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <select value={location} onChange={(e) => setLocation(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm font-bold text-[#1A1A1A] rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-[#002147]">
+                          <option value="" disabled>Select Zone...</option>
+                          {AVAILABLE_LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                        </select>
                       </div>
-                      <CalendarDays size={18} className={subscriptionPlan === 'daily' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
-                      <span className="text-xs font-bold">Daily</span>
-                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'daily' ? 'text-red-200' : 'text-gray-400'}`}>30 Deliveries/Mo</span>
-                    </button>
-
-                    {/* Alternate Days */}
-                    <button onClick={() => setSubscriptionPlan('alternate')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'alternate' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                      <Calendar size={18} className={subscriptionPlan === 'alternate' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
-                      <span className="text-xs font-bold leading-tight">Alternate Days</span>
-                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'alternate' ? 'text-red-200' : 'text-gray-400'}`}>15 Deliveries/Mo</span>
-                    </button>
-
-                    {/* Weekly */}
-                    <button onClick={() => setSubscriptionPlan('weekly')} className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${subscriptionPlan === 'weekly' ? 'bg-[#9e111a] border-[#9e111a] text-white shadow-md' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                      <CalendarDays size={18} className={subscriptionPlan === 'weekly' ? 'text-white mb-2' : 'text-gray-400 mb-2'} />
-                      <span className="text-xs font-bold">Weekly</span>
-                      <span className={`text-[9px] mt-1 ${subscriptionPlan === 'weekly' ? 'text-red-200' : 'text-gray-400'}`}>4 Deliveries/Mo</span>
-                    </button>
-
-                  </div>
-                </div>
-
-                {/* --- NEW: DELIVERY TIMING SECTION --- */}
-                <div className="mb-6">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Delivery Timing</label>
-                  
-                  {/* Notice Box */}
-                  <div className="bg-red-50 border border-red-100 text-[#9e111a] p-3 rounded-xl flex items-start gap-2 mb-3">
-                    <Info size={16} className="shrink-0 mt-0.5" />
-                    <p className="text-xs">Order before 8:00 PM for tomorrow's delivery. Your cycle begins: <strong className="font-black">{tomorrowFormatted}</strong></p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Timing</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => setTiming('morning')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'morning' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunrise size={14}/> AM</button>
+                        <button onClick={() => setTiming('evening')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'evening' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunset size={14}/> PM</button>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => setDeliveryTiming('morning')} className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${deliveryTiming === 'morning' ? 'border-[#9e111a] text-[#9e111a] bg-red-50/50 font-bold shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300 font-medium'}`}>
-                      <Sunrise size={16} className={deliveryTiming === 'morning' ? 'text-[#9e111a]' : 'text-gray-400'} />
-                      <span className="text-xs">Morning <span className="text-[10px] opacity-70">(7:00 AM)</span></span>
-                    </button>
-
-                    <button onClick={() => setDeliveryTiming('evening')} className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${deliveryTiming === 'evening' ? 'border-[#9e111a] text-[#9e111a] bg-red-50/50 font-bold shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300 font-medium'}`}>
-                      <Sunset size={16} className={deliveryTiming === 'evening' ? 'text-[#9e111a]' : 'text-gray-400'} />
-                      <span className="text-xs">Evening <span className="text-[10px] opacity-70">(5:00 PM)</span></span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Final Cost & Submit */}
-                <div className="mt-auto border-t border-gray-100 pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-xs font-black uppercase tracking-widest text-gray-500">Total Calculation</span>
-                    <span className="text-2xl font-black text-[#1A1A1A]">NPR {finalCost.toLocaleString()}</span>
+                  {/* Calculations */}
+                  <div className="border-t border-gray-100 pt-6 space-y-3">
+                    <div className="flex justify-between text-sm font-bold text-gray-600">
+                      <span>Weekly Base Cost</span>
+                      <span>NPR {weeklyCost.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold text-gray-600">
+                      <span>Plan Multiplier</span>
+                      <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">x{plan === 'custom' ? '1 Week' : '4 Weeks'}</span>
+                    </div>
+                    <div className="flex justify-between items-end pt-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#002147]">Grand Total</span>
+                      <span className="text-3xl font-black text-[#9e111a]">NPR {finalCost.toLocaleString()}</span>
+                    </div>
                   </div>
 
+                  {/* Checkout Button */}
                   <button 
-                    onClick={handleSubmit}
-                    disabled={(!selectedLocation || summaryItems.length === 0 || isSubmitting) && isAuthenticated}
-                    className={`w-full py-4 rounded-xl font-black text-sm tracking-widest uppercase transition-all ${
-                      !isAuthenticated 
-                        ? 'bg-[#1A1A1A] text-white hover:bg-black shadow-lg hover:-translate-y-0.5'
-                        : (!selectedLocation || summaryItems.length === 0)
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                          : 'bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#002147] shadow-[0_4px_14px_rgba(226,178,84,0.4)] hover:shadow-lg hover:-translate-y-0.5'
-                    }`}
+                    onClick={handleEsewaCheckout}
+                    disabled={!isBasketValid || !location || !timing || isSubmitting}
+                    className="w-full bg-[#60A839] hover:bg-[#4d872d] disabled:bg-gray-200 disabled:text-gray-400 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg flex justify-center items-center gap-2"
                   >
-                    {isSubmitting ? (
-                      <span className="flex items-center justify-center gap-2"><Loader2 className="animate-spin" size={18} /> Processing...</span>
-                    ) : !isAuthenticated ? (
-                      "Login to Continue"
-                    ) : (
-                      "Confirm Schedule"
-                    )}
+                    {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Pay via eSewa`}
                   </button>
                 </div>
-
               </div>
             </div>
 

@@ -11,7 +11,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState('customer');
+  const [activeTab, setActiveTab] = useState('all');
 
   // Modals
   const [selectedUser, setSelectedUser] = useState(null);
@@ -59,7 +59,7 @@ export default function UserManagement() {
         user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.phone?.includes(searchQuery);
       
-      const roleMatch = (user.role || 'customer') === activeTab;
+      const roleMatch = activeTab === 'all' || (user.role || 'customer') === activeTab;
       return matchesSearch && roleMatch;
     });
   }, [users, searchQuery, activeTab]);
@@ -67,7 +67,7 @@ export default function UserManagement() {
   const handleDeleteUser = async (id) => {
     if (window.confirm("Are you sure you want to permanently delete this account? This cannot be undone.")) {
       try {
-        await api.delete('/admin/users/staff.php', { data: { id } });
+        await api.delete('/admin/users/delete.php', { data: { id } });
         setSelectedUser(null);
         fetchUsers();
       } catch (e) {
@@ -137,6 +137,7 @@ export default function UserManagement() {
       {/* 3. TABS */}
       <div className="flex gap-4 border-b border-gray-200 pb-2 overflow-x-auto custom-scrollbar">
         {[
+          { id: 'all', label: 'All Accounts', icon: Users },
           { id: 'customer', label: 'Customers', icon: Users },
           { id: 'delivery', label: 'Delivery Team', icon: Truck },
           { id: 'admin', label: 'Administrators', icon: ShieldAlert }
@@ -161,6 +162,7 @@ export default function UserManagement() {
               <tr>
                 <th className="p-6">Name & Contact</th>
                 <th className="p-6">Account Status</th>
+                <th className="p-6">Orders</th>
                 <th className="p-6">Joined Date</th>
                 <th className="p-6 text-right">Action</th>
               </tr>
@@ -168,14 +170,14 @@ export default function UserManagement() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="p-16 text-center">
+                  <td colSpan="5" className="p-16 text-center">
                     <Loader2 className="mx-auto animate-spin text-[#9e111a] mb-3" size={32} />
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Accounts...</p>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="p-16 text-center">
+                  <td colSpan="5" className="p-16 text-center">
                     <ShieldAlert className="mx-auto text-gray-200 mb-3" size={40} />
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No accounts found in this category.</p>
                   </td>
@@ -223,6 +225,9 @@ export default function UserManagement() {
                         </span>
                       )}
                     </td>
+                    <td className="p-6">
+                      <span className="text-sm font-black text-[#1A1A1A]">{user.total_orders || 0}</span>
+                    </td>
                     <td className="p-6 text-sm text-gray-600 font-bold">
                       {new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
@@ -269,7 +274,10 @@ export default function UserManagement() {
                   <InfoCard icon={<Phone/>} label="Phone" value={selectedUser.phone || 'N/A'} color="text-emerald-600" />
                   <InfoCard icon={<Mail/>} label="Email" value={selectedUser.email} color="text-blue-600" />
                 </div>
-                <InfoCard icon={<MapPin/>} label="Address" value={selectedUser.address || 'N/A'} color="text-[#9e111a]" />
+                <div className="grid grid-cols-2 gap-3">
+                  <InfoCard icon={<MapPin/>} label="Address" value={selectedUser.address || 'N/A'} color="text-[#9e111a]" />
+                  <InfoCard icon={<TrendingUp/>} label="Total Orders" value={selectedUser.total_orders || '0'} color="text-[#E2B254]" />
+                </div>
               </div>
 
               {/* Administrative Actions */}

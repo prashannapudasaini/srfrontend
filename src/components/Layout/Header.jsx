@@ -68,7 +68,8 @@ const Header = () => {
     <>
       <header className="bg-white/80 backdrop-blur-xl shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 relative">
-          <div className="flex justify-between items-center">
+          {/* ADJUSTED: Added gap-4 lg:gap-8 w-full to prevent overlapping sections */}
+          <div className="flex justify-between items-center gap-4 lg:gap-8 w-full">
             
             <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center gap-3 sm:gap-4 group shrink-0">
               <motion.img 
@@ -92,8 +93,8 @@ const Header = () => {
               </div>
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex gap-4 xl:gap-8 items-center">
+            {/* ADJUSTED: Added flex-1 justify-center to keep nav centered, adjusted gap sizing */}
+            <nav className="hidden lg:flex flex-1 justify-center gap-3 xl:gap-6 items-center">
               {navItems.map((item) => (
                 <div 
                   key={item.id} 
@@ -104,7 +105,8 @@ const Header = () => {
                   <Link
                     to={item.path}
                     onClick={() => window.scrollTo(0, 0)}
-                    className={`text-xs xl:text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
+                    /* ADJUSTED: Added whitespace-nowrap and slightly scaled text for lg screens */
+                    className={`whitespace-nowrap text-[11px] xl:text-sm tracking-wider uppercase transition-all duration-300 relative cursor-pointer ${
                       activeLink === item.id 
                         ? 'text-[#9e111a] font-black' 
                         : 'text-gray-600 font-bold hover:text-[#1A1A1A]'
@@ -149,26 +151,27 @@ const Header = () => {
               ))}
             </nav>
 
-            <div className="flex items-center gap-3 sm:gap-6">
+            {/* ADJUSTED: Added shrink-0 so these icons never get squished by the nav menu */}
+            <div className="flex items-center gap-4 sm:gap-6 shrink-0">
               <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#9e111a] transition-colors">
                 <PhoneCall size={20} />
               </button>
 
               {/* Profile Dropdown / Login Block */}
-             {/* {isAuthenticated ? (
+              {isAuthenticated ? (
                 <div className="relative group hidden sm:block">
                   <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 py-1.5 px-3 rounded-full transition-colors cursor-pointer">
                     <div className="w-6 h-6 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shrink-0">
                       <User size={14} />
                     </div>
-                    <span className="text-xs font-bold text-[#1A1A1A] tracking-wider uppercase">
+                    <span className="text-xs font-bold text-[#1A1A1A] tracking-wider uppercase truncate max-w-[100px]">
                       {user?.name?.split(' ')[0] || 'Profile'}
                     </span>
-                    <ChevronDown size={14} className="text-gray-500" />
+                    <ChevronDown size={14} className="text-gray-500 shrink-0" />
                   </button>
                   
                   {/* Dropdown Menu */}
-                 {/* <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <Link 
                       to={user?.role === 'admin' ? '/admin' : '/history'} 
                       onClick={() => window.scrollTo(0, 0)}

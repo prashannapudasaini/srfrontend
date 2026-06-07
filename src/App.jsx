@@ -1,6 +1,7 @@
 // frontend/src/App.jsx
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import { XCircle } from 'lucide-react'; // Added icon for the failure page
 
 import DeliveryDashboard from './delivery/DeliveryDashboard';
 
@@ -8,7 +9,6 @@ import DeliveryDashboard from './delivery/DeliveryDashboard';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import FloatingChat from './components/FloatingChat'; 
-
 
 // Public Facing Pages
 import HomePage from './pages/HomePage';
@@ -96,7 +96,27 @@ function App() {
         <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
         <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
         <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
+        
+        {/* === ESEWA PAYMENT ROUTES === */}
         <Route path="/payment-success" element={<PaymentSuccess/>} />
+        
+        {/* ADDED: Payment Failure Route */}
+        <Route path="/payment-failure" element={
+          <PublicLayout>
+            <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+              <div className="w-24 h-24 bg-red-50 rounded-[2rem] border border-red-100 flex items-center justify-center text-[#9e111a] mb-6 shadow-sm">
+                <XCircle size={48} strokeWidth={2.5} />
+              </div>
+              <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Payment Failed</h2>
+              <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
+                Your transaction was cancelled or unsuccessful. No charges were made to your account.
+              </p>
+              <Link to="/checkout" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
+                Return to Checkout
+              </Link>
+            </div>
+          </PublicLayout>
+        } />
         
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
