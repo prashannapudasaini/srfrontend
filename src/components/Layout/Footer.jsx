@@ -23,8 +23,8 @@ const EXPLORE_LINKS = [
 ];
 
 const SOCIAL_LINKS = [
-  { icon: (s) => <Facebook s={s} />, label: "Facebook", href: "https://www.facebook.com/sitaramdairy" },
-  { icon: (s) => <Instagram s={s} />, label: "Instagram", href: "https://www.instagram.com/sitaramdairy" },
+  { icon: (s) => <Facebook s={s} />, label: "Facebook", href: "https://www.facebook.com/sitaramdudh/" },
+  { icon: (s) => <Instagram s={s} />, label: "Instagram", href: "https://www.instagram.com/sitaram.dudh/?hl=en" },
   { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
 ];
 
