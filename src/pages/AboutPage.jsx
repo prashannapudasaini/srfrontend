@@ -295,7 +295,7 @@ export default function AboutPage() {
           {/* Banner */}
           <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
             <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
-              Leading Trust Since 30 Years
+              30 Years of Leading Trust
             </span>
           </div>
 
