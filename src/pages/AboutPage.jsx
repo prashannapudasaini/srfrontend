@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, Droplets, Heart, Award, Leaf, Sun, Truck, Sparkles, MapPin, Milestone, GraduationCap } from 'lucide-react';
+import { ShieldCheck, Droplets, Heart, Award, Leaf, Sun, Truck, Sparkles, MapPin, Milestone } from 'lucide-react';
 import MilkDivider from '../components/Home/MilkDivider';
 
 export default function AboutPage() {
@@ -22,7 +22,9 @@ export default function AboutPage() {
   ];
 
   return (
-    <main className="bg-white min-h-screen pb-20">
+    // 🔥 FIX APPLIED HERE: Added `overflow-x-hidden` to strictly prevent horizontal mobile tilting
+    <main className="bg-white min-h-screen pb-20 overflow-x-hidden">
+      
       {/* HERO SECTION - RED & WHITE HIGH CONTRAST */}
       <div className="relative h-[85vh] flex items-center overflow-hidden bg-[#1A1A1A]">
         {/* Background Image with Dark Overlay for maximum White Text contrast */}
@@ -137,7 +139,7 @@ export default function AboutPage() {
           </p>
         </motion.div>
 
-        {/* --- 🔥 NEW SECTION ADDED ACCORDING TO SCREENSHOT 2026-06-07 165000.PNG --- */}
+        {/* OUR CATALOG SECTION */}
         <div className="mb-40 border-b border-gray-100 pb-24">
           <div className="text-center mb-12">
             <h2 className="text-[#9e111a] text-xs font-black uppercase tracking-[0.3em] mb-3">OUR CATALOG</h2>
@@ -149,7 +151,6 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Staggered fluid bubble pill dynamic array matrix component */}
           <div className="flex flex-wrap justify-center items-center gap-4 max-w-5xl mx-auto px-4">
             {premiumProducts.map((product, idx) => (
               <motion.div
@@ -170,7 +171,6 @@ export default function AboutPage() {
 
         {/* REGIONAL HARVEST PIPELINE & MACRO BIO-NUTRITION SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-40 items-start">
-          {/* Left Column: Logistical Network */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -189,7 +189,6 @@ export default function AboutPage() {
             </p>
           </motion.div>
 
-          {/* Right Column: Biochemical Sizing Matrix */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -220,7 +219,6 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connecting line for desktop */}
             <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
             
             {processes.map((step, idx) => (
@@ -276,9 +274,7 @@ export default function AboutPage() {
           viewport={{ once: true }}
           className="mb-28 text-center flex flex-col items-center justify-center"
         >
-          {/* Featured Leading Image */}
           <div className="relative flex justify-center mb-12">
-            {/* Glow Background */}
             <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
 
             <motion.img 
@@ -292,14 +288,12 @@ export default function AboutPage() {
             />
           </div>
 
-          {/* Banner */}
           <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
             <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
               30 Years of Leading Trust
             </span>
           </div>
 
-          {/* Subtext */}
           <p className="text-[#9e111a] font-bold text-sm md:text-base uppercase tracking-[0.25em] mt-6">
             Nepal's Most Trusted Dairy Brand
           </p>

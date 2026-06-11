@@ -1,16 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   MapPin, Phone, Mail, Clock, Award, Shield, Leaf, Truck, Globe, 
-  Map as MapIcon,
-  Plane 
+  Map as MapIcon, Plane, X, ShieldCheck
 } from "lucide-react";
 import FeaturedCarousel from "../Home/FeaturedCarousel";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
 // --- Constants ---
 const MARQUEE_ITEMS = [
-  "BHAT BHATENI", "SALESBERRY", , "KC STORE", "METRO MARKET", "SMILE MART", "BIG MART", "HORIZONS MART","GAUTAM GENERAL","DARAZ"
+  "BHAT BHATENI", "SALESBERRY", "KC STORE", "METRO MARKET", "SMILE MART", "BIG MART", "HORIZONS MART","GAUTAM GENERAL","DARAZ"
 ];
 
 const EXPLORE_LINKS = [
@@ -28,14 +27,6 @@ const SOCIAL_LINKS = [
   { icon: (s) => <Youtube s={s} />, label: "YouTube", href: "https://www.youtube.com/@sitaramdairy" }
 ];
 
-const BIGGEST_CLIENTS = [
-  { name: "Soaltee Hotel", url: "https://www.soalteehotel.com/uploads/images1/20250115110040.png" },
-  { name: "Mercure Hotel", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Mercure_Hotels_Logo_2013.svg/3840px-Mercure_Hotels_Logo_2013.svg.png" },
-  { name: "Client 3", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+3" },
-  { name: "Client 4", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+4" },
-  { name: "Client 5", url: "https://placehold.co/150x150/ffffff/c8102e?text=Client+5" }
-];
-
 const AVAILABLE_ON = [
   { name: "Bhat Bhateni", url: "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/eae0449ffdcaaaecca846c6da03443e8", initials: "BB" },
   { name: "SalesBerry", url: "https://media.insurancekhabar.com/uploads/2023/11/salesberry-logo.png", initials: "SB" },
@@ -48,7 +39,6 @@ const AVAILABLE_ON = [
   { name: "Daraz", url: "https://www.shutterstock.com/image-vector/daraz-logo-typically-features-distinctive-600nw-2383185843.jpg", initials: "DZ" }
 ];
 
-// --- Custom Icons ---
 const Facebook = ({ s }) => (
   <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
 );
@@ -60,13 +50,55 @@ const Youtube = ({ s }) => (
 );
 
 const Footer = () => {
+  // 🔥 2FA states for dynamic document views
+  const [activeDoc, setActiveDoc] = useState(null);
+
+  const docContents = {
+    privacy: {
+      title: "Privacy Policy",
+      content: (
+        <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+          <p className="font-bold text-gray-900">Sitaram Gokul Milks Kathmandu Pvt. Ltd. Privacy Policy</p>
+          <p>We respect the absolute privacy parameters of our customers across the Kathmandu Valley. This policy explicitly describes how data records collected via our web portals or incoming mobile software applications are securely maintained.</p>
+          <h5 className="font-bold text-gray-800 pt-2">1. Data Collection Fields</h5>
+          <p>We log your name, phone identification strings, precise delivery geolocation pins, and transaction histories solely to fulfill automated drops and coordinate with local logistical centers.</p>
+          <h5 className="font-bold text-gray-800 pt-2">2. Processing Security Standards</h5>
+          <p>Your records are locked behind standard token layers. We do not distribute private identifying markers to outside marketing channels. Information is processed strictly for delivery processing and structural safety logs.</p>
+        </div>
+      )
+    },
+    terms: {
+      title: "Terms & Conditions",
+      content: (
+        <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+          <p className="font-bold text-gray-900">Sitaram Gokul Milks Terms of Operational Service</p>
+          <p>By engaging with our platform or establishing ongoing farm-to-table delivery parameters, you implicitly agree to the following corporate regulations:</p>
+          <h5 className="font-bold text-gray-800 pt-2">1. Infrastructure Network</h5>
+          <p>All items distributed under our brand are verified cleanly via our 22 milk chilling centers across Nawalparasi, Rupandehi, Chitwan, and Kavre, utilizing a baseline grouping of over 150 local dairy producer cooperatives.</p>
+          <h5 className="font-bold text-gray-800 pt-2">2. Supply Modification & Holds</h5>
+          <p>Subscribers have the explicit right to pause or update their distribution parameters. To protect the raw schedules of our cooperative collection frames, modification requests must be processed via the platform prior to dispatch routines.</p>
+        </div>
+      )
+    },
+    returns: {
+      title: "Returns & Refund Policy",
+      content: (
+        <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+          <p className="font-bold text-gray-900">Premium Dairy Quality Guarantee</p>
+          <p>Because dairy items (Milk, Paneer, Yogurt, Lassi) contain sensitive, natural proteins and lipids without artificial preservative thickeners, specialized return guidelines are strictly operationalized:</p>
+          <h5 className="font-bold text-gray-800 pt-2">1. Delivery Inspection</h5>
+          <p>Due to the perishable nature of fresh products, clients are requested to verify package integrity immediately upon accessible drop-off. If a batch fails your laboratory or structural verification, it must be reported instantly for replacement.</p>
+          <h5 className="font-bold text-gray-800 pt-2">2. Refund Allocations</h5>
+          <p>Verified batch compromises will result in immediate credits to your digital platform wallet. Wallet assets remain non-transferable and can be safely applied to any upcoming product orders or subscription renewals.</p>
+        </div>
+      )
+    }
+  };
+
   return (
     <footer className="w-full flex flex-col bg-white overflow-hidden">
-
-       
-
       {/* Featured Carousel */}
-  <FeaturedCarousel />
+      <FeaturedCarousel />
       
       {/* 1. Marquee Section */}
       <div className="bg-white text-red-700 py-2.5 border-t border-b border-red-50 overflow-hidden mt-2">
@@ -89,7 +121,6 @@ const Footer = () => {
 
       {/* 2. Main Body Section */}
       <div className="relative bg-[#C8102E] text-white">
-        
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="hidden lg:block absolute top-0 left-[40%] w-[250px] h-full z-10 translate-x-[-50%]">
              <svg viewBox="0 0 200 800" preserveAspectRatio="none" className="h-full w-full fill-white/5 opacity-30">
@@ -111,11 +142,11 @@ const Footer = () => {
                   <h3 className="text-xl md:text-2xl font-serif font-bold tracking-tight">
                     Sita Ram <span className="text-red-200">Gokul Milk</span>
                   </h3>
-                  <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1985 • Sanepa, Kathmandu</p>
+                  <p className="text-red-100/70 text-[10px] font-semibold uppercase tracking-wider mt-0.5">Est. 1995 • Sanepa, Kathmandu</p>
                 </div>
               </div>
               <p className="text-sm text-red-50 leading-relaxed pr-4">
-                Generations of pure goodness. Premium organic dairy and artisanal bakery products from Nepal's lush pastures.
+                Generations of pure goodness. Premium quality dairy and nutritional products from Nepal's trusted regional farming networks.
               </p>
             </div>
 
@@ -155,14 +186,13 @@ const Footer = () => {
                 </div>
               </div>
 
-              {/* Why Choose Us */}
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Why Choose Us</h4>
                 <ul className="space-y-2.5 text-red-50 text-sm">
                   <li className="flex gap-3 items-center"><Award className="shrink-0 w-4 h-4 text-red-300" /> <span>Premium Quality</span></li>
-                  <li className="flex gap-3 items-center"><Leaf className="shrink-0 w-4 h-4 text-red-300" /> <span>100% Organic</span></li>
-                  <li className="flex gap-3 items-center"><Shield className="shrink-0 w-4 h-4 text-red-300" /> <span>Trusted Since 1985</span></li>
-                  <li className="flex gap-3 items-center"><Truck className="shrink-0 w-4 h-4 text-red-300" /> <span>Fast Delivery</span></li>
+                  <li className="flex gap-3 items-center"><Leaf className="shrink-0 w-4 h-4 text-red-300" /> <span>Optimal Nutrition</span></li>
+                  <li className="flex gap-3 items-center"><Shield className="shrink-0 w-4 h-4 text-red-300" /> <span>Reputable Industry</span></li>
+                  <li className="flex gap-3 items-center"><Truck className="shrink-0 w-4 h-4 text-red-300" /> <span>Accessible Sourcing</span></li>
                 </ul>
               </div>
             </div>
@@ -170,12 +200,10 @@ const Footer = () => {
         </div>
       </div>
 
- {/* 3. New Availability Info Section */}
+      {/* 3. Availability Info Section */}
       <div className="bg-white py-8 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
-            {/* Online Availability */}
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
                 <Globe className="w-5 h-5 text-[#C8102E]" />
@@ -184,7 +212,6 @@ const Footer = () => {
               <p className="text-gray-600 text-sm">Available on <span className="font-semibold text-[#C8102E]">Daraz</span></p>
             </div>
 
-            {/* Nationally - Using MapIcon instead of Map */}
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
                 <MapIcon className="w-5 h-5 text-[#C8102E]" />
@@ -198,7 +225,6 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* International */}
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
                 <Plane className="w-5 h-5 text-[#C8102E]" />
@@ -213,17 +239,12 @@ const Footer = () => {
         </div>
       </div>
 
-     
-      {/* 4. Available On Section - Partner Stores with smaller logos in a single horizontal line */}
+      {/* 4. Available On Section */}
       <div className="bg-gray-50 py-8 border-t border-gray-100">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex flex-col items-center text-center">
             <h4 className="text-sm font-bold tracking-wide text-[#002147] uppercase border-b border-[#002147]/20 pb-2 mb-6 inline-block">Products Availability</h4>
             
-            {/* MODIFICATION: Increased gap from gap-4 to gap-5. 
-              Increased container size from w-16 h-16 to w-20 h-20 (md:w-24 md:h-24 on medium screens and up). 
-              Increased padding slightly from p-2 to p-3 to give the logos room to breathe inside the larger box.
-            */}
             <div className="flex flex-wrap justify-center items-center gap-5">
               {AVAILABLE_ON.map((partner, index) => (
                 <div key={index} className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center border border-gray-200 p-3 transition-transform hover:-translate-y-1 hover:shadow-md">
@@ -236,24 +257,53 @@ const Footer = () => {
                 </div>
               ))}
             </div>
-
           </div>
         </div>
       </div>
-    
 
       {/* 5. Bottom Bar */}
       <div className="bg-white py-4 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-          <p>© 2026 Sita Ram Dairy. All rights reserved.</p>
+          <p>© 2026 Sitaram Gokul Milks. All rights reserved.</p>
           <p>Designed and Developed by MotionAge.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-red-600 transition-colors">Privacy</a>
-            <a href="#" className="hover:text-red-600 transition-colors">Terms</a>
-            <a href="#" className="hover:text-red-600 transition-colors">Returns</a>
+            {/* 🔥 MODIFIED: Added specific parameter targets to trigger modal frames */}
+            <button onClick={() => setActiveDoc('privacy')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Privacy</button>
+            <button onClick={() => setActiveDoc('terms')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Terms</button>
+            <button onClick={() => setActiveDoc('returns')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Returns</button>
           </div>
         </div>
       </div>
+
+      {/* 🔥 OVERLAY PANEL COMPONENT FOR BALANCED INLINE TEXT VIEWS */}
+      <AnimatePresence>
+        {activeDoc && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2rem] border border-gray-100 w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+            >
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div className="flex items-center gap-2 text-[#C8102E]">
+                  <ShieldCheck size={20} />
+                  <h4 className="font-serif font-black text-xl text-gray-900">{docContents[activeDoc].title}</h4>
+                </div>
+                <button 
+                  onClick={() => setActiveDoc(null)}
+                  className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 shadow-sm"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto">
+                {docContents[activeDoc].content}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </footer>
   );
 };
