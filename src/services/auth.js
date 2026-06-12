@@ -1,9 +1,7 @@
 // frontend/src/services/auth.js
 
-// Hardcode your backend API URL (adjust to your actual backend)
-// frontend/src/services/auth.js
-
-const API_BASE_URL = 'http://localhost/sita-ram-dairy/backend/api';
+// 🔥 FIXED: Changed from localhost to your live production server
+const API_BASE_URL = 'https://sitaramdudh.com/backend/api';
 
 /**
  * Login user with email/phone and password
@@ -96,5 +94,7 @@ export const logoutUser = async () => {
   localStorage.removeItem('sitaRamUser');
   localStorage.removeItem('cartItems');
   localStorage.removeItem('sitaRamCart');
+  // Also clear the admin token on logout
+  localStorage.removeItem('adminToken');
   return { success: true, message: 'Logged out securely' };
 };

@@ -2,6 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Edit, Trash2, Plus, Package, Search, X, PlusCircle, AlertCircle, UploadCloud, Settings, AlertTriangle, AlignLeft, Activity } from 'lucide-react';
 import api from '../services/api';
 
+// Admin Security Token
+const ADMIN_TOKEN = 'sitaram_secret_2026';
+
+// Helper to fix broken localhost images from the database dynamically
+const fixImageUrl = (url) => {
+  if (!url) return '/logo.png';
+  // Dynamically replaces 'localhost' with your current IP address or live domain
+  return url.replace('localhost', window.location.hostname).replace('127.0.0.1', window.location.hostname);
+};
+
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]); 
@@ -17,7 +27,6 @@ export default function ProductManagement() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  // CUSTOM UI DIALOG STATE (Replaces window.confirm and alert)
   const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
 
   const showAlert = (message) => {
@@ -44,7 +53,8 @@ export default function ProductManagement() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/products/index.php');
+      // Removed leading slash
+      const res = await api.get('products/index.php');
       if (res.data.status === 'success') {
         setProducts(res.data.data);
       }
@@ -57,7 +67,10 @@ export default function ProductManagement() {
 
   const fetchCategories = async () => {
     try {
-      const res = await api.get('/admin/categories.php');
+      // 🔥 FIX: Point to the correct categories fetcher file
+      const res = await api.get('categories/index.php', {
+        headers: { 'X-Admin-Token': ADMIN_TOKEN }
+      });
       if (res.data.status === 'success') {
         setCategories(res.data.data);
       }
@@ -70,21 +83,28 @@ export default function ProductManagement() {
     e.preventDefault();
     if(!newCategoryName.trim()) return;
     try {
-      const res = await api.post('/admin/categories.php', { name: newCategoryName });
+      // Removed leading slash & added token
+      const res = await api.post('admin/categories.php', { name: newCategoryName }, {
+        headers: { 'X-Admin-Token': ADMIN_TOKEN }
+      });
       if (res.data.status === 'success') {
         setNewCategoryName("");
         fetchCategories();
         showAlert("Category added successfully!");
       }
     } catch (error) { 
-      showAlert("Failed to add category. It may already exist."); 
+      showAlert("Failed to add category. It may already exist or you lack permission."); 
     }
   };
 
   const handleDeleteCategory = (id) => {
     showConfirm("Are you sure you want to permanently delete this category?", async () => {
       try {
-        const res = await api.delete('/admin/categories.php', { data: { id } });
+        // Removed leading slash & added token
+        const res = await api.delete('admin/categories.php', { 
+          data: { id },
+          headers: { 'X-Admin-Token': ADMIN_TOKEN }
+        });
         if (res.data.status === 'success') {
           fetchCategories();
           setActiveCategory("All");
@@ -101,7 +121,10 @@ export default function ProductManagement() {
   const handleDelete = (id) => {
     showConfirm("Are you sure you want to permanently delete this product? This action cannot be undone.", async () => {
       try {
-        const res = await api.post('/admin/products/delete.php', { id });
+        // Removed leading slash & added token
+        const res = await api.post('admin/products/delete.php', { id }, {
+          headers: { 'X-Admin-Token': ADMIN_TOKEN }
+        });
         if (res.data.status === 'success') {
           setProducts(products.filter(p => p.id !== id));
           showAlert("Product deleted successfully.");
@@ -117,7 +140,10 @@ export default function ProductManagement() {
 
   const handleSaveProduct = async (savedProduct) => {
     try {
-      const res = await api.post('/admin/products/update.php', savedProduct);
+      // Removed leading slash & added token
+      const res = await api.post('admin/products/update.php', savedProduct, {
+        headers: { 'X-Admin-Token': ADMIN_TOKEN }
+      });
       if (res.data.status === 'success') {
         fetchProducts(); 
         setIsModalOpen(false);
@@ -239,7 +265,7 @@ export default function ProductManagement() {
                   <tr key={p.id} className="hover:bg-[#FDF8E7]/30 transition-colors group">
                     <td className="p-4 lg:p-6 flex items-center gap-4 lg:gap-6">
                       <div className="w-12 h-12 lg:w-16 lg:h-16 bg-[#FDF8E7] rounded-2xl p-2 flex items-center justify-center border border-[#9e111a]/5 shrink-0">
-                        <img src={p.image || p.variants?.[0]?.image || '/logo.png'} alt={p.name} className="w-full h-full object-contain mix-blend-multiply" />
+                        <img src={fixImageUrl(p.image || p.variants?.[0]?.image)} alt={p.name} className="w-full h-full object-contain mix-blend-multiply" />
                       </div>
                       <div>
                         <p className="font-serif font-black text-sm lg:text-lg text-[#1A1A1A] line-clamp-1">
@@ -333,7 +359,6 @@ export default function ProductManagement() {
 // =====================================================================
 
 function ProductFormModal({ closeModal, product, categories, onSave, showAlert }) {
-  // Safely parse JSON strings from the database back into arrays
   let parsedFeatures = product?.features;
   if (typeof parsedFeatures === 'string') {
     if (parsedFeatures.trim().startsWith('[')) {
@@ -363,7 +388,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
   
   const [isUploading, setIsUploading] = useState(false);
 
-  // === Dynamic Arrays Handlers ===
   const handleFeatureChange = (index, value) => {
     const newFeatures = [...formData.features];
     newFeatures[index] = value;
@@ -380,7 +404,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
   const addNutrition = () => setFormData({ ...formData, nutrition: [...formData.nutrition, { nutrient: '', value: '' }] });
   const removeNutrition = (index) => setFormData({ ...formData, nutrition: formData.nutrition.filter((_, i) => i !== index) });
 
-  // === Variant Handlers ===
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...formData.variants];
     newVariants[index][field] = value;
@@ -407,11 +430,15 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
     data.append('image', file);
 
     try {
-      const res = await api.post('/products/upload.php', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      // Removed leading slash & added token
+      const res = await api.post('products/upload.php', data, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'X-Admin-Token': ADMIN_TOKEN 
+        }
       });
       if (res.data.status === 'success') {
-        const url = `http://localhost/sita-ram-dairy/backend${res.data.url}`;
+        const url = `https://${window.location.hostname}/backend${res.data.url}`;
         if (isMain) setFormData({ ...formData, image: url });
         else if (variantIndex !== null) handleVariantChange(variantIndex, 'image', url);
       } else {
@@ -431,7 +458,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
       return;
     }
 
-    // Sanitize empty rows before saving to database
     const cleanedData = {
       ...formData,
       features: formData.features.filter(f => f.trim() !== ''),
@@ -458,12 +484,11 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
         <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar flex-grow space-y-8">
           <form id="productForm" onSubmit={handleSubmit} className="space-y-8">
             
-            {/* 1. Base Product Details */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><Package size={16}/> Base Product Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="md:col-span-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden h-32 md:h-full">
-                  {formData.image ? <img src={formData.image} alt="Main" className="w-full h-full object-contain p-2" /> : <div className="text-center p-2 text-gray-400"><UploadCloud size={24} className="mx-auto mb-1" /><span className="text-[10px] font-bold">Main Image</span></div>}
+                  {formData.image ? <img src={fixImageUrl(formData.image)} alt="Main" className="w-full h-full object-contain p-2" /> : <div className="text-center p-2 text-gray-400"><UploadCloud size={24} className="mx-auto mb-1" /><span className="text-[10px] font-bold">Main Image</span></div>}
                   <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], true, null)} className="absolute inset-0 opacity-0 cursor-pointer" />
                   {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#9e111a]"></div></div>}
                 </div>
@@ -488,7 +513,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
               </div>
             </div>
 
-            {/* 2. Overview, Description & Features */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
               <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><AlignLeft size={16}/> Overview & Features</h3>
               
@@ -529,7 +553,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
               </div>
             </div>
 
-            {/* 3. Nutritional Information */}
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest flex items-center gap-2"><Activity size={16}/> Nutritional Information</h3>
               <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-4">Approximate Composition Per 100g/mL</p>
@@ -562,7 +585,6 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
               </div>
             </div>
 
-            {/* 4. Product Variants */}
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <div><h3 className="text-xs font-bold text-[#9e111a] uppercase tracking-widest">Product Variants</h3><p className="text-[10px] text-gray-500 mt-1">Set individual prices, stock, descriptions, and images.</p></div>
@@ -578,7 +600,7 @@ function ProductFormModal({ closeModal, product, categories, onSave, showAlert }
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="md:col-span-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden h-32">
-                        {v.image ? <img src={v.image} alt="Variant" className="w-full h-full object-contain p-2" /> : <div className="text-center p-2 text-gray-400"><UploadCloud size={24} className="mx-auto mb-1" /><span className="text-[10px] font-bold">Variant Image</span></div>}
+                        {v.image ? <img src={fixImageUrl(v.image)} alt="Variant" className="w-full h-full object-contain p-2" /> : <div className="text-center p-2 text-gray-400"><UploadCloud size={24} className="mx-auto mb-1" /><span className="text-[10px] font-bold">Variant Image</span></div>}
                         <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], false, idx)} className="absolute inset-0 opacity-0 cursor-pointer" />
                         {isUploading && <div className="absolute inset-0 bg-white/50 flex items-center justify-center"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#002147]"></div></div>}
                       </div>

@@ -1,20 +1,26 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // IMPORTANT: Change this to match your XAMPP local server URL
-  // If your backend is at http://localhost/sita-ram-dairy/backend/api
-  baseURL: 'http://localhost/sita-ram-dairy/backend/api',
+  // 🔥 FIXED: Changed from localhost to your live production server
+  baseURL: 'https://sitaramdudh.com/backend/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Optional: Add a token interceptor if you are using JWT auth
 api.interceptors.request.use((config) => {
+  // Standard User Token
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Admin Security Token (Automatically attaches if an Admin is logged in)
+  const adminToken = localStorage.getItem('adminToken');
+  if (adminToken) {
+    config.headers['X-Admin-Token'] = adminToken;
+  }
+  
   return config;
 });
 
