@@ -1,8 +1,7 @@
 // context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loginUser, logoutUser, registerUser } from '../services/auth';
+import api from '../services/api'; // 🔥 Import your API instance directly
 
-// Create context (exported for useAuth hook)
 export const AuthContext = createContext();
 
 // Custom hook for easy access
@@ -40,46 +39,78 @@ export const AuthProvider = ({ children }) => {
     hydrateAuth();
   }, []);
 
+  // 🔥 NEW: Helper to manually set auth data (used after 2FA is successful)
+  const setAuthData = (userData, token) => {
+    localStorage.setItem('sitaRamUser', JSON.stringify(userData));
+    localStorage.setItem('sitaRamToken', token);
+    setUser(userData);
+  };
+
   // --- LOGIN ---
   const login = async (loginId, password) => {
-    // Admin hardcoded override (matches your original)
-    if (loginId === 'adminsitaram@gmail.com' && password === 'adminPASSWORD@') {
-      const adminUser = {
-        id: 999,
-        name: 'Super Admin',
-        role: 'admin',
-        email: loginId
-      };
-      const adminToken = 'admin-secure-token-999';
-      localStorage.setItem('sitaRamUser', JSON.stringify(adminUser));
-      localStorage.setItem('sitaRamToken', adminToken);
-      setUser(adminUser);
-      return { success: true, role: 'admin' };
-    }
+    try {
+      const response = await api.post('auth/login.php', { loginId, password });
 
-    // Regular login via API
-    const result = await loginUser({ email: loginId, password });
-    if (result.success && result.user) {
-      localStorage.setItem('sitaRamUser', JSON.stringify(result.user));
-      if (result.token) localStorage.setItem('sitaRamToken', result.token);
-      setUser(result.user);
-      return { success: true, role: result.user.role };
+      // 1. Standard Login Success (Standard Users)
+      if (response.data.status === 'success') {
+        const { user: userData, token } = response.data.data;
+        setAuthData(userData, token);
+        return { success: true, role: userData.role };
+      } 
+      // 2. 🔥 Catch Admin 2FA Interception
+      else if (response.data.status === '2fa_required') {
+        return { 
+          success: false, // Don't log them in yet!
+          requires2FA: true, 
+          userId: response.data.data.user_id, 
+          message: response.data.message 
+        };
+      }
+
+      return { success: false, error: response.data.message };
+
+    } catch (error) {
+      // Handles 401 Invalid Credentials & 429 Account Lockout
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Login failed. Please check your credentials.' 
+      };
     }
-    return { success: false, error: result.error };
   };
 
   // --- REGISTER ---
   const register = async (userData) => {
-    // userData should contain: name, email, phone, address, password
-    const result = await registerUser(userData);
-    return result; // already has success, error, fieldErrors, etc.
+    try {
+      const response = await api.post('auth/register.php', userData);
+      if (response.data.status === 'success') {
+        return { success: true, message: response.data.message };
+      }
+      return { success: false, error: response.data.message };
+    } catch (error) {
+      // Handle strict backend validation errors (e.g., missing address)
+      if (error.response?.status === 422) {
+         return { success: false, fieldErrors: error.response.data.errors };
+      }
+      return { 
+        success: false, 
+        error: error.response?.data?.message || 'Registration failed. Please try again.' 
+      };
+    }
   };
 
   // --- LOGOUT ---
   const logout = async () => {
-    await logoutUser();
+    try {
+      // Ping backend to destroy token if you have a logout endpoint
+      // await api.post('auth/logout.php'); 
+    } catch (e) {
+      console.error("Logout error", e);
+    }
+    
+    // Completely wipe local session
+    localStorage.removeItem('sitaRamUser');
+    localStorage.removeItem('sitaRamToken');
     setUser(null);
-    // localStorage cleared inside logoutUser
   };
 
   const value = {
@@ -87,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    setAuthData, // 🔥 Exported so LoginPage can use it after 2FA verification
     loading,
     isAuthenticated: !!user
   };

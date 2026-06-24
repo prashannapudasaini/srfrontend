@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ShoppingCart, Star, ShieldCheck } from 'lucide-react';
 
@@ -7,27 +7,59 @@ export default function ProductDetail({
 }) {
   const [activeImage, setActiveImage] = useState('/logo.png');
   
-  // FIX: Strictly grab the exact variant based on the state index
-  const selectedVariant = product?.variants?.[selectedIndex];
+  // --- PARSE FLAVORS & SIZES ---
+  const parsedVariants = useMemo(() => {
+    if (!product?.variants) return [];
+    return product.variants.map((v, index) => {
+      let flavor = 'Original';
+      let packSize = v.size;
+      if (v.size && v.size.includes(' - ')) {
+        const parts = v.size.split(' - ');
+        flavor = parts[0];
+        packSize = parts.slice(1).join(' - ');
+      }
+      return { ...v, originalIndex: index, flavor, packSize };
+    });
+  }, [product]);
 
+  const uniqueFlavors = useMemo(() => [...new Set(parsedVariants.map(v => v.flavor))], [parsedVariants]);
+  const [selectedFlavor, setSelectedFlavor] = useState('');
+
+  // Set default flavor on load
   useEffect(() => {
-    if (selectedVariant?.image) {
-      setActiveImage(selectedVariant.image);
-    } else if (product?.image) {
-      setActiveImage(product.image);
+    if (uniqueFlavors.length > 0 && !selectedFlavor) {
+      setSelectedFlavor(uniqueFlavors[0]);
     }
+  }, [uniqueFlavors, selectedFlavor]);
+
+  // Keep selected index in sync with chosen flavor
+  useEffect(() => {
+    const variantsInFlavor = parsedVariants.filter(v => v.flavor === selectedFlavor);
+    const currentIsInvalid = !variantsInFlavor.find(v => v.originalIndex === selectedIndex);
+    
+    if (currentIsInvalid && variantsInFlavor.length > 0) {
+      setSelectedIndex(variantsInFlavor[0].originalIndex);
+      setQuantity(1);
+    }
+  }, [selectedFlavor, parsedVariants, selectedIndex, setSelectedIndex, setQuantity]);
+
+  const availableSizesForFlavor = parsedVariants.filter(v => v.flavor === selectedFlavor);
+  const selectedVariant = product?.variants?.[selectedIndex];
+  const showFlavors = uniqueFlavors.length > 1 || (uniqueFlavors.length === 1 && uniqueFlavors[0] !== 'Original');
+
+  // Handle active image sync
+  useEffect(() => {
+    if (selectedVariant?.image) setActiveImage(selectedVariant.image);
+    else if (product?.image) setActiveImage(product.image);
   }, [selectedIndex, product, selectedVariant]);
 
   if (!product || !selectedVariant) return null;
 
   const currentPrice = parseFloat(selectedVariant.price_npr || 0);
   const currentStock = parseInt(selectedVariant.stock_quantity || 0);
-  
-  // FIX: Force React to read the exact description of the active index
   const currentDescription = (selectedVariant.description && selectedVariant.description.trim() !== '') 
     ? selectedVariant.description 
     : "A premium dairy product crafted with excellence by Sita Ram.";
-  
   const totalPrice = currentPrice * quantity;
 
   const galleryImages = [product.image, ...(product.variants?.map(v => v.image) || [])].filter(Boolean);
@@ -50,7 +82,7 @@ export default function ProductDetail({
               transition={{ duration: 0.3 }}
               src={activeImage} 
               alt={product.name} 
-              className="w-full h-64 md:h-80 object-contain drop-shadow-xl mb-8"
+              className="w-full h-64 md:h-80 object-contain drop-shadow-xl mb-8 mix-blend-multiply"
             />
           </AnimatePresence>
 
@@ -64,7 +96,7 @@ export default function ProductDetail({
                     activeImage === img ? 'border-2 border-[#002147] scale-110 shadow-md' : 'border border-gray-200 hover:border-[#E2B254]'
                   }`}
                 >
-                  <img src={img} className="w-full h-full object-contain" />
+                  <img src={img} className="w-full h-full object-contain mix-blend-multiply" alt="Thumbnail" />
                 </button>
               ))}
             </div>
@@ -96,7 +128,6 @@ export default function ProductDetail({
           )}
         </div>
         
-        {/* FIX: key={selectedIndex} forces a re-render/animation so you SEE the text change */}
         <AnimatePresence mode="wait">
           <motion.p 
             key={selectedIndex} 
@@ -110,35 +141,64 @@ export default function ProductDetail({
           </motion.p>
         </AnimatePresence>
 
-        <div className="flex flex-wrap items-end gap-6 mb-8 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-bold text-[#002147] uppercase tracking-[0.1em] ml-1">Quantity</span>
-            <div className="flex items-center border border-gray-200 rounded-xl bg-white h-14 w-max shadow-sm">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-5 h-full text-gray-400 hover:text-[#002147] font-bold text-xl transition-colors">-</button>
-              <span className="w-12 text-center font-bold text-lg text-[#002147]">{quantity}</span>
-              <button onClick={() => setQuantity(Math.min(currentStock || 10, quantity + 1))} className="px-5 h-full text-gray-400 hover:text-[#002147] font-bold text-xl transition-colors">+</button>
+        <div className="flex flex-col gap-6 mb-8 bg-gray-50/50 p-6 rounded-3xl border border-gray-100">
+          
+          {/* FLAVOR SELECTION (Only shows if Flavors exist) */}
+          {showFlavors && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-[#002147] uppercase tracking-[0.1em] ml-1">Select Flavor</span>
+              <div className="flex flex-wrap gap-2">
+                {uniqueFlavors.map(flavor => (
+                  <button
+                    key={flavor}
+                    onClick={() => setSelectedFlavor(flavor)}
+                    className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all border-2 duration-300 ${
+                      selectedFlavor === flavor 
+                        ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md' 
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-[#002147] hover:text-[#002147]'
+                    }`}
+                  >
+                    {flavor}
+                  </button>
+                ))}
+              </div>
             </div>
+          )}
+
+          <div className="flex flex-wrap items-end gap-6 pt-2">
+            {/* QUANTITY SELECTOR */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-[#002147] uppercase tracking-[0.1em] ml-1">Quantity</span>
+              <div className="flex items-center border border-gray-200 rounded-xl bg-white h-14 w-max shadow-sm">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-5 h-full text-gray-400 hover:text-[#002147] font-bold text-xl transition-colors">-</button>
+                <span className="w-12 text-center font-bold text-lg text-[#002147]">{quantity}</span>
+                <button onClick={() => setQuantity(Math.min(currentStock || 10, quantity + 1))} className="px-5 h-full text-gray-400 hover:text-[#002147] font-bold text-xl transition-colors">+</button>
+              </div>
+            </div>
+
+            {/* SIZE SELECTOR */}
+            {availableSizesForFlavor.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-[#002147] uppercase tracking-[0.1em] ml-1">Pack Size</span>
+                <div className="flex flex-wrap gap-2">
+                  {availableSizesForFlavor.map((variant) => (
+                    <button
+                      key={variant.originalIndex}
+                      onClick={() => { setSelectedIndex(variant.originalIndex); setQuantity(1); }}
+                      className={`h-14 px-5 rounded-xl font-bold text-sm transition-all border-2 duration-300 ${
+                        selectedIndex === variant.originalIndex 
+                          ? 'border-[#E2B254] bg-[#E2B254] text-[#002147] shadow-md transform scale-105' 
+                          : 'border-gray-200 bg-white text-gray-500 hover:border-[#E2B254] hover:text-[#002147]'
+                      }`}
+                    >
+                      {variant.packSize}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-bold text-[#002147] uppercase tracking-[0.1em] ml-1">Size / Flavor Options</span>
-            <div className="flex flex-wrap gap-2">
-              {/* FIX: Now uses the array index to set the active variant */}
-              {product.variants?.map((variant, idx) => (
-                <button
-                  key={variant.size + idx}
-                  onClick={() => { setSelectedIndex(idx); setQuantity(1); }}
-                  className={`h-14 px-5 rounded-xl font-bold text-sm transition-all border-2 duration-300 ${
-                    selectedIndex === idx 
-                      ? 'border-[#002147] bg-[#002147] text-[#E2B254] shadow-md transform scale-105' 
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#E2B254] hover:text-[#002147]'
-                  }`}
-                >
-                  {variant.size}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
         
         <button 

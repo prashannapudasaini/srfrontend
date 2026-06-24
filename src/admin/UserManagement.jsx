@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, UserCheck, MapPin, X, Phone, Mail, Calendar, Search, Loader2, ShieldAlert, Truck, Key, Trash2, Plus, TrendingUp } from 'lucide-react';
+import { Users, UserCheck, MapPin, X, Phone, Mail, Search, Loader2, ShieldAlert, Truck, Key, Trash2, Plus, TrendingUp, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,6 +18,25 @@ export default function UserManagement() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
+  // CUSTOM UI DIALOG STATE
+  const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+
+  const showAlert = (message) => {
+    setDialog({ isOpen: true, type: 'alert', message, onConfirm: () => setDialog({ isOpen: false }) });
+  };
+
+  const showConfirm = (message, onConfirmCallback) => {
+    setDialog({
+      isOpen: true,
+      type: 'confirm',
+      message,
+      onConfirm: () => {
+        setDialog({ isOpen: false });
+        if (onConfirmCallback) onConfirmCallback();
+      }
+    });
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -25,7 +44,8 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/admin/users/index.php');
+      // 🔥 Cache-buster added here so it always fetches the newest list
+      const res = await api.get(`admin/users/index.php?_t=${Date.now()}`);
       if (res.data.status === 'success') {
         setUsers(res.data.data);
       }
@@ -36,7 +56,7 @@ export default function UserManagement() {
     }
   };
 
-  // --- DYNAMIC OVERVIEW METRICS ---
+  // DYNAMIC OVERVIEW METRICS
   const overviewMetrics = useMemo(() => {
     const customers = users.filter(u => (u.role || 'customer') === 'customer');
     const subscribers = users.filter(u => u.is_subscriber > 0);
@@ -51,13 +71,17 @@ export default function UserManagement() {
     ];
   }, [users]);
 
-  // Tab Filtering
+  // Tab Filtering (With Safe Strings to prevent crashes)
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
+      const safeName = user.name || '';
+      const safeEmail = user.email || '';
+      const safePhone = String(user.phone || '');
+
       const matchesSearch = 
-        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.phone?.includes(searchQuery);
+        safeName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        safeEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        safePhone.includes(searchQuery);
       
       const roleMatch = activeTab === 'all' || (user.role || 'customer') === activeTab;
       return matchesSearch && roleMatch;
@@ -65,20 +89,46 @@ export default function UserManagement() {
   }, [users, searchQuery, activeTab]);
 
   const handleDeleteUser = async (id) => {
-    if (window.confirm("Are you sure you want to permanently delete this account? This cannot be undone.")) {
+    showConfirm("Are you sure you want to permanently delete this account? This cannot be undone.", async () => {
       try {
-        await api.delete('/admin/users/delete.php', { data: { id } });
+        await api.delete('admin/users/delete.php', { data: { id } });
         setSelectedUser(null);
         fetchUsers();
+        showAlert("Account permanently deleted.");
       } catch (e) {
-        alert("Failed to delete user.");
+        showAlert("Failed to delete user due to a server error.");
       }
-    }
+    });
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
+    <div className="space-y-6 animate-fade-in pb-10 relative">
       
+      {/* CUSTOM UI DIALOG */}
+      {dialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl text-center transform scale-100 animate-in fade-in zoom-in duration-200">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${dialog.type === 'confirm' ? 'bg-orange-50 text-orange-500' : 'bg-[#FDF8E7] text-[#9e111a]'}`}>
+              <AlertTriangle size={32} />
+            </div>
+            <h3 className="text-2xl font-serif font-black text-[#1A1A1A] mb-2">
+              {dialog.type === 'confirm' ? 'Confirm Action' : 'Notice'}
+            </h3>
+            <p className="text-gray-500 mb-8 font-medium leading-relaxed">{dialog.message}</p>
+            <div className="flex justify-center gap-3">
+              {dialog.type === 'confirm' && (
+                <button onClick={() => setDialog({ isOpen: false })} className="flex-1 py-3 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
+                  Cancel
+                </button>
+              )}
+              <button onClick={dialog.onConfirm} className={`flex-1 py-3 rounded-xl font-bold text-white transition-colors ${dialog.type === 'confirm' ? 'bg-[#9e111a] hover:bg-[#1A1A1A]' : 'bg-[#1A1A1A] hover:bg-[#9e111a]'}`}>
+                {dialog.type === 'confirm' ? 'Yes, Proceed' : 'Got it'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. DYNAMIC OVERVIEW METRICS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {overviewMetrics.map((metric, idx) => (
@@ -303,8 +353,8 @@ export default function UserManagement() {
       </AnimatePresence>
 
       {/* MODALS */}
-      {isCreateModalOpen && <CreateStaffModal closeModal={() => setIsCreateModalOpen(false)} refresh={fetchUsers} />}
-      {isPasswordModalOpen && <PasswordResetModal userId={selectedUser?.id} closeModal={() => setIsPasswordModalOpen(false)} />}
+      {isCreateModalOpen && <CreateStaffModal closeModal={() => setIsCreateModalOpen(false)} refresh={fetchUsers} showAlert={showAlert} />}
+      {isPasswordModalOpen && <PasswordResetModal userId={selectedUser?.id} closeModal={() => setIsPasswordModalOpen(false)} showAlert={showAlert} />}
     </div>
   );
 }
@@ -324,7 +374,7 @@ function InfoCard({ icon, label, value, color }) {
 }
 
 // Create Staff Modal
-function CreateStaffModal({ closeModal, refresh }) {
+function CreateStaffModal({ closeModal, refresh, showAlert }) {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '', password: '', role: 'delivery', can_create_admins: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -332,15 +382,16 @@ function CreateStaffModal({ closeModal, refresh }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await api.post('/admin/users/staff.php', formData);
+      const res = await api.post('admin/users/staff.php', formData);
       if (res.data.status === 'success') {
         refresh();
         closeModal();
+        showAlert(res.data.message);
       } else {
-        alert(res.data.message);
+        showAlert(res.data.message || "Failed to register staff.");
       }
     } catch (err) {
-      alert("Registration failed. Email might already exist.");
+      showAlert(err.response?.data?.message || "Registration failed. Check network or data.");
     } finally {
       setIsSubmitting(false);
     }
@@ -367,6 +418,10 @@ function CreateStaffModal({ closeModal, refresh }) {
           <div>
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Email</label>
             <input type="email" required onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-3 border-2 border-gray-100 rounded-xl outline-none focus:border-[#002147] font-bold text-sm" />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Delivery Address</label>
+            <input type="text" required onChange={e => setFormData({...formData, address: e.target.value})} className="w-full p-3 border-2 border-gray-100 rounded-xl outline-none focus:border-[#002147] font-bold text-sm" />
           </div>
           <div>
             <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Password</label>
@@ -397,7 +452,7 @@ function CreateStaffModal({ closeModal, refresh }) {
 }
 
 // Password Reset Modal
-function PasswordResetModal({ userId, closeModal }) {
+function PasswordResetModal({ userId, closeModal, showAlert }) {
   const [newPassword, setNewPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -405,11 +460,15 @@ function PasswordResetModal({ userId, closeModal }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api.put('/admin/users/staff.php', { id: userId, new_password: newPassword });
-      alert("Password updated successfully.");
-      closeModal();
+      const res = await api.put('admin/users/staff.php', { id: userId, new_password: newPassword });
+      if(res.data.status === 'success') {
+        showAlert("Password updated successfully.");
+        closeModal();
+      } else {
+        showAlert(res.data.message || "Failed to reset password.");
+      }
     } catch (e) {
-      alert("Failed to reset password.");
+      showAlert(e.response?.data?.message || "Failed to reset password due to a server error.");
     } finally {
       setIsSubmitting(false);
     }

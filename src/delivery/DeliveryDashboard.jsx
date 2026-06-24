@@ -1,169 +1,230 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Phone, CheckCircle2, XCircle, Package, Loader2, Navigation, Clock } from 'lucide-react';
+import { MapPin, Phone, Package, Repeat, Navigation, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function DeliveryDashboard() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'completed'
+  const [activeTab, setActiveTab] = useState('Pending'); // 'Pending' or 'Completed'
+  const [updatingId, setUpdatingId] = useState(null);
 
+  // Custom UI Alert
+  const [dialog, setDialog] = useState({ isOpen: false, type: 'alert', message: '', onConfirm: null });
+  const showAlert = (message) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: () => setDialog({ isOpen: false }) });
+  
   useEffect(() => {
     fetchTasks();
   }, []);
 
   const fetchTasks = async () => {
+    setLoading(true);
     try {
-      const res = await api.get('/delivery/tasks.php');
+      // Point this to your PHP file that outputs the $tasks array
+      const res = await api.get(`delivery/tasks.php?_t=${Date.now()}`);
       if (res.data.status === 'success') {
-        // Add a local UI state to track completed items before page refresh
-        const formattedTasks = res.data.data.map(t => ({ ...t, ui_status: 'pending' }));
-        setTasks(formattedTasks);
+        setTasks(res.data.data);
       }
     } catch (error) {
-      console.error("Failed to load delivery tasks", error);
+      console.error("Fetch error", error);
+      showAlert("Failed to load delivery tasks. Check your connection.");
     } finally {
-      setLoading(false);    
+      setLoading(false);
     }
   };
 
-  const updateStatus = async (taskId, newStatus) => {
-    // Optimistic UI Update (remove from screen instantly for a snappy feel)
-    setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, ui_status: newStatus } : t));
-
+  const handleUpdateStatus = async (taskId, newStatus) => {
+    setUpdatingId(taskId);
     try {
-      await api.post('/delivery/update.php', { task_id: taskId, status: newStatus === 'completed' ? 'Delivered' : 'Failed' });
+      // Calls your update_status.php which expects task_id and status
+      const res = await api.post('delivery/update_status.php', {
+        task_id: taskId,
+        status: newStatus
+      });
+      
+      if (res.data.status === 'success') {
+        // Instantly update the UI locally to reflect the change
+        setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: newStatus } : t));
+      } else {
+        showAlert("Failed to update status.");
+      }
     } catch (error) {
-      alert("Failed to sync with server. Please try again.");
-      // Revert if failed
-      setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, ui_status: 'pending' } : t));
+      showAlert("Network error while updating.");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
-  const displayedTasks = tasks.filter(t => t.ui_status === activeTab);
+  // Filter tasks based on the active tab
+  const displayedTasks = useMemo(() => {
+    return tasks.filter(t => {
+      if (activeTab === 'Pending') {
+        return t.status !== 'Delivered' && t.status !== 'Completed';
+      } else {
+        return t.status === 'Delivered' || t.status === 'Completed';
+      }
+    });
+  }, [tasks, activeTab]);
+
+  const completedCount = tasks.filter(t => t.status === 'Delivered' || t.status === 'Completed').length;
+  const pendingCount = tasks.length - completedCount;
 
   return (
-    <div className="bg-[#FAF9F6] min-h-screen pb-24 font-sans selection:bg-[#9e111a] selection:text-white">
+    <div className="min-h-screen bg-[#F3F4F6] pb-24 font-sans">
       
-      {/* Mobile-Friendly App Header */}
-      <div className="bg-[#002147] text-white pt-12 pb-6 px-6 rounded-b-[2.5rem] shadow-xl sticky top-0 z-40">
+      {/* DIALOG MODAL */}
+      {dialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl text-center transform scale-100 animate-in zoom-in duration-200">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-50 text-red-500">
+              <AlertTriangle size={28} />
+            </div>
+            <h3 className="text-xl font-black text-[#1A1A1A] mb-2">Notice</h3>
+            <p className="text-gray-500 mb-6 font-medium text-sm">{dialog.message}</p>
+            <button onClick={dialog.onConfirm} className="w-full py-3 rounded-xl font-bold text-white bg-[#1A1A1A] hover:bg-[#9e111a]">Got it</button>
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE HEADER */}
+      <div className="bg-[#1A1A1A] text-white px-5 pt-8 pb-6 rounded-b-[2rem] shadow-lg sticky top-0 z-40">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-black tracking-tight">Today's Route</h1>
-            <p className="text-[#E2B254] text-xs font-bold uppercase tracking-widest mt-1">
-              {new Date().toDateString()}
+            <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
+            <h1 className="text-2xl font-serif font-black truncate max-w-[200px]">Hello, {user?.name?.split(' ')[0] || 'Driver'}</h1>
           </div>
-          <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
-            <Truck size={24} className="text-white" />
+          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shadow-inner">
+            <Navigation className="text-[#E2B254]" size={24} fill="currentColor" />
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex bg-[#00152e] p-1.5 rounded-2xl">
-          <button 
-            onClick={() => setActiveTab('pending')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'pending' ? 'bg-[#E2B254] text-[#002147] shadow-md' : 'text-gray-400'}`}
-          >
-            Pending ({tasks.filter(t => t.ui_status === 'pending').length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('completed')}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'completed' ? 'bg-emerald-500 text-white shadow-md' : 'text-gray-400'}`}
-          >
-            Done ({tasks.filter(t => t.ui_status === 'completed').length})
-          </button>
+        {/* MOBILE TABS */}
+        <div className="flex bg-white/10 p-1.5 rounded-2xl">
+          <TabButton name="Pending" active={activeTab} onClick={setActiveTab} count={pendingCount} />
+          <TabButton name="Completed" active={activeTab} onClick={setActiveTab} count={completedCount} />
         </div>
       </div>
 
-      {/* Task List */}
-      <div className="px-4 mt-6">
+      {/* TASK LIST */}
+      <div className="p-4 space-y-4 mt-2">
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <Loader2 className="animate-spin text-[#9e111a] mb-4" size={32} />
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Syncing Route...</p>
+            <p className="text-xs font-black uppercase tracking-widest">Loading Route...</p>
           </div>
         ) : displayedTasks.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 size={40} />
+          <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+              <CheckCircle className="text-emerald-500" size={40} />
             </div>
-            <h2 className="text-xl font-black text-[#1A1A1A]">All Caught Up!</h2>
-            <p className="text-sm text-gray-500 font-medium mt-2">There are no {activeTab} deliveries right now.</p>
+            <h3 className="text-lg font-black text-[#1A1A1A] mb-1">You're all caught up!</h3>
+            <p className="text-sm font-medium text-gray-500">No {activeTab.toLowerCase()} tasks right now.</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <AnimatePresence>
-              {displayedTasks.map((task) => (
-                <motion.div 
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95, x: task.ui_status === 'completed' ? 100 : -100 }}
-                  transition={{ duration: 0.2 }}
-                  key={task.task_id} 
-                  className="bg-white rounded-3xl p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-gray-100 relative overflow-hidden"
-                >
-                  {/* Card Header */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${task.type.includes('Routine') ? 'bg-[#E2B254]/20 text-[#9e111a]' : 'bg-[#002147]/10 text-[#002147]'}`}>
-                        {task.type}
-                      </span>
-                      <span className="text-gray-400 text-[10px] font-bold">{task.task_id}</span>
-                    </div>
-                    {task.amount !== 'Pre-Paid' && (
-                      <span className="text-[#9e111a] font-black text-sm">{task.amount}</span>
-                    )}
-                  </div>
+          <AnimatePresence>
+            {displayedTasks.map((task, idx) => (
+              <motion.div
+                key={task.task_id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: idx * 0.05 }}
+                className="bg-white rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.05)] border border-gray-100 relative overflow-hidden"
+              >
+                {/* Visual indicator for Subscriptions vs One-Time */}
+                <div className={`absolute top-0 left-0 w-1.5 h-full ${task.type === 'Routine Subscription' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
 
-                  {/* Customer Info */}
-                  <h3 className="text-xl font-black text-[#1A1A1A] leading-tight mb-3">{task.customer}</h3>
+                <div className="flex justify-between items-start mb-4 pl-2">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.type === 'Routine Subscription' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                      {task.type === 'Routine Subscription' ? <Repeat size={20} /> : <Package size={20} />}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-[#1A1A1A]">{task.customer}</h3>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{task.type}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-xs font-black text-[#1A1A1A]">{task.amount}</span>
+                    <span className={`text-[9px] font-black uppercase tracking-widest ${task.status === 'On Way' ? 'text-orange-500' : 'text-gray-400'}`}>
+                      {task.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-5 pl-2">
+                  {/* HUGE Tap Target for Google Maps */}
+                  <a href={`https://maps.google.com/?q=${encodeURIComponent(task.address)}`} target="_blank" rel="noreferrer" 
+                     className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-2xl active:bg-gray-200 transition-colors border border-gray-100">
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
+                      <MapPin className="text-[#9e111a]" size={16} />
+                    </div>
+                    <span className="text-sm font-bold text-gray-700 leading-tight">{task.address}</span>
+                  </a>
                   
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-start gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                      <MapPin size={18} className="text-[#002147] shrink-0 mt-0.5" />
-                      <p className="text-sm font-bold text-gray-700 leading-snug">{task.address}</p>
+                  {/* HUGE Tap Target for Calling */}
+                  <a href={`tel:${task.phone}`} 
+                     className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-2xl active:bg-gray-200 transition-colors border border-gray-100">
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
+                      <Phone className="text-green-600" size={16} />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <a href={`tel:${task.phone}`} className="flex-1 flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 py-3 rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-transform">
-                        <Phone size={16} /> Call Customer
-                      </a>
-                      <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(task.address)}`} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 py-3 rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-transform">
-                        <Navigation size={16} /> Navigate
-                      </a>
-                    </div>
-                  </div>
+                    <span className="text-sm font-black text-gray-700">{task.phone}</span>
+                  </a>
+                </div>
 
-                  {/* Actions (Only show if pending) */}
-                  {activeTab === 'pending' && (
-                    <div className="flex gap-3 pt-4 border-t border-gray-100">
-                      <button onClick={() => updateStatus(task.task_id, 'failed')} className="w-14 h-14 shrink-0 rounded-xl bg-red-50 text-red-500 flex items-center justify-center border border-red-100 active:scale-95 transition-transform">
-                        <XCircle size={24} />
-                      </button>
-                      <button onClick={() => updateStatus(task.task_id, 'completed')} className="flex-grow h-14 rounded-xl bg-[#1A1A1A] text-white flex items-center justify-center gap-2 font-black uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-transform">
-                        <CheckCircle2 size={20} /> Mark Delivered
-                      </button>
+                {/* DYNAMIC ACTION BUTTONS */}
+                <div className="pt-2 pl-2">
+                  {activeTab === 'Pending' && (
+                    <>
+                      {task.status === 'Pending' || task.status === 'Pending Dispatch' ? (
+                         <button 
+                         onClick={() => handleUpdateStatus(task.task_id, 'On Way')}
+                         disabled={updatingId === task.task_id}
+                         className="w-full bg-[#E2B254] text-[#002147] py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-transform"
+                       >
+                         {updatingId === task.task_id ? <Loader2 className="animate-spin" size={16} /> : <><Navigation size={16} /> Start Delivery</>}
+                       </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleUpdateStatus(task.task_id, 'Delivered')}
+                          disabled={updatingId === task.task_id}
+                          className="w-full bg-[#002147] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-transform"
+                        >
+                          {updatingId === task.task_id ? <Loader2 className="animate-spin" size={16} /> : <><CheckCircle size={16} /> Mark as Delivered</>}
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {activeTab === 'Completed' && (
+                    <div className="w-full bg-emerald-50 text-emerald-700 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                      <CheckCircle size={16} /> Delivery Successful
                     </div>
                   )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </div>
     </div>
   );
 }
 
-// Quick Truck Icon fallback since it wasn't imported in standard lucide-react list above
-function Truck({ size, className }) {
+// Mobile Tab Helper
+function TabButton({ name, active, onClick, count }) {
+  const isActive = active === name;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/>
-      <path d="M14 9h4l4 4v5c0 .6-.4 1-1 1h-2"/>
-      <circle cx="7" cy="18" r="2"/>
-      <circle cx="17" cy="18" r="2"/>
-    </svg>
+    <button
+      onClick={() => onClick(name)}
+      className={`flex-1 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+        isActive ? 'bg-white text-[#1A1A1A] shadow-sm' : 'text-gray-400 hover:text-white'
+      }`}
+    >
+      {name}
+      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] ${isActive ? 'bg-[#9e111a] text-white' : 'bg-white/20 text-white'}`}>
+        {count}
+      </span>
+    </button>
   );
 }

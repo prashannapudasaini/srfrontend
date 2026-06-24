@@ -95,7 +95,9 @@ function App() {
         <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
         <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
         <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
+        <Route path="/delivery" element={<DeliveryDashboard />} />
         <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
+        
         
         {/* === ESEWA PAYMENT ROUTES === */}
         <Route path="/payment-success" element={<PaymentSuccess/>} />
@@ -120,7 +122,7 @@ function App() {
         
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
-        <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+      
         
         {/* === NEWLY ADDED PAGES === */}
         <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />

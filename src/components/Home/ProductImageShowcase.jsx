@@ -10,17 +10,19 @@ const ProductImageShowcase = () => {
       image: "./ourfarm1.png",
       title: "Processed Premium Butter",
       subtitle: "स्वस्थ र स्वादिलो (Healthy & Tasty)",
-      description: "Our Sita Ram Butter is crafted for a rich, creamy texture that melts perfectly. Sourced from cows grazing in pristine Himalayan-view pastures, it brings the traditional taste of pure dairy to your morning bread.",
+      description:
+        "Our Sita Ram Butter is crafted for a rich, creamy texture that melts perfectly. Sourced from cows grazing in pristine Himalayan-view pastures, it brings the traditional taste of pure dairy to your morning bread. Note: Only bulk orders are available. Contact 015213049 for bulk orders.",
       features: ["Pure Pasteurized", "Rich Golden Texture", "Himalayan Farm Sourced"],
       reversed: false
     },
     {
       id: 2,
-      image: "./ourfarm2.png",
-      title: "Traditional Creamy Dahi",
+      image: "./ourfarm3.png",
+      title: "Premium Ice Cream",
       subtitle: "शुद्ध दुधबाट बनेको (Made from Pure Milk)",
-      description: "Experience the authentic taste of Sita Ram Dahi. Set using traditional methods from 100% pure milk, our yogurt is naturally thick, smooth, and packed with probiotic goodness for a healthy lifestyle.",
-      features: ["No Added Preservatives", "Naturally Thick", "Traditional Culture"],
+      description:
+        "Experience the rich, creamy delight of our premium ice cream made from 100% pure milk. Smooth, indulgent, and crafted for perfect taste in every scoop. Note: Only bulk orders are available. Contact 015213049 for bulk orders.",
+      features: ["No Added Preservatives", "Creamy Texture", "Premium Dairy Base"],
       reversed: true
     }
   ];
@@ -39,12 +41,14 @@ const ProductImageShowcase = () => {
 
         <div className="space-y-32">
           {showcaseItems.map((item) => (
-            <div 
-              key={item.id} 
-              className={`flex flex-col ${item.reversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}
+            <div
+              key={item.id}
+              className={`flex flex-col ${
+                item.reversed ? "lg:flex-row-reverse" : "lg:flex-row"
+              } items-center gap-12 lg:gap-20`}
             >
               {/* Image Side with 3D Effect */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: item.reversed ? 50 : -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -52,11 +56,13 @@ const ProductImageShowcase = () => {
                 className="w-full lg:w-1/2"
               >
                 <div className="relative group">
-                  {/* Decorative background element */}
                   <div className="absolute -inset-4 bg-dairyRed/5 rounded-full blur-3xl group-hover:bg-dairyRed/10 transition-colors duration-500" />
-                  
+
                   <motion.img
-                    whileHover={{ scale: 1.02, rotateY: item.reversed ? -5 : 5 }}
+                    whileHover={{
+                      scale: 1.02,
+                      rotateY: item.reversed ? -5 : 5
+                    }}
                     src={item.image}
                     alt={item.title}
                     className="relative z-10 w-full h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl"
@@ -65,7 +71,7 @@ const ProductImageShowcase = () => {
               </motion.div>
 
               {/* Description Side */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -80,14 +86,17 @@ const ProductImageShowcase = () => {
                     {item.title}
                   </h4>
                 </div>
-                
+
                 <p className="text-gray-600 text-lg leading-relaxed">
                   {item.description}
                 </p>
 
                 <ul className="grid grid-cols-1 gap-3 pt-4">
                   {item.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-dairyBlack font-medium">
+                    <li
+                      key={idx}
+                      className="flex items-center gap-3 text-dairyBlack font-medium"
+                    >
                       <CheckCircle2 className="text-dairyRed" size={20} />
                       {feature}
                     </li>
@@ -95,8 +104,7 @@ const ProductImageShowcase = () => {
                 </ul>
 
                 <div className="pt-6">
-                  {/* Replaced button with Link */}
-                  <Link 
+                  <Link
                     to="/about"
                     className="inline-block border-2 border-dairyRed text-dairyRed px-8 py-3 rounded-full font-bold uppercase tracking-wider hover:bg-dairyRed hover:text-white transition-all duration-300"
                   >
