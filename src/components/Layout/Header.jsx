@@ -73,7 +73,7 @@ const Header = () => {
             
             <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center gap-3 sm:gap-4 group shrink-0">
               <motion.img 
-                src="/leading.png" 
+                src="/leading.webp" 
                 alt="Leading Brand Badge"
                 className="w-10 h-10 sm:w-14 sm:h-14 object-contain drop-shadow-sm"
                 animate={{ scale: [1, 1.15, 1] }}

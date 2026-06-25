@@ -265,7 +265,7 @@ const Footer = () => {
       <div className="bg-white py-4 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
           <p>© 2026 Sitaram Gokul Milks. All rights reserved.</p>
-          <p>Designed and Developed by MotionAge.</p>
+          <p>Designed and Developed by <a href="https://motionage.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">MotionAge</a>.</p>
           <div className="flex gap-6">
             {/* 🔥 MODIFIED: Added specific parameter targets to trigger modal frames */}
             <button onClick={() => setActiveDoc('privacy')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Privacy</button>

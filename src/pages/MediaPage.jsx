@@ -180,6 +180,57 @@ export default function MediaPage() {
 
           </AnimatePresence>
         )}
+
+        {/* --- IN THE NEWS SECTION --- */}
+        <div className="mt-24 pt-16 border-t border-gray-200">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-serif font-black text-[#1A1A1A] tracking-tight">
+              In the <span className="text-[#9e111a]">News</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            
+            {/* News Item 1 */}
+            <a 
+              href="https://hamroartha.com/news/133156" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white rounded-[2rem] p-4 shadow-xl border border-gray-100 hover:shadow-2xl transition-all group flex flex-col"
+            >
+              <div className="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 mb-6">
+                <img 
+                  src="https://media.sobizcdn.com/hamroartha.com/media-file/images/2026/06/1782106488-IkWaZ.jpg" 
+                  alt="विदेशी ब्रान्डलाई चुनौती दिँदै सिताराम ‘चिलाक्स’, पूर्वी एशियामा निर्यातको तयारी" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2">
+                विदेशी ब्रान्डलाई चुनौती दिँदै सिताराम ‘चिलाक्स’, पूर्वी एशियामा निर्यातको तयारी
+              </h3>
+            </a>
+
+            {/* News Item 2 */}
+            <a 
+              href="https://bizmandu.com/content/20260618182321.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white rounded-[2rem] p-4 shadow-xl border border-gray-100 hover:shadow-2xl transition-all group flex flex-col"
+            >
+              <div className="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 mb-6">
+                <img 
+                  src="https://bizmandu.com/wp-content/uploads/2026/06/WhatsApp-Image-2026-06-18-at-5.37.05-PM-2.jpeg" 
+                  alt="सीताराम गोकुल मिल्कले मोही उत्पादन गर्न थाल्यो, उपभोक्ता मूल्य ३० रुपैयाँ" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <h3 className="text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2">
+                सीताराम गोकुल मिल्कले मोही उत्पादन गर्न थाल्यो, उपभोक्ता मूल्य ३० रुपैयाँ
+              </h3>
+            </a>
+
+          </div>
+        </div>
+
       </div>
 
       {/* --- GALLERY LIGHTBOX MODAL --- */}

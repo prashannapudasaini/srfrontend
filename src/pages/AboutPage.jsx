@@ -278,7 +278,7 @@ export default function AboutPage() {
             <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
 
             <motion.img 
-              src="/leading.png" 
+              src="/leading.webp" 
               alt="Leading Trust Symbol" 
               className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
               initial={{ scale: 0.85, opacity: 0 }}
@@ -290,7 +290,7 @@ export default function AboutPage() {
 
           <div className="inline-flex items-center gap-4 bg-gradient-to-r from-[#9e111a] to-[#c41e2a] px-10 py-5 rounded-full shadow-2xl shadow-[#9e111a]/30">
             <span className="text-white font-black text-xl md:text-2xl tracking-wide uppercase">
-              30 Years of Leading Trust
+              30+ Years of Leading Trust
             </span>
           </div>
 
