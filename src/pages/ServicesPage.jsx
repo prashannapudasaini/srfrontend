@@ -3,15 +3,18 @@ import { useState } from 'react';
 import { Truck, Users, CalendarDays, ShieldAlert, Sparkles, Headset } from 'lucide-react';
 import MilkDivider from '../components/Home/MilkDivider';
 
+// 1. Import your hero image here
+import heroImg from '../assets/hero_2.webp';
+
 const ServicesPage = () => {
   const [hoveredService, setHoveredService] = useState(null);
 
   const services = [
     {
       id: 1,
-      title: "Chilled Supply Delivery",
+      title: "Timely Delivery",
       icon: Truck,
-      description: "Direct distribution pipelines preserving raw freshness from regional networks straight to Kathmandu consumers.",
+      description: "Direct distribution pipelines preserving raw freshness from regional networks straight to Kathmandu consumers on time.",
       features: ["Temperature-controlled fleet", "Accessible valley coverage", "Strict batch safety logs"]
     },
     {
@@ -67,7 +70,7 @@ const ServicesPage = () => {
       <div className="relative h-[80vh] flex items-center overflow-hidden bg-[#1A1A1A]">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-65 scale-105" 
-          style={{ backgroundImage: "url('/hero_2.png')" }} 
+          style={{ backgroundImage: `url(${heroImg})` }} // 2. Use the imported variable here
         />
         
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />

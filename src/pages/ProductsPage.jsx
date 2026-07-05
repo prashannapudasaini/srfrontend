@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays } from 'lucide-react'; // <-- Imported icon for the subscribe button
+import { CalendarDays } from 'lucide-react'; 
 import api from '../services/api';
 import { useCart } from '../context/CartContext'; 
 
@@ -31,7 +31,8 @@ export default function ProductsPage() {
       try {
         const res = await api.get('/products/index.php');
         if (res.data.status === 'success') {
-          setProducts(res.data.data);
+          // --- UPDATED: Reversing the array so the latest uploaded products show first ---
+          setProducts([...res.data.data].reverse());
         }
       } catch (error) {
         console.error("Failed to load products", error);
@@ -166,7 +167,7 @@ function ProductCard({ product, navigate, addToCart }) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#9e111a]/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
 
-          {/* --- UPDATED: Bigger Eye-Catchy Subscribe Button (Top Left on Hover) --- */}
+          {/* Bigger Eye-Catchy Subscribe Button (Top Left on Hover) */}
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevents navigating to product detail

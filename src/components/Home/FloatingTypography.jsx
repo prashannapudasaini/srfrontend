@@ -1,6 +1,9 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 
+// 1. IMPORT THE IMAGE DIRECTLY
+import hero5 from '../../assets/hero_5.webp';
+
 const FloatingTypography = () => {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -29,7 +32,7 @@ const FloatingTypography = () => {
       >
         {/* object-contain for mobile, object-cover for larger screens */}
         <img 
-          src="/hero_5.png" 
+          src={hero5} // 2. USE THE IMPORTED VARIABLE HERE INSTEAD OF THE STRING
           alt="Sita Ram Heritage"
           className="w-full h-full object-contain md:object-cover md:scale-105 transition-all duration-700 ease-out drop-shadow-2xl"
         />

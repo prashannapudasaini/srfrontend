@@ -202,7 +202,7 @@ const Header = () => {
                   </span>
                 )}
               </button>
-              
+              */}
 
               {/* Mobile Menu Toggle */}
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
@@ -216,10 +216,11 @@ const Header = () => {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-gray-100 overflow-hidden"
+              initial={{ x: '-100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-100%', opacity: 0 }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="lg:hidden absolute top-full left-0 w-[80%] sm:w-[60%] h-screen bg-white shadow-2xl border-r border-t border-gray-100 overflow-y-auto pb-32"
             >
               <div className="flex flex-col px-6 py-4 gap-4">
                 {navItems.map((item) => (

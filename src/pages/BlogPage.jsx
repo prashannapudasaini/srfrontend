@@ -3,6 +3,20 @@ import { motion } from 'framer-motion';
 import { Calendar, ArrowRight, BookOpen, Clock, TrendingUp, Eye, Heart, Share2, Bookmark, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// IMPORT YOUR IMAGES HERE
+import milkImg from '../assets/milk.webp';
+import gheeImg from '../assets/ghee.webp';
+import dahiImg from '../assets/dahi.webp';
+import paneerImg from '../assets/paneer.webp';
+import butterImg from '../assets/butter.webp';
+import kesharmilkImg from '../assets/kesharmilk.webp';
+import lassiImg from '../assets/lassi.webp';
+import strawberrylassiImg from '../assets/strawberrylassi.webp';
+import farmImg from '../assets/farm.webp';
+import subscriptionImg from '../assets/subscription.png'; 
+import icecreamImg from '../assets/icecream.webp';
+import chillaxImg from '../assets/chillax.webp';
+
 export const BLOG_POSTS = [
   {
     id: 1,
@@ -25,7 +39,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> fresh milk Kathmandu, pure cow milk Nepal, organic milk delivery, pasteurized milk benefits, A2 milk Nepal, full cream milk price, daily milk subscription, best milk brand in Nepal, chemical-free milk, farm fresh milk near me.</p>`,
-    image: "/milk.png",
+    image: milkImg, // USE IMPORTED VARIABLE
     date: "May 10, 2026",
     category: "Fresh Milk",
     keywords: ["Fresh milk Kathmandu", "pure cow milk Nepal", "organic milk delivery", "A2 milk Nepal", "best milk brand in Nepal", "farm fresh milk near me"],
@@ -50,7 +64,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> pure cow ghee Nepal, bilona ghee benefits, danedar ghee price, A2 cow ghee Kathmandu, organic ghee for babies, ghee for weight loss, best ghee brand Nepal.</p>`,
-    image: "/ghee.png",
+    image: gheeImg, // USE IMPORTED VARIABLE
     date: "May 08, 2026",
     category: "Superfoods",
     keywords: ["Pure cow ghee Nepal", "bilona ghee", "danedar ghee price", "A2 cow ghee", "organic ghee for babies", "ghee for weight loss", "best ghee brand Nepal"],
@@ -76,7 +90,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> best dahi in Nepal, fresh curd Kathmandu, probiotic yogurt benefits, thick curd delivery, dahi for weight loss, gut health foods Nepal.</p>`,
-    image: "/dahi.png",
+    image: dahiImg, // USE IMPORTED VARIABLE
     date: "May 06, 2026",
     category: "Probiotics",
     keywords: ["Best dahi in Nepal", "Fresh curd Kathmandu", "probiotic yogurt", "thick curd delivery", "dahi for weight loss", "gut health foods Nepal"],
@@ -105,7 +119,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> soft paneer Nepal, high protein paneer, fresh cottage cheese delivery, homemade paneer recipe, paneer for weight loss, calcium rich foods.</p>`,
-    image: "/paneer.png",
+    image: paneerImg, // USE IMPORTED VARIABLE
     date: "May 04, 2026",
     category: "Vegetarian Protein",
     keywords: ["Soft paneer Nepal", "High protein paneer", "fresh cottage cheese", "homemade paneer recipe", "paneer for weight loss", "calcium rich foods"],
@@ -128,7 +142,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> best butter in Nepal, creamy table butter, white butter vs yellow butter, homemade butter recipe, grass fed butter benefits.</p>`,
-    image: "/butter.png",
+    image: butterImg, // USE IMPORTED VARIABLE
     date: "May 02, 2026",
     category: "Dairy Essentials",
     keywords: ["Best butter in Nepal", "creamy table butter", "white butter", "homemade butter", "grass fed butter benefits"],
@@ -152,7 +166,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> saffron milk benefits Nepal, keshar milk price, healthy flavored milk, kesar badam milk, traditional Nepali beverages.</p>`,
-    image: "/kesharmilk.png",
+    image: kesharmilkImg, // USE IMPORTED VARIABLE
     date: "April 30, 2026",
     category: "Wellness Drinks",
     keywords: ["Saffron milk benefits", "keshar milk", "healthy flavored milk", "kesar badam milk", "traditional Nepali beverages"],
@@ -172,7 +186,7 @@ export const BLOG_POSTS = [
 <p>Lassi contains electrolytes (sodium, potassium, calcium, magnesium) that match what your body loses through sweat. A 300ml serving hydrates more effectively than 500ml of plain water.</p>
 
 <p><strong>📍 Most Searched Keywords:</strong> best lassi in Kathmandu, healthy summer drinks, sweet lassi vs salted lassi, mango lassi recipe, probiotic drink benefits.</p>`,
-    image: "/lassi.png",
+    image: lassiImg, // USE IMPORTED VARIABLE
     date: "April 28, 2026",
     category: "Refreshments",
     keywords: ["Best lassi Kathmandu", "healthy summer drinks", "sweet lassi", "mango lassi recipe", "probiotic drink benefits"],
@@ -182,10 +196,6 @@ export const BLOG_POSTS = [
   {
     id: 8,
     title: "Fruity Delight: Why Kids Love Sita Ram Strawberry Lassi",
-
-    excerpt: "A vibrant, fruity twist on our classic favorite that masterfully combines the potent probiotic goodness of fresh yogurt with irresistible, natural strawberry flavors.",
-    fullContent: "Getting energetic kids to sit down and eat plain yogurt can often be a daily struggle for parents, but they simply cannot resist the vibrant and tasty <b>Strawberry Lassi from Sita Ram</b>. We purposefully use natural fruit extracts to give it that highly appealing pink glow and authentic, sweet berry taste.<br/><br/>This drink is a brilliant way to sneak essential nutrients into your child's diet. It ensures your children eagerly get their vital daily dose of calcium and gut-friendly bacteria while thoroughly enjoying a sweet treat that feels just like a dessert but acts like a potent health supplement. Packaged conveniently for on-the-go consumption, it is the ultimate healthy lunchbox addition that parents trust and kids actually ask for.",
-
     excerpt: "A vibrant, fruity twist that combines probiotic goodness of fresh yogurt with natural strawberry flavors kids can't resist.",
     fullContent: `<p>Kids can't resist the <strong>Strawberry Lassi from Sita Ram</strong>. We use natural fruit extracts for the pink glow and authentic berry taste.</p>
 
@@ -202,8 +212,7 @@ export const BLOG_POSTS = [
 <p>A typical juice box contains 20-25g of added sugar. Our Strawberry Lassi has 12g natural sugars plus 8g protein, 300mg calcium, and live probiotics.</p>
 
 <p><strong>📍 Most Searched Keywords:</strong> strawberry lassi benefits, fruit yogurt drink Nepal, healthy snacks for kids, calcium for children, probiotic for kids immunity.</p>`,
-
-    image: "/strawberrylassi.png",
+    image: strawberrylassiImg, // USE IMPORTED VARIABLE
     date: "April 26, 2026",
     category: "Kids Nutrition",
     keywords: ["Strawberry lassi benefits", "fruit yogurt drink", "healthy snacks for kids", "calcium for children", "probiotic for kids"],
@@ -228,7 +237,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> organic dairy farming Nepal, A2 milk farms Kathmandu, ethical dairy practices, sustainable farming Nepal, grass fed cows.</p>`,
-    image: "/farm.png",
+    image: farmImg, // USE IMPORTED VARIABLE
     date: "April 24, 2026",
     category: "Farm Life",
     keywords: ["Organic dairy farming Nepal", "A2 milk farms", "ethical dairy practices", "sustainable farming Nepal", "grass fed cows"],
@@ -258,7 +267,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> milk delivery Kathmandu, online dairy subscription, fresh milk doorstep, daily milk home delivery, dairy app Nepal.</p>`,
-    image: "/subscription.png",
+    image: subscriptionImg, // USE IMPORTED VARIABLE
     date: "April 22, 2026",
     category: "Services",
     keywords: ["Milk delivery Kathmandu", "online dairy subscription", "fresh milk doorstep", "daily milk home delivery", "dairy app Nepal"],
@@ -290,7 +299,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> natural ice cream Nepal, best ice cream Kathmandu, homemade ice cream recipe, dairy ice cream vs frozen dessert, mango ice cream seasonal, kulfi near me.</p>`,
-    image: "/icecream.png",
+    image: icecreamImg, // USE IMPORTED VARIABLE
     date: "May 12, 2026",
     category: "Ice Cream",
     keywords: ["natural ice cream Nepal", "best ice cream Kathmandu", "homemade ice cream", "mango ice cream", "kulfi near me", "artisanal ice cream"],
@@ -331,7 +340,7 @@ export const BLOG_POSTS = [
 </ul>
 
 <p><strong>📍 Most Searched Keywords:</strong> frozen yogurt Nepal, froyo Kathmandu, healthy dessert options, shrikhand near me, mishti doi delivery, guilt free sweets.</p>`,
-    image: "/chillax.png",
+    image: chillaxImg, // USE IMPORTED VARIABLE
     date: "May 14, 2026",
     category: "Chillax",
     keywords: ["frozen yogurt Nepal", "froyo Kathmandu", "healthy dessert options", "shrikhand near me", "mishti doi delivery", "guilt free sweets"],

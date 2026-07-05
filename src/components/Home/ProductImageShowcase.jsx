@@ -3,27 +3,41 @@ import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// 1. Import your images here
+import farm1 from '../../assets/ourfarm1.png';
+import farm3 from '../../assets/ourfarm3.png';
+
 const ProductImageShowcase = () => {
   const showcaseItems = [
     {
       id: 1,
-      image: "./ourfarm1.png",
+      image: farm1, 
       title: "Processed Premium Butter",
       subtitle: "स्वस्थ र स्वादिलो (Healthy & Tasty)",
-      description:
-        "Our Sita Ram Butter is crafted for a rich, creamy texture that melts perfectly. Sourced from cows grazing in pristine Himalayan-view pastures, it brings the traditional taste of pure dairy to your morning bread. Note: Only bulk orders are available. Contact 015213049 for bulk orders.",
+      description: (
+        <>
+          Our Sita Ram Butter is crafted for a rich, creamy texture that melts perfectly. Sourced from cows grazing in pristine Himalayan-view pastures, it brings the traditional taste of pure dairy to your morning bread. <br /> <span className="text-dairyRed font-medium">Note: Only bulk orders are available.</span>
+        </>
+      ),
       features: ["Pure Pasteurized", "Rich Golden Texture", "Himalayan Farm Sourced"],
-      reversed: false
+      reversed: false,
+      buttonText: "Learn More",
+      buttonLink: "/about"
     },
     {
       id: 2,
-      image: "./ourfarm3.png",
+      image: farm3, 
       title: "Premium Ice Cream",
       subtitle: "शुद्ध दुधबाट बनेको (Made from Pure Milk)",
-      description:
-        "Experience the rich, creamy delight of our premium ice cream made from 100% pure milk. Smooth, indulgent, and crafted for perfect taste in every scoop. Note: Only bulk orders are available. Contact 015213049 for bulk orders.",
+      description: (
+        <>
+          Experience the rich, creamy delight of our premium ice cream made from 100% pure milk. Smooth, indulgent, and crafted for perfect taste in every scoop. <br /> <span className="text-dairyRed font-medium">Note: Only bulk orders are available.</span>
+        </>
+      ),
       features: ["No Added Preservatives", "Creamy Texture", "Premium Dairy Base"],
-      reversed: true
+      reversed: true,
+      buttonText: "Explore Flavors",
+      buttonLink: "/ice-cream"
     }
   ];
 
@@ -104,11 +118,12 @@ const ProductImageShowcase = () => {
                 </ul>
 
                 <div className="pt-6">
+                  {/* Dynamic Button Text and Link */}
                   <Link
-                    to="/about"
+                    to={item.buttonLink}
                     className="inline-block border-2 border-dairyRed text-dairyRed px-8 py-3 rounded-full font-bold uppercase tracking-wider hover:bg-dairyRed hover:text-white transition-all duration-300"
                   >
-                    Learn More
+                    {item.buttonText}
                   </Link>
                 </div>
               </motion.div>

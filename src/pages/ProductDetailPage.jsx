@@ -310,7 +310,8 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/2 border border-gray-200 bg-white flex flex-col">
+            {/* --- NUTRITIONAL INFORMATION (COMMENTED OUT) --- */}
+            {/* <div className="w-full md:w-1/2 border border-gray-200 bg-white flex flex-col">
               <div className="bg-[#F8F9FA] border-b border-gray-200 p-4 text-center">
                 <h2 className="text-gray-700 font-bold uppercase tracking-widest text-sm font-serif">Nutritional Information</h2>
               </div>
@@ -340,8 +341,9 @@ export default function ProductDetailPage() {
                 )}
               </div>
             </div>
+            */}
 
-            <div className="w-full md:w-1/2 border border-gray-200 bg-white flex flex-col">
+            <div className="w-full md:w-full border border-gray-200 bg-white flex flex-col">
               <div className="bg-[#F8F9FA] border-b border-gray-200 p-4 text-center">
                 <h2 className="text-gray-700 font-bold uppercase tracking-widest text-sm font-serif">Product Features</h2>
               </div>

@@ -3,6 +3,12 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// 1. Import your images here
+import milkImg from '../../assets/milk.webp';
+import gheeImg from '../../assets/ghee.webp';
+import dahiImg from '../../assets/dahi.webp';
+import paneerImg from '../../assets/paneer.webp';
+
 const HeroProductGrid = () => {
   const products = [
     {
@@ -10,7 +16,7 @@ const HeroProductGrid = () => {
       name: "DAIRY ESSENTIAL",
       title: "Pure A2 Milk",
       description: "Sourced directly from our lush Tokha pastures. Unadulterated milk rich in A2 protein, delivered fresh within hours of milking.",
-      image: "/milk.png",
+      image: milkImg, // 2. Use the imported variable
       badge: "FRESH DAILY",
     },
     {
@@ -18,7 +24,7 @@ const HeroProductGrid = () => {
       name: "HERITAGE GOLD",
       title: "Bilona Local Ghee",
       description: "Crafted using the ancient slow-churned bilona method. Aromatic, nutrient-dense, and perfect for your family's health.",
-      image: "/ghee.png",
+      image: gheeImg, // 2. Use the imported variable
       badge: "BESTSELLER",
     },
     {
@@ -26,7 +32,7 @@ const HeroProductGrid = () => {
       name: "CULTURED PRIDE",
       title: "Probiotic Dahi",
       description: "Traditional Juju Dhau set in earthen pots. A naturally sweet, probiotic powerhouse for superior gut health and digestion.",
-      image: "/dahi.png",
+      image: dahiImg, // 2. Use the imported variable
       badge: "TRADITIONAL",
     },
     {
@@ -34,7 +40,7 @@ const HeroProductGrid = () => {
       name: "ARTISANAL SOFT",
       title: "Fresh Paneer",
       description: "Non-crumbling, ultra-soft paneer made daily from single-source milk. Pressed naturally without any artificial binders.",
-      image: "/paneer.png",
+      image: paneerImg, // 2. Use the imported variable
       badge: "PROTEIN RICH",
     }
   ];

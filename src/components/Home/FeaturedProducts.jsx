@@ -14,8 +14,8 @@ const FeaturedProducts = () => {
     price: i % 2 === 0 ? 130 : 1200,
     oldPrice: i % 2 === 0 ? 150 : 1400,
     image: i % 2 === 0 
-      ? "/milk.png" 
-      : "/ghee.png",
+      ? "../assets//milk.webp" 
+      : "../assets//ghee.webp",
     badge: i === 0 ? "Top Seller" : i === 2 ? "New" : null
   }));
 

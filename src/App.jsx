@@ -1,7 +1,7 @@
 // frontend/src/App.jsx
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { XCircle } from 'lucide-react'; // Added icon for the failure page
+import { XCircle } from 'lucide-react';
 
 import DeliveryDashboard from './delivery/DeliveryDashboard';
 
@@ -9,6 +9,7 @@ import DeliveryDashboard from './delivery/DeliveryDashboard';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import FloatingChat from './components/FloatingChat'; 
+import ProtectedRoute from './components/ProtectedRoute'; // <-- ADDED IMPORT
 
 // Public Facing Pages
 import HomePage from './pages/HomePage';
@@ -43,6 +44,9 @@ import BannerManagement from './admin/BannerManagement';
 import UserManagement from './admin/UserManagement'; 
 import MediaManagement from './admin/MediaManagement';
 import SubscriptionManagement from './admin/SubscriptionManagement';
+
+// Ice Cream Page
+import IceCreamPage from './pages/IceCreamPage';
 
 /**
  * ScrollToTop Utility Component
@@ -98,7 +102,6 @@ function App() {
         <Route path="/delivery" element={<DeliveryDashboard />} />
         <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
         
-        
         {/* === ESEWA PAYMENT ROUTES === */}
         <Route path="/payment-success" element={<PaymentSuccess/>} />
         
@@ -123,7 +126,6 @@ function App() {
         {/* === MEDIA & UPDATES === */}
         <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
       
-        
         {/* === NEWLY ADDED PAGES === */}
         <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
         <Route path="/outlets" element={<PublicLayout><OutletsPage /></PublicLayout>} />
@@ -136,9 +138,16 @@ function App() {
         <Route path="/checkout" element={<PublicLayout><CheckoutPage /></PublicLayout>} />
         <Route path="/history" element={<PublicLayout><OrderHistoryPage /></PublicLayout>} />
 
-        {/* === ADMIN PANEL (NESTED) === */}
-        <Route path="/admin" element={<Dashboard />}>
-          {/* Only ONE index route and ONE products route */}
+        {/* === ADMIN PANEL (NESTED & PROTECTED) === */}
+        {/* The ProtectedRoute wraps the main Dashboard. All children inherit this protection automatically! */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminOverview />} />
           <Route path="products" element={<ProductManagement />} />
           <Route path="milk" element={<MilkStockManagement />} />
@@ -148,6 +157,9 @@ function App() {
           <Route path="media" element={<MediaManagement />} />
           <Route path="subscriptions" element={<SubscriptionManagement />} />
         </Route>
+
+        {/* === ICE CREAM PAGE === */}
+        <Route path="/ice-cream" element={<IceCreamPage />} />
 
         {/* === 404 NOT FOUND === */}
         <Route path="*" element={

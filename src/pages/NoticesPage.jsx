@@ -2,6 +2,9 @@ import { motion } from 'framer-motion';
 import { Calendar, Smartphone, CalendarClock, ShieldCheck } from 'lucide-react';
 import MilkDivider from '../components/Home/MilkDivider';
 
+// 1. Import your hero image here
+import heroImg from '../assets/hero_4.webp';
+
 export default function NoticesPage() {
   const notices = [
     { 
@@ -36,7 +39,7 @@ export default function NoticesPage() {
       <div className="relative h-[80vh] flex items-center overflow-hidden bg-[#1A1A1A]">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-70 scale-105" 
-          style={{ backgroundImage: "url('/hero_4.png')" }} 
+          style={{ backgroundImage: `url(${heroImg})` }} // 2. Use the imported variable here
         />
         
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />

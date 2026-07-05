@@ -22,7 +22,6 @@ export default function LoginPage() {
   const [otpCode, setOtpCode] = useState('');
   const [tempUserId, setTempUserId] = useState(null);
 
-  // 🔥 FIX: Added 'address' to field errors state
   const [fieldErrors, setFieldErrors] = useState({
     name: '',
     email: '',
@@ -71,7 +70,6 @@ export default function LoginPage() {
     return '';
   };
 
-  // 🔥 FIX: Strict Address Validation function
   const validateAddress = (address) => {
     if (!address.trim()) return 'Delivery address is required for checkout';
     if (address.trim().length < 4) return 'Please provide a more detailed delivery location';
@@ -93,7 +91,7 @@ export default function LoginPage() {
     const nameErr = validateName(formData.name);
     const emailErr = validateEmail(formData.email);
     const phoneErr = validatePhone(formData.phone);
-    const addressErr = validateAddress(formData.address); // 🔥 FIX: Validate Address
+    const addressErr = validateAddress(formData.address); 
     const pwdErr = validatePassword(formData.password, false);
 
     setFieldErrors({ 
@@ -115,7 +113,7 @@ export default function LoginPage() {
     return !(loginErr || pwdErr);
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -137,15 +135,14 @@ const handleSubmit = async (e) => {
       const result = await login(formData.loginId, formData.password);
       
       if (result.success) {
-        // 🔥 FIX: Explicit Role-Based Redirection
         let defaultRoute = '/';
         
         if (result.role === 'admin') {
           defaultRoute = '/admin';
         } else if (result.role === 'delivery') {
-          defaultRoute = '/delivery'; // Routes to your DeliveryDashboard
+          defaultRoute = '/delivery'; 
         } else {
-          defaultRoute = '/'; // Regular customer
+          defaultRoute = '/'; 
         }
 
         navigate(redirectParam || defaultRoute);
@@ -159,7 +156,7 @@ const handleSubmit = async (e) => {
         setError(result.error || 'Invalid credentials. Please try again.');
       }
     } else {
-      // Registration flow...
+      // Registration flow
       const result = await register({
         name: formData.name, email: formData.email, phone: formData.phone, address: formData.address, password: formData.password
       });
@@ -176,7 +173,7 @@ const handleSubmit = async (e) => {
     setIsLoading(false);
   };
 
-  // OTP Submission Handler
+  // OTP Submission Handler with Professional Dynamic Token
   const handleVerify2FA = async (e) => {
     e.preventDefault();
     if (otpCode.length < 6) {
@@ -193,7 +190,16 @@ const handleSubmit = async (e) => {
       });
       
       if (res.data.status === 'success') {
-        if(setAuthData) setAuthData(res.data.data.user, res.data.data.token);
+        const user = res.data.data.user;
+        const token = res.data.data.token; // This is the real, dynamic backend token
+
+        if(setAuthData) setAuthData(user, token);
+
+        // Save the dynamic token to local storage securely
+        if (user.role === 'admin') {
+          localStorage.setItem('adminToken', token);
+        }
+
         navigate(redirectParam || '/admin');
       }
     } catch (err) {
@@ -352,7 +358,7 @@ const handleSubmit = async (e) => {
                         {fieldErrors.phone && <p className="text-red-500 text-xs mt-1 ml-2">{fieldErrors.phone}</p>}
                       </div>
 
-                      {/* 🔥 FIX: Address field strictly required */}
+                      {/* Address field */}
                       <div>
                         <div className="relative">
                           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9e111a]" size={18} />

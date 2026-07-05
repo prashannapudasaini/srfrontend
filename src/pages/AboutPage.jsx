@@ -2,6 +2,11 @@ import { motion } from 'framer-motion';
 import { ShieldCheck, Droplets, Heart, Award, Leaf, Sun, Truck, Sparkles, MapPin, Milestone } from 'lucide-react';
 import MilkDivider from '../components/Home/MilkDivider';
 
+
+import heroImg from '../assets/hero_3.webp';
+import factoryImg from '../assets/factory.webp';
+import leadingImg from '/leading.webp';
+
 export default function AboutPage() {
   const features = [
     { icon: <Droplets size={32} />, title: "100% Pure A2 Milk", desc: "Sourced exclusively from indigenous cattle breeds for better digestion and health." },
@@ -30,7 +35,7 @@ export default function AboutPage() {
         {/* Background Image with Dark Overlay for maximum White Text contrast */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-60" 
-          style={{ backgroundImage: "url('/hero_3.png')" }} 
+          style={{ backgroundImage: `url(${heroImg})` }} // 2. Use the imported variable inside template literals
         />
         
         {/* Deep Red Gradient Overlay */}
@@ -114,7 +119,7 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-[#9e111a] rounded-[2.5rem] transform -rotate-3 scale-105 opacity-10" />
   
             <img 
-              src="/factory.png" 
+              src={factoryImg} // 3. Use the imported variable
               alt="Sita Ram Premium Ghee Facility" 
               className="relative rounded-[2.5rem] shadow-2xl object-cover h-[550px] w-full bg-white border border-gray-100 hover:scale-[1.02] transition-transform duration-700" 
             />
@@ -278,7 +283,7 @@ export default function AboutPage() {
             <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[#9e111a]/10 rounded-full blur-3xl" />
 
             <motion.img 
-              src="/leading.webp" 
+              src={leadingImg} // 4. Use the imported variable
               alt="Leading Trust Symbol" 
               className="relative w-44 md:w-60 lg:w-72 h-auto object-contain drop-shadow-2xl"
               initial={{ scale: 0.85, opacity: 0 }}

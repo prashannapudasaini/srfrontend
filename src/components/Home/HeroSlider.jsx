@@ -3,6 +3,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MilkDivider from './MilkDivider';
 
+// 1. IMPORT YOUR IMAGES DIRECTLY
+// Adjust this path if your assets folder is located somewhere else inside 'src'
+import hero1 from '../../assets/hero_1.webp';
+import hero2 from '../../assets/hero_2.webp';
+import hero3 from '../../assets/hero_3.webp';
+
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
@@ -12,7 +18,7 @@ const HeroSlider = () => {
       title: "Pure Organic GHEE",
       subtitle: "Fresh from our happy cows",
       description: "Slow-churned, aromatic golden ghee. Rich in nutrients and pure taste..",
-      image: "/hero_1.png", // Image 1
+      image: hero1, // 2. USE THE IMPORTED VARIABLE HERE
       buttonText: "Explore Ghee"
     },
     {
@@ -20,7 +26,7 @@ const HeroSlider = () => {
       title: "Energy Fresh Drink",
       subtitle: "Traditional model Method",
       description: "Farm-fresh, A2 organic ghee to elevate your food taste.",
-      image: "/hero_2.png", // Image 2
+      image: hero2, // 2. USE THE IMPORTED VARIABLE HERE
       buttonText: "shop Now"
     },
     {
@@ -28,7 +34,7 @@ const HeroSlider = () => {
       title: "Fresh Dairy Products",
       subtitle: "Straight from nature",
       description: "Experience the true taste of purity with our wide range of organic dairy lassi.",
-      image: "/hero_3.png", // Image 3
+      image: hero3, // 2. USE THE IMPORTED VARIABLE HERE
       buttonText: "View Collection"
     }
   ];

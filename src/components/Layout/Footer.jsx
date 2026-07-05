@@ -168,10 +168,11 @@ const Footer = () => {
               <div className="space-y-4">
                 <h4 className="text-base font-bold tracking-tight border-b border-white/20 pb-1.5 inline-block">Support</h4>
                 <ul className="space-y-2.5 text-red-50 text-sm">
-                  <li className="flex gap-3 items-center"><MapPin className="shrink-0 w-4 h-4 text-red-300" /> <span> Kuleshwor and Jyatha (Factory outlets)</span></li>
+                  {/* 🔥 UPDATED LOCATION HERE */}
+                  <li className="flex gap-3 items-center"><MapPin className="shrink-0 w-4 h-4 text-red-300" /> <span>Dudhpokhari 4, Kirtipur, Kathmandu</span></li>
                   <li className="flex gap-3 items-center"><Phone className="shrink-0 w-4 h-4 text-red-300" /> <span>015213049</span></li>
                   <li className="flex gap-3 items-center"><Mail className="shrink-0 w-4 h-4 text-red-300" /> <span>sgokulmilks1@gmail.com </span></li>
-                  <li className="flex gap-3 items-center"><Clock className="shrink-0 w-4 h-4 text-red-300" /> <span>6 AM - 8 PM</span></li>
+                  <li className="flex gap-3 items-center"><Clock className="shrink-0 w-4 h-4 text-red-300" /> <span>9 AM - 5 PM</span></li>
                 </ul>
               </div>
 
@@ -267,7 +268,6 @@ const Footer = () => {
           <p>© 2026 Sitaram Gokul Milks. All rights reserved.</p>
           <p>Designed and Developed by <a href="https://motionage.com" target="_blank" rel="noopener noreferrer" className="hover:text-red-600 transition-colors">MotionAge</a>.</p>
           <div className="flex gap-6">
-            {/* 🔥 MODIFIED: Added specific parameter targets to trigger modal frames */}
             <button onClick={() => setActiveDoc('privacy')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Privacy</button>
             <button onClick={() => setActiveDoc('terms')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Terms</button>
             <button onClick={() => setActiveDoc('returns')} className="hover:text-red-600 transition-colors uppercase font-bold text-[10px]">Returns</button>

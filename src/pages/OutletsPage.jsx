@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, MapPin, Phone, Clock, ArrowRight, RefreshCw } from 'lucide-react';
 
-// Centralized data for dynamic dropdowns (1 State, 3 Cities)
+// Centralized data for dynamic dropdowns
 const REGION_DATA = {
   "Bagmati": {
     cities: {
-      "Kathmandu": ["Kuleshwor", "Jyatha"],
-       "Bhaktapur": [],
-        "Lalitpur": [],
+      "Kathmandu": ["Factory", "Kuleshwor", "Jyatha"],
     }
   }
 };
@@ -16,15 +14,17 @@ const REGION_DATA = {
 // All physical outlets mapped with state, city, and Real Google Map Embed URLs
 const ALL_OUTLETS = [
   {
-    name: "Jyatha",
+    name: "Factory",
     state: "Bagmati",
     city: "Kathmandu",
-    address: "Jyatha Thamel",
+    address: "Dudhpokhari 4, Kirtipur, Kathmandu, Nepal",
     phone: "015213049",
-    hours: "5:00 AM - 7:00 PM (Daily)",
-    isMain: true
+    hours: "9:00 AM - 5:00 PM (Sun-Fri)",
+    isMain: true,
+    badgeText: "Manufacturing Unit",
+    // Note: This is a general map embed for Kirtipur. You can replace the src with the exact Google Maps embed URL for the factory.
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14133.07604169992!2d85.2671569!3d27.6781216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb18635f5674c1%3A0x88981f3e742813df!2sKirtipur%2C%20Nepal!5e0!3m2!1sen!2sus!4v1717000000000!5m2!1sen!2sus"
   },
- 
   {
     name: "Kuleshwor",
     state: "Bagmati",
@@ -32,11 +32,21 @@ const ALL_OUTLETS = [
     address: "Kuleshwor, Kathmandu",
     phone: "015213049",
     hours: "7:00 AM - 8:00 PM (Daily)",
-    isMain: false
+    isMain: false,
+    badgeText: "Factory Outlet",
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14131.033785172605!2d85.2936279!3d27.6938363!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb185a198533b5%3A0xc621b589a8dc735e!2sKuleshwor%2C%20Kathmandu%2044600%2C%20Nepal!5e0!3m2!1sen!2sus!4v1717000000001!5m2!1sen!2sus"
+  },
+  {
+    name: "Jyatha",
+    state: "Bagmati",
+    city: "Kathmandu",
+    address: "Jyatha, Thamel, Kathmandu",
+    phone: "015213049",
+    hours: "5:00 AM - 7:00 PM (Daily)",
+    isMain: false,
+    badgeText: "Factory Outlet",
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.0620854652236!2d85.31016831506161!3d27.71536798278832!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb18fdc043e0a7%3A0x6b63f69fc84f7b49!2sJyatha%2C%20Kathmandu%2044600%2C%20Nepal!5e0!3m2!1sen!2sus!4v1717000000002!5m2!1sen!2sus"
   }
-
- 
-  
 ];
 
 export default function OutletsPage() {
@@ -118,7 +128,7 @@ export default function OutletsPage() {
                 value={selectedState} 
                 onChange={handleStateChange}
                 className="w-full h-12 px-4 border border-gray-200 rounded-lg text-gray-600 text-sm focus:outline-none focus:border-[#9e111a] appearance-none bg-white cursor-pointer"
-                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
               >
                 <option value="">Select State / Province</option>
                 {Object.keys(REGION_DATA).map(state => (
@@ -134,7 +144,7 @@ export default function OutletsPage() {
                 onChange={handleCityChange}
                 disabled={!selectedState}
                 className="w-full h-12 px-4 border border-gray-200 rounded-lg text-gray-600 text-sm focus:outline-none focus:border-[#9e111a] appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
-                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
               >
                 <option value="">City</option>
                 {selectedState && Object.keys(REGION_DATA[selectedState].cities).map(city => (
@@ -150,7 +160,7 @@ export default function OutletsPage() {
                 onChange={(e) => setSelectedStore(e.target.value)}
                 disabled={!selectedCity}
                 className="w-full h-12 px-4 border border-gray-200 rounded-lg text-gray-600 text-sm focus:outline-none focus:border-[#9e111a] appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
-                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
+                style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center", backgroundSize: "20px" }}
               >
                 <option value="">Store</option>
                 {selectedState && selectedCity && REGION_DATA[selectedState].cities[selectedCity].map(store => (
@@ -206,16 +216,16 @@ export default function OutletsPage() {
                   transition={{ delay: index * 0.05 }}
                   className="bg-white border border-gray-200 p-8 rounded-2xl relative hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
                 >
-                  {/* Headquarters Red Badge */}
-                  {outlet.isMain && (
+                  {/* Badge Text (Manufacturing Unit or Factory Outlet) */}
+                  {outlet.badgeText && (
                     <div className="absolute top-0 right-0 bg-[#9e111a] text-white px-4 py-1.5 rounded-bl-xl font-bold text-[10px] uppercase tracking-widest z-10 shadow-sm">
-                      Headquarters
+                      {outlet.badgeText}
                     </div>
                   )}
                   
                   {/* Top Header Row */}
                   <div className="flex items-center gap-4 mb-6">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${outlet.isMain ? 'bg-red-50 text-[#9e111a]' : 'bg-gray-50 text-gray-500'}`}>
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${outlet.isMain || outlet.badgeText ? 'bg-red-50 text-[#9e111a]' : 'bg-gray-50 text-gray-500'}`}>
                       <Store size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
