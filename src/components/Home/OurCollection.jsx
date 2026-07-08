@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,11 +23,17 @@ const OurCollection = ({ products = [] }) => {
     },
   };
 
-  // Don't render the section if there are no premium products checked in admin
   if (products.length === 0) return null;
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/logo.png';
+    if (imagePath.startsWith('http') || imagePath.startsWith('data:')) return imagePath;
+    return `https://sitaramdudh.com/backend${imagePath}`; 
+  };
+
   return (
-    <section className="py-24 bg-[#FDF8E7] relative overflow-hidden">
+    // 🔥 FIX: Changed 'pb-24' to 'pb-12' to significantly reduce the bottom spacing
+    <section className="pt-8 pb-12 bg-[#FDF8E7] relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -49,12 +56,13 @@ const OurCollection = ({ products = [] }) => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
+ 
           <h2 className="text-[#9e111a] text-sm uppercase tracking-[0.3em] font-bold mb-4">
             Our Collection
           </h2>
 
           <h3 className="text-5xl md:text-6xl font-serif font-extrabold text-[#1A1A1A] mb-6 drop-shadow-sm">
-            Premium Dairy <span className="text-[#9e111a]">Selection</span>
+           Dairy <span className="text-[#9e111a]">Selection</span>
           </h3>
 
           <div className="w-24 h-1 bg-[#9e111a] mx-auto rounded-full" />
@@ -68,10 +76,9 @@ const OurCollection = ({ products = [] }) => {
           viewport={{ once: true, amount: 0.1 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
         >
-          {products.map((product) => {
-            // Dynamically extract data from DB format
+          {[...products].reverse().map((product) => {
             const lowestPrice = product.variants?.length > 0 ? Math.min(...product.variants.map(v => parseFloat(v.price_npr) || 0)) : 0;
-            const displayImage = product.image || product.variants?.[0]?.image || '/logo.png';
+            const displayImage = getImageUrl(product.image || product.variants?.[0]?.image);
             const unit = product.variants?.[0]?.size ? ` / ${product.variants[0].size}` : '';
             const subtitle = product.variants?.[0]?.description || "Farm Fresh Dairy";
 
@@ -122,7 +129,6 @@ const OurCollection = ({ products = [] }) => {
                         NPR {lowestPrice}<span className="text-xs text-gray-400 font-bold ml-1">{unit}</span>
                       </span>
 
-                      {/* WIRED UP ADD TO CART BUTTON */}
                       <button 
                         onClick={(e) => {
                           e.stopPropagation(); 

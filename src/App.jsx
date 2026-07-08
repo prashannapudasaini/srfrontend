@@ -1,15 +1,17 @@
 // frontend/src/App.jsx
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { XCircle } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion'; 
 
 import DeliveryDashboard from './delivery/DeliveryDashboard';
+import Preloader from './components/Preloader'; 
 
 // Global Layout Components
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import FloatingChat from './components/FloatingChat'; 
-import ProtectedRoute from './components/ProtectedRoute'; // <-- ADDED IMPORT
+import ProtectedRoute from './components/ProtectedRoute'; 
 
 // Public Facing Pages
 import HomePage from './pages/HomePage';
@@ -25,6 +27,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostDetail from './pages/BlogPostDetail';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ContactPage from './pages/ContactPage'; // ADDED: ContactPage import
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -79,6 +82,17 @@ const PublicLayout = ({ children }) => (
 );
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Preloader Logic: Hide after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Router 
       future={{ 
@@ -89,96 +103,105 @@ function App() {
       {/* Global Scroll Handler */}
       <ScrollToTop />
 
-      <Routes>
-        {/* === PUBLIC USER ROUTES === */}
-        <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
-        <Route path="/products" element={<PublicLayout><ProductsPage /></PublicLayout>} />
-        <Route path="/products/:id" element={<PublicLayout><ProductDetailPage /></PublicLayout>} />
-        <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
-        <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
-        <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
-        <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
-        <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
-        <Route path="/delivery" element={<DeliveryDashboard />} />
-        <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
-        
-        {/* === ESEWA PAYMENT ROUTES === */}
-        <Route path="/payment-success" element={<PaymentSuccess/>} />
-        
-        {/* ADDED: Payment Failure Route */}
-        <Route path="/payment-failure" element={
-          <PublicLayout>
-            <div className="flex flex-col items-center justify-center py-32 text-center px-6">
-              <div className="w-24 h-24 bg-red-50 rounded-[2rem] border border-red-100 flex items-center justify-center text-[#9e111a] mb-6 shadow-sm">
-                <XCircle size={48} strokeWidth={2.5} />
-              </div>
-              <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Payment Failed</h2>
-              <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
-                Your transaction was cancelled or unsuccessful. No charges were made to your account.
-              </p>
-              <Link to="/checkout" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
-                Return to Checkout
-              </Link>
-            </div>
-          </PublicLayout>
-        } />
-        
-        {/* === MEDIA & UPDATES === */}
-        <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
-      
-        {/* === NEWLY ADDED PAGES === */}
-        <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
-        <Route path="/outlets" element={<PublicLayout><OutletsPage /></PublicLayout>} />
-        
-        {/* === AUTHENTICATION === */}
-        <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
+      {/* === PRELOADER IMPLEMENTATION === */}
+      <AnimatePresence mode="wait">
+        {isLoading && <Preloader key="preloader" />}
+      </AnimatePresence>
 
-        {/* === SHOPPING FLOW === */}
-        <Route path="/cart" element={<PublicLayout><CartPage /></PublicLayout>} />
-        <Route path="/checkout" element={<PublicLayout><CheckoutPage /></PublicLayout>} />
-        <Route path="/history" element={<PublicLayout><OrderHistoryPage /></PublicLayout>} />
-
-        {/* === ADMIN PANEL (NESTED & PROTECTED) === */}
-        {/* The ProtectedRoute wraps the main Dashboard. All children inherit this protection automatically! */}
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminOverview />} />
-          <Route path="products" element={<ProductManagement />} />
-          <Route path="milk" element={<MilkStockManagement />} />
-          <Route path="orders" element={<OrderManagement />} />
-          <Route path="banners" element={<BannerManagement />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="media" element={<MediaManagement />} />
-          <Route path="subscriptions" element={<SubscriptionManagement />} />
-        </Route>
-
-        {/* === ICE CREAM PAGE === */}
-        <Route path="/ice-cream" element={<IceCreamPage />} />
-
-        {/* === 404 NOT FOUND === */}
-        <Route path="*" element={
-          <PublicLayout>
-            <div className="flex flex-col items-center justify-center py-40 text-center px-6">
-              <h1 className="text-[12rem] font-serif font-black text-[#9e111a]/5 leading-none">404</h1>
-              <div className="relative -mt-20">
-                <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Lost in the pasture?</h2>
+      {/* Hide overflow on the main app while preloader is active */}
+      <div className={isLoading ? 'h-screen overflow-hidden' : ''}>
+        <Routes>
+          {/* === PUBLIC USER ROUTES === */}
+          <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+          <Route path="/products" element={<PublicLayout><ProductsPage /></PublicLayout>} />
+          <Route path="/products/:id" element={<PublicLayout><ProductDetailPage /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+          <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+          <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
+          <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
+          <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
+          <Route path="/delivery" element={<DeliveryDashboard />} />
+          <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
+          <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} /> {/* ADDED: Contact Route */}
+          
+          {/* === ESEWA PAYMENT ROUTES === */}
+          <Route path="/payment-success" element={<PaymentSuccess/>} />
+          
+          {/* Payment Failure Route */}
+          <Route path="/payment-failure" element={
+            <PublicLayout>
+              <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+                <div className="w-24 h-24 bg-red-50 rounded-[2rem] border border-red-100 flex items-center justify-center text-[#9e111a] mb-6 shadow-sm">
+                  <XCircle size={48} strokeWidth={2.5} />
+                </div>
+                <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Payment Failed</h2>
                 <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
-                  The page you are looking for has moved to a different pasture or no longer exists.
+                  Your transaction was cancelled or unsuccessful. No charges were made to your account.
                 </p>
-                <Link to="/" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
-                  Return to Farm Home
+                <Link to="/checkout" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
+                  Return to Checkout
                 </Link>
               </div>
-            </div>
-          </PublicLayout>
-        } />
-      </Routes>
+            </PublicLayout>
+          } />
+          
+          {/* === MEDIA & UPDATES === */}
+          <Route path="/media" element={<PublicLayout><MediaPage /></PublicLayout>} /> 
+        
+          {/* === NEWLY ADDED PAGES === */}
+          <Route path="/availability" element={<PublicLayout><AvailabilityPage /></PublicLayout>} />
+          <Route path="/outlets" element={<PublicLayout><OutletsPage /></PublicLayout>} />
+          
+          {/* === AUTHENTICATION === */}
+          <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
+
+          {/* === SHOPPING FLOW === */}
+          <Route path="/cart" element={<PublicLayout><CartPage /></PublicLayout>} />
+          <Route path="/checkout" element={<PublicLayout><CheckoutPage /></PublicLayout>} />
+          <Route path="/history" element={<PublicLayout><OrderHistoryPage /></PublicLayout>} />
+
+          {/* === ADMIN PANEL (NESTED & PROTECTED) === */}
+          {/* The ProtectedRoute wraps the main Dashboard. All children inherit this protection automatically! */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="products" element={<ProductManagement />} />
+            <Route path="milk" element={<MilkStockManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
+            <Route path="banners" element={<BannerManagement />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="media" element={<MediaManagement />} />
+            <Route path="subscriptions" element={<SubscriptionManagement />} />
+          </Route>
+
+          {/* === ICE CREAM PAGE === */}
+          <Route path="/ice-cream" element={<IceCreamPage />} />
+
+          {/* === 404 NOT FOUND === */}
+          <Route path="*" element={
+            <PublicLayout>
+              <div className="flex flex-col items-center justify-center py-40 text-center px-6">
+                <h1 className="text-[12rem] font-serif font-black text-[#9e111a]/5 leading-none">404</h1>
+                <div className="relative -mt-20">
+                  <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Lost in the pasture?</h2>
+                  <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
+                    The page you are looking for has moved to a different pasture or no longer exists.
+                  </p>
+                  <Link to="/" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
+                    Return to Farm Home
+                  </Link>
+                </div>
+              </div>
+            </PublicLayout>
+          } />
+        </Routes>
+      </div>
     </Router>
   );
 }

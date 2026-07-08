@@ -254,9 +254,9 @@ export default function ProductDetailPage() {
                 )}
                 
                 <div className="mt-2 p-4 bg-gray-50 border border-gray-100 rounded-xl">
-                  <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Shelf Life & Subscriptions</h3>
+                  <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Instant Buying & Subscriptions</h3>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                     If the product price range extends 3000rs, you can place an order without a subscription.
+                     If the product price range extends 1000Rs, you can place an order without a subscription.
                   </p>
                 </div>
               </div>

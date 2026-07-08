@@ -1,10 +1,9 @@
-// frontend/src/components/Home/HeroSlider.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // <-- Imported Icons for arrows
 import MilkDivider from './MilkDivider';
 
-// 1. IMPORT YOUR IMAGES DIRECTLY
-// Adjust this path if your assets folder is located somewhere else inside 'src'
+// IMPORT YOUR IMAGES DIRECTLY
 import hero1 from '../../assets/hero_1.webp';
 import hero2 from '../../assets/hero_2.webp';
 import hero3 from '../../assets/hero_3.webp';
@@ -12,42 +11,52 @@ import hero3 from '../../assets/hero_3.webp';
 const HeroSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
-    const slides = [
+  const slides = [
     {
       id: 1,
-      title: "Pure Organic GHEE",
-      subtitle: "Fresh from our happy cows",
-      description: "Slow-churned, aromatic golden ghee. Rich in nutrients and pure taste..",
-      image: hero1, // 2. USE THE IMPORTED VARIABLE HERE
-      buttonText: "Explore Ghee"
+      title: "Pure Organic Ghee",
+      subtitle: "Authentic Homemade Taste",
+      // Condensed to 22 words
+      description: "Healthy, flavorful ghee with a rich aroma and granulated texture. Hygienically packed for authentic homemade taste, perfect for traditional and modern cooking.",
+      image: hero1, 
     },
     {
       id: 2,
       title: "Energy Fresh Drink",
-      subtitle: "Traditional model Method",
-      description: "Farm-fresh, A2 organic ghee to elevate your food taste.",
-      image: hero2, // 2. USE THE IMPORTED VARIABLE HERE
-      buttonText: "shop Now"
+      subtitle: "Smooth & Energizing",
+      // Condensed to 21 words, flavor-neutral for all 5 flavors
+      description: "A refreshing low-fat dairy beverage packed with protein and calcium. Hygienically processed and ready to drink for a smooth, energizing boost.",
+      image: hero2, 
     },
     {
       id: 3,
-      title: "Fresh Dairy Products",
-      subtitle: "Straight from nature",
-      description: "Experience the true taste of purity with our wide range of organic dairy lassi.",
-      image: hero3, // 2. USE THE IMPORTED VARIABLE HERE
-      buttonText: "View Collection"
+      title: "Strawberry Lassi",
+      subtitle: "Fresh Curd & Berries",
+      // Condensed to 21 words
+      description: "Smooth, creamy lassi blended with fresh curd and delicious strawberry crush. Rich in protein and calcium, hygienically packed for refreshing enjoyment.",
+      image: hero3, 
     }
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-    }, 6000); // Slower, cinematic transition
-    return () => clearInterval(interval);
+  // Manual Navigation Functions
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
   }, [slides.length]);
 
+  const prevSlide = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  // Auto-sliding interval
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 6000); // 6 seconds per slide
+    return () => clearInterval(interval);
+  }, [nextSlide]);
+
   return (
-    <div className="relative h-[90vh] md:h-screen overflow-hidden bg-[#a80000]">
+    <div className="relative h-[90vh] md:h-screen overflow-hidden bg-[#a80000] group">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
@@ -81,18 +90,32 @@ const HeroSlider = () => {
               <h1 className="text-5xl md:text-7xl font-serif font-extrabold mb-6 leading-[1.1] text-white">
                 {slides[currentIndex].title}
               </h1>
-              <p className="text-lg md:text-xl mb-10 text-gray-200 font-sans max-w-lg">
+              <p className="text-lg md:text-xl mb-10 text-gray-200 font-sans max-w-lg leading-relaxed">
                 {slides[currentIndex].description}
               </p>
-              <button className="bg-[#E2B254] text-[#a80000] px-8 py-4 rounded-full font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(226,178,84,0.3)]">
-                {slides[currentIndex].buttonText}
-              </button>
+              {/* Button removed as requested previously */}
             </motion.div>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Pagination Indicators */}
+      {/* --- MANUAL SLIDING ARROWS --- */}
+      {/* Hidden on mobile to prevent clutter, visible on hover on larger screens */}
+      <button 
+        onClick={prevSlide}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-black/20 hover:bg-[#E2B254] text-white hover:text-[#a80000] rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+      >
+        <ChevronLeft size={28} strokeWidth={2.5} />
+      </button>
+
+      <button 
+        onClick={nextSlide}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-black/20 hover:bg-[#E2B254] text-white hover:text-[#a80000] rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"
+      >
+        <ChevronRight size={28} strokeWidth={2.5} />
+      </button>
+
+      {/* Pagination Indicators (Dots) */}
       <div className="absolute bottom-24 left-6 lg:left-auto lg:right-12 flex gap-3 z-30">
         {slides.map((_, index) => (
           <button

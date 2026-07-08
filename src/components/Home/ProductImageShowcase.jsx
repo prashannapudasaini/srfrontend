@@ -4,8 +4,8 @@ import { CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // 1. Import your images here
-import farm1 from '../../assets/ourfarm1.png';
-import farm3 from '../../assets/ourfarm3.png';
+import farm1 from '../../assets/butter.webp';
+import farm3 from '../../assets/icecream.png';
 
 const ProductImageShowcase = () => {
   const showcaseItems = [

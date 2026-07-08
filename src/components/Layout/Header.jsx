@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; 
 import { ShoppingCart, User, PhoneCall, Menu, X, LogOut, ChevronDown } from 'lucide-react'; 
-import ContactModal from '../ContactModal';
+// ContactModal import removed
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import CartDrawer from './CartDrawer';
 
 const Header = () => {
-  const [isContactOpen, setIsContactOpen] = useState(false);
+  // isContactOpen state removed
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState(null); 
@@ -88,7 +88,7 @@ const Header = () => {
                 />
                 <div className="flex flex-col justify-center">
                   <h1 className="text-lg sm:text-2xl font-serif font-black text-[#1A1A1A] leading-none">Sita Ram</h1>
-                  <span className="text-[8px] sm:text-[10px] font-bold text-[#9e111a] uppercase tracking-[0.2em] mt-0.5">Gokul Milk</span>
+                  <span className="text-[8px] sm:text-[10px] font-bold text-[#9e111a] uppercase tracking-[0.2em] mt-0.5">Gokul Milks Kathmandu Pvt. Ltd.</span>
                 </div>
               </div>
             </Link>
@@ -153,12 +153,14 @@ const Header = () => {
 
             {/* ADJUSTED: Added shrink-0 so these icons never get squished by the nav menu */}
             <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-              <button onClick={() => setIsContactOpen(true)} className="hidden sm:flex text-gray-700 hover:text-[#9e111a] transition-colors">
+              
+              {/* UPDATED: Changed from button/modal to Link navigating to /contact */}
+              <Link to="/contact" onClick={() => window.scrollTo(0, 0)} className="hidden sm:flex text-gray-700 hover:text-[#9e111a] transition-colors">
                 <PhoneCall size={20} />
-              </button>
+              </Link>
 
               {/* Profile Dropdown / Login Block */}
-              {/*{isAuthenticated ? (
+              {isAuthenticated ? (
                 <div className="relative group hidden sm:block">
                   <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 py-1.5 px-3 rounded-full transition-colors cursor-pointer">
                     <div className="w-6 h-6 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shrink-0">
@@ -171,7 +173,7 @@ const Header = () => {
                   </button>
                   
                   {/* Dropdown Menu */}
-                  {/*<div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <Link 
                       to={user?.role === 'admin' ? '/admin' : '/history'} 
                       onClick={() => window.scrollTo(0, 0)}
@@ -194,7 +196,7 @@ const Header = () => {
               )}
 
               {/* Cart Button - COMMENTED OUT FOR NOW */}
-               {/*<button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#9e111a] transition-colors p-1">
+               <button onClick={() => setIsCartOpen(true)} className="relative text-gray-700 hover:text-[#9e111a] transition-colors p-1">
                 <ShoppingCart size={24} />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-2 bg-[#9e111a] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
@@ -202,7 +204,7 @@ const Header = () => {
                   </span>
                 )}
               </button>
-              */}
+              
 
               {/* Mobile Menu Toggle */}
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden text-gray-700 z-50 p-1">
@@ -279,6 +281,22 @@ const Header = () => {
                     </AnimatePresence>
                   </div>
                 ))}
+
+                {/* ADDED: Contact link for Mobile Menu */}
+                <div className="flex flex-col">
+                  <Link
+                    to="/contact"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.scrollTo(0, 0);
+                    }}
+                    className={`text-sm tracking-wider uppercase font-bold ${
+                      activeLink === 'contact' ? 'text-[#9e111a]' : 'text-[#1A1A1A]'
+                    }`}
+                  >
+                    Contact
+                  </Link>
+                </div>
                 
                 {/* Mobile Auth Links */}
                 <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
@@ -304,7 +322,7 @@ const Header = () => {
         </AnimatePresence>
       </header>
 
-      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
+      {/* Removed ContactModal component instance */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );

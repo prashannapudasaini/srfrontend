@@ -65,7 +65,8 @@ export default function CartPage() {
             {/* List of Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               <AnimatePresence mode="popLayout">
-                {cartItems.map((item) => {
+                {/* 🔥 THE FIX: Reversing the array here puts newest items on top! */}
+                {[...cartItems].reverse().map((item) => {
                   const itemPrice = Number(item.price) || Number(item.price_npr) || 0;
                   // Use cartItemId if it exists (for variants), otherwise fallback to standard id
                   const itemIdentifier = item.cartItemId || item.id;

@@ -13,41 +13,32 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const data = searchParams.get('data');
+      // 1. connectIPS returns the transaction ID in the URL as TXNID
+      const txnId = searchParams.get('TXNID');
       
-      if (!data) {
+      if (!txnId) {
         setStatus('failed');
         setMessage('No payment data found.');
         return;
       }
 
       try {
-        // 1. Decode eSewa's response
-        const decodedString = atob(data);
-        const parsedData = JSON.parse(decodedString);
+        // 2. Send the TXNID to your backend for final verification
+        const response = await api.post('/orders/verify_connectips.php', {
+          txnId: txnId
+        });
 
-        if (parsedData.status === "COMPLETE") {
-          // 2. Send the decoded data to your backend for final verification
-          const response = await api.post('/orders/verify_esewa.php', {
-            transaction_uuid: parsedData.transaction_uuid,
-            transaction_code: parsedData.transaction_code, // eSewa's reference ID
-            total_amount: parsedData.total_amount
-          });
-
-          if (response.data.status === 'success') {
-            setStatus('success');
-            clearCart(); // Empty the cart
-          } else {
-            setStatus('failed');
-            setMessage(response.data.message || 'Verification failed on server.');
-          }
+        if (response.data.success) {
+          setStatus('success');
+          clearCart(); // Empty the cart on successful payment
         } else {
           setStatus('failed');
-          setMessage('Payment was not completed.');
+          setMessage(response.data.message || 'Verification failed on server.');
         }
       } catch (error) {
+        console.error("Verification Error:", error);
         setStatus('failed');
-        setMessage('Failed to decode or verify payment.');
+        setMessage('Failed to verify payment with the server.');
       }
     };
 

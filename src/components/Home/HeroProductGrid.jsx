@@ -14,32 +14,32 @@ const HeroProductGrid = () => {
     {
       id: 1,
       name: "DAIRY ESSENTIAL",
-      title: "Pure A2 Milk",
-      description: "Sourced directly from our lush Tokha pastures. Unadulterated milk rich in A2 protein, delivered fresh within hours of milking.",
+      title: "Standard Milk",
+      description: "Made from fresh pasteurized milk. Rich in protein and calcium, hygienically packed for freshness and everyday family nutrition.",
       image: milkImg, // 2. Use the imported variable
       badge: "FRESH DAILY",
     },
     {
       id: 2,
       name: "HERITAGE GOLD",
-      title: "Bilona Local Ghee",
-      description: "Crafted using the ancient slow-churned bilona method. Aromatic, nutrient-dense, and perfect for your family's health.",
+      title: "Ghee",
+      description: "Made from pure dairy butter. Rich, aromatic ghee with authentic taste, hygienically prepared for everyday cooking and celebrations.",
       image: gheeImg, // 2. Use the imported variable
       badge: "BESTSELLER",
     },
     {
       id: 3,
       name: "CULTURED PRIDE",
-      title: "Probiotic Dahi",
-      description: "Traditional Juju Dhau set in earthen pots. A naturally sweet, probiotic powerhouse for superior gut health and digestion.",
+      title: "Dahi Sugar Free",
+      description: "Made from pure milk and active cultures. Thick, creamy sugar-free curd rich in protein and calcium, hygienically packed for freshness.",
       image: dahiImg, // 2. Use the imported variable
       badge: "TRADITIONAL",
     },
     {
       id: 4,
       name: "ARTISANAL SOFT",
-      title: "Fresh Paneer",
-      description: "Non-crumbling, ultra-soft paneer made daily from single-source milk. Pressed naturally without any artificial binders.",
+      title: "Paneer",
+      description: "Made from fresh milk without preservatives. Soft, protein-rich paneer, vacuum packed for freshness and versatile everyday cooking.",
       image: paneerImg, // 2. Use the imported variable
       badge: "PROTEIN RICH",
     }

@@ -1,8 +1,10 @@
-// frontend/src/pages/IceCreamPage.jsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Phone, Info, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Phone, Info } from 'lucide-react';
+
+// Import Layout Components
+import Header from '../components/Layout/Header';
+import Footer from '../components/Layout/Footer';
 
 // Import all Ice Cream Images
 import chocolate100 from '../assets/chocolate_100.png';
@@ -17,12 +19,11 @@ import strawberry500 from '../assets/strawberry_500.png';
 const ICE_CREAMS = [
   {
     id: 'chocolate',
-    name: 'Chocolate', // Changed from Premium Chocolate
+    name: 'Chocolate', 
     tagline: 'Rich, indulgent Belgian cocoa blend.',
     themeText: 'text-[#4A2511]',
     themeBg: 'bg-[#4A2511]',
     glowBg: 'from-[#4A2511]/20 to-transparent',
-    watermark: 'COCOA',
     variants: {
       '100ml': { price: 75, image: chocolate100, label: 'Single Cup' },
       '500ml': { price: 240, image: chocolate500, label: 'Family Tub' }
@@ -35,7 +36,6 @@ const ICE_CREAMS = [
     themeText: 'text-[#D49A36]',
     themeBg: 'bg-[#D49A36]',
     glowBg: 'from-[#D49A36]/20 to-transparent',
-    watermark: 'CARAMEL',
     variants: {
       '100ml': { price: 75, image: butterscotch100, label: 'Single Cup' },
       '500ml': { price: 240, image: butterscotch500, label: 'Family Tub' }
@@ -48,7 +48,6 @@ const ICE_CREAMS = [
     themeText: 'text-[#B89B42]',
     themeBg: 'bg-[#B89B42]',
     glowBg: 'from-[#F3E5AB]/40 to-transparent',
-    watermark: 'CLASSIC',
     variants: {
       '100ml': { price: 65, image: vanilla100, label: 'Single Cup' },
       '500ml': { price: 210, image: vanilla500, label: 'Family Tub' }
@@ -61,7 +60,6 @@ const ICE_CREAMS = [
     themeText: 'text-[#E8748F]',
     themeBg: 'bg-[#E8748F]',
     glowBg: 'from-[#E8748F]/20 to-transparent',
-    watermark: 'BERRY',
     variants: {
       '100ml': { price: 65, image: strawberry100, label: 'Single Cup' },
       '500ml': { price: 210, image: strawberry500, label: 'Family Tub' }
@@ -69,153 +67,85 @@ const ICE_CREAMS = [
   }
 ];
 
-export default function IceCreamPage() {
-  const [activeFlavor, setActiveFlavor] = useState(0);
-  const [activeSize, setActiveSize] = useState('500ml'); // Default to 500ml
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  const currentProduct = ICE_CREAMS[activeFlavor];
-  const currentVariant = currentProduct.variants[activeSize];
+// Individual Card Component to handle independent state per flavor
+const IceCreamCard = ({ product }) => {
+  const [activeSize, setActiveSize] = useState('500ml');
+  const currentVariant = product.variants[activeSize];
 
   return (
-    <div className="bg-[#FAF9F6] min-h-screen pt-24 pb-12 flex flex-col font-sans selection:bg-[#9e111a] selection:text-white">
-      
-      {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center mb-8 z-20 relative">
-        <Link to="/" className="inline-flex items-center gap-2 text-gray-500 hover:text-[#9e111a] font-bold text-xs uppercase tracking-widest transition-colors group">
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Home
-        </Link>
-        <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-gray-100 shadow-sm flex items-center gap-2 text-xs font-bold text-[#9e111a] uppercase tracking-widest">
-          <Star size={14} fill="currentColor" /> Artisanal Dairy
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      className="bg-white rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col relative group"
+    >
+      {/* Top Image Section */}
+      <div className="relative h-80 sm:h-96 w-full overflow-hidden bg-gray-100">
+        
+        {/* Full Fitting Image */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={product.id + activeSize}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="absolute inset-0 z-10 w-full h-full"
+          >
+            <img
+              src={currentVariant.image}
+              alt={`${product.name} ${activeSize}`}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Giant Watermark Text placed OVER the image */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-20 opacity-30 group-hover:opacity-40 transition-opacity duration-500">
+          <span className="text-[6rem] sm:text-[9rem] font-black tracking-tighter text-white mix-blend-overlay drop-shadow-md uppercase transform -rotate-12 whitespace-nowrap">
+            {product.watermark}
+          </span>
         </div>
       </div>
 
-      {/* Main Interactive Showcase */}
-      <div className="max-w-7xl mx-auto px-6 w-full flex-grow flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 relative z-10">
-        
-        {/* LEFT SIDE: Immersive Visuals */}
-        <div className="w-full lg:w-1/2 h-[50vh] lg:h-[70vh] relative flex items-center justify-center rounded-[3rem] overflow-hidden bg-white shadow-2xl border border-gray-100/50">
-          
-          {/* Dynamic Background Gradient */}
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-br transition-colors duration-1000"
-            style={{ backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-stops))` }}
-            animate={{ 
-              '--tw-gradient-from': currentProduct.glowBg.split(' ')[0].replace('from-', ''),
-              '--tw-gradient-to': 'transparent'
-            }}
-          />
+      {/* Details Section */}
+      <div className="p-8 sm:p-10 flex flex-col flex-grow bg-white z-20">
+        <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-3 leading-tight tracking-tight">
+          {product.name}
+        </h2>
+        <p className="text-gray-500 text-base font-medium mb-8 leading-relaxed">
+          {product.tagline} Made from 100% pure Sita Ram milk.
+        </p>
 
-          {/* Giant Watermark Text */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentProduct.id + '-watermark'}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.04, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
-              transition={{ duration: 0.8 }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
-            >
-              <span className="text-[8rem] lg:text-[12rem] font-black tracking-tighter text-black uppercase transform -rotate-12 whitespace-nowrap">
-                {currentProduct.watermark}
-              </span>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Floating Ice Cream Image */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentProduct.id + activeSize}
-              initial={{ opacity: 0, y: 50, rotate: -5 }}
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              exit={{ opacity: 0, y: -50, rotate: 5 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="relative z-10 w-3/4 h-3/4 flex items-center justify-center"
-            >
-              <motion.img
-                animate={{ y: [-15, 15, -15] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                src={currentVariant.image}
-                alt={`${currentProduct.name} ${activeSize}`}
-                className="w-full h-full object-contain drop-shadow-[0_30px_30px_rgba(0,0,0,0.25)]"
-              />
-            </motion.div>
-          </AnimatePresence>
+        {/* Size Segmented Control */}
+        <div className="mb-10">
+          <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Select Size</h3>
+          <div className="inline-flex bg-gray-100 p-1.5 rounded-2xl relative w-full sm:w-auto">
+            {['100ml', '500ml'].map((size) => (
+              <button
+                key={size}
+                onClick={() => setActiveSize(size)}
+                className={`relative flex-1 sm:flex-none px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-300 z-10 ${
+                  activeSize === size ? product.themeText : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {activeSize === size && (
+                  <motion.div
+                    layoutId={`activeSizeBg-${product.id}`}
+                    className="absolute inset-0 bg-white rounded-xl shadow-sm border border-gray-200/50 -z-10"
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  />
+                )}
+                {size} <span className="hidden sm:inline">{size === '100ml' ? 'Cup' : 'Tub'}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* RIGHT SIDE: Interactive Controls & Details */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center">
-          
-          {/* Title & Description */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentProduct.id + "-text"}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="mb-10"
-            >
-              <h1 className="text-5xl lg:text-7xl font-serif font-black text-[#1A1A1A] mb-4 leading-tight tracking-tight">
-                {currentProduct.name}
-              </h1>
-              <p className="text-gray-500 text-lg lg:text-xl font-medium max-w-md leading-relaxed">
-                {currentProduct.tagline} Made from 100% pure Sita Ram milk.
-              </p>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Flavor Selector */}
-          <div className="mb-10">
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Select Flavor</h3>
-            <div className="flex flex-wrap gap-3">
-              {ICE_CREAMS.map((flavor, index) => (
-                <button
-                  key={flavor.id}
-                  onClick={() => setActiveFlavor(index)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border-2 ${
-                    activeFlavor === index
-                      ? `border-transparent ${flavor.themeBg} text-white shadow-lg transform scale-105`
-                      : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {flavor.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Size Segmented Control */}
-          <div className="mb-12">
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Select Size</h3>
-            <div className="inline-flex bg-gray-100 p-1.5 rounded-2xl relative">
-              {['100ml', '500ml'].map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setActiveSize(size)}
-                  className={`relative px-8 py-3 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-300 z-10 ${
-                    activeSize === size ? currentProduct.themeText : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {activeSize === size && (
-                    <motion.div
-                      layoutId="activeSizeBg"
-                      className="absolute inset-0 bg-white rounded-xl shadow-sm border border-gray-200/50 -z-10"
-                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    />
-                  )}
-                  {size} {size === '100ml' ? 'Cup' : 'Tub'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Price & Action Section */}
-          <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="text-center sm:text-left">
+        {/* Price & Action Section */}
+        <div className="mt-auto pt-8 border-t border-gray-100 flex flex-col gap-6">
+          <div className="flex justify-between items-end">
+            <div>
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Total Price</span>
               <AnimatePresence mode="wait">
                 <motion.div
@@ -223,32 +153,78 @@ export default function IceCreamPage() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="text-4xl font-black text-[#1A1A1A]"
+                  className="text-3xl sm:text-4xl font-black text-[#1A1A1A]"
                 >
                   NPR {currentVariant.price}
                 </motion.div>
               </AnimatePresence>
             </div>
-
-            <div className="flex-1 w-full">
-              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-start gap-3 mb-3">
-                <Info className="text-amber-500 shrink-0 mt-0.5" size={18} />
-                <div>
-                  <p className="text-sm font-bold text-[#1A1A1A]">Bulk Orders Only</p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">Online buying is disabled for ice creams. Please contact us directly for events and large orders.</p>
-                </div>
-              </div>
-              <a 
-                href="tel:015213049" 
-                className={`w-full flex items-center justify-center gap-2 ${currentProduct.themeBg} text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
-              >
-                <Phone size={16} /> Order: 015213049
-              </a>
-            </div>
           </div>
 
+          <div className="w-full">
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-start gap-3 mb-4">
+              <Info className="text-amber-500 shrink-0 mt-0.5" size={18} />
+              <div>
+                <p className="text-sm font-bold text-[#1A1A1A]">Bulk Orders Only</p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">Online buying is disabled for ice creams. Please contact us directly for events and large orders.</p>
+              </div>
+            </div>
+            <a 
+              href="tel:015213049" 
+              className={`w-full flex items-center justify-center gap-2 ${product.themeBg} text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+            >
+              <Phone size={16} /> Order: 015213049
+            </a>
+          </div>
         </div>
       </div>
+    </motion.div>
+  );
+};
+
+export default function IceCreamPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="flex flex-col min-h-screen relative">
+      <Header />
+      
+      {/* Main Page Content */}
+      <main className="flex-grow bg-[#FAF9F6] pt-32 pb-24 flex flex-col font-sans selection:bg-[#9e111a] selection:text-white">
+        
+        {/* Page Header */}
+        <div className="max-w-7xl mx-auto px-6 w-full text-center mb-16 relative z-10">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-5xl md:text-6xl lg:text-7xl font-serif font-black text-[#1A1A1A] mb-6 tracking-tight"
+          >
+            Sita Ram <span className="text-[#9e111a]">Ice Creams</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-500 text-lg md:text-xl font-medium max-w-2xl mx-auto"
+          >
+            Discover our luxurious collection of Sita Ram ice creams, crafted with pure milk and the finest ingredients.
+          </motion.p>
+        </div>
+
+        {/* Main Grid Showcase */}
+        <div className="max-w-7xl mx-auto px-6 w-full flex-grow relative z-10">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 lg:gap-16">
+            {ICE_CREAMS.map((product) => (
+              <IceCreamCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+        
+      </main>
+
+      <Footer />
     </div>
   );
 }
