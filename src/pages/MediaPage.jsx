@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Image as ImageIcon, X, Loader2, Calendar } from 'lucide-react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function MediaPage() {
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState([]);
   const [videos, setVideos] = useState([]);
   const [activeTab, setActiveTab] = useState('photos'); // 'photos' or 'videos'
@@ -11,6 +13,11 @@ export default function MediaPage() {
 
   // Gallery Lightbox State
   const [selectedGallery, setSelectedGallery] = useState(null);
+
+  // Typography helper for Nepali script
+  const isNepali = i18n.language === 'ne';
+  // NEW
+  const nepaliFontClass = isNepali ? "nepali-heading" : "tracking-wider";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -35,29 +42,30 @@ export default function MediaPage() {
   };
 
   return (
-    <div className="bg-[#FAF9F6] min-h-screen pt-32 pb-24 font-sans selection:bg-[#9e111a] selection:text-white">
+    // 🔥 FIX: Changed pb-24 to pb-10 md:pb-16 to reduce the massive gap above the footer
+    <div className="bg-[#FAF9F6] min-h-screen pt-12 pb-10 md:pb-16 font-sans selection:bg-[#9e111a] selection:text-white">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 mt-2">
           <motion.div 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 bg-[#E2B254]/20 text-[#002147] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6"
+            className={`inline-flex items-center gap-2 bg-[#E2B254]/20 text-[#002147] px-4 py-1.5 rounded-full text-xs font-black uppercase mb-6 ${isNepali ? nepaliFontClass : 'tracking-widest'}`}
           >
-            <ImageIcon size={14} /> Media Center
+            <ImageIcon size={14} /> {t('mediaPage.badge', 'Media Center')}
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-serif font-black text-[#1A1A1A] mb-6 tracking-tight"
+            className={`text-4xl md:text-6xl font-serif font-black text-[#1A1A1A] mb-6 ${isNepali ? nepaliFontClass : 'tracking-tight'}`}
           >
-            Our Journey in <span className="text-[#9e111a]">Pictures & Video</span>
+            {t('mediaPage.titleLine1', 'Our Journey in')} <span className="text-[#9e111a]">{t('mediaPage.titleLine2', 'Pictures & Video')}</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="text-gray-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed"
+            className={`text-gray-500 max-w-2xl mx-auto font-medium text-lg ${isNepali ? nepaliFontClass : 'leading-relaxed'}`}
           >
-            Take a look behind the scenes at Sita Ram Dairy. From our lush green pastures to community events and factory tours.
+            {t('mediaPage.description', 'Take a look behind the scenes at Sita Ram Dairy. From our lush green pastures to community events and factory tours.')}
           </motion.p>
         </div>
 
@@ -66,19 +74,19 @@ export default function MediaPage() {
           <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex gap-2">
             <button 
               onClick={() => setActiveTab('photos')}
-              className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+              className={`px-8 py-3 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-2 ${isNepali ? nepaliFontClass : 'tracking-widest'} ${
                 activeTab === 'photos' ? 'bg-[#002147] text-[#E2B254] shadow-md' : 'text-gray-400 hover:bg-gray-50'
               }`}
             >
-              <ImageIcon size={16} /> Photo Galleries
+              <ImageIcon size={16} /> {t('mediaPage.tabs.photos', 'Photo Galleries')}
             </button>
             <button 
               onClick={() => setActiveTab('videos')}
-              className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+              className={`px-8 py-3 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-2 ${isNepali ? nepaliFontClass : 'tracking-widest'} ${
                 activeTab === 'videos' ? 'bg-[#9e111a] text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'
               }`}
             >
-              <Play size={16} /> Video Tours
+              <Play size={16} /> {t('mediaPage.tabs.videos', 'Video Tours')}
             </button>
           </div>
         </div>
@@ -87,7 +95,9 @@ export default function MediaPage() {
         {loading && (
           <div className="py-20 flex flex-col items-center justify-center text-[#002147]">
             <Loader2 className="animate-spin mb-4" size={40} />
-            <p className="font-black tracking-widest uppercase text-sm">Loading Media...</p>
+            <p className={`font-black uppercase text-sm ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+              {t('mediaPage.loading', 'Loading Media...')}
+            </p>
           </div>
         )}
 
@@ -105,7 +115,9 @@ export default function MediaPage() {
                 {events.length === 0 ? (
                   <div className="col-span-full py-20 text-center text-gray-400">
                     <ImageIcon size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="font-bold uppercase tracking-widest">No galleries published yet.</p>
+                    <p className={`font-bold uppercase ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                      {t('mediaPage.emptyPhotos', 'No galleries published yet.')}
+                    </p>
                   </div>
                 ) : events.map((event, idx) => (
                   <motion.div 
@@ -123,14 +135,16 @@ export default function MediaPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
                       
                       {/* Floating Info Badge */}
-                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-[#002147] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-                        <ImageIcon size={12} /> {(event.images?.length || 0) + 1} Photos
+                      <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-[#002147] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1.5 shadow-lg ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                        <ImageIcon size={12} /> {(event.images?.length || 0) + 1} {t('mediaPage.photoCount', 'Photos')}
                       </div>
 
                       <div className="absolute bottom-6 left-6 right-6">
-                        <h3 className="text-xl font-serif font-black text-white leading-tight mb-2 group-hover:text-[#E2B254] transition-colors">{event.title}</h3>
-                        <p className="text-[10px] text-gray-300 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                          <Calendar size={12} /> {new Date(event.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        <h3 className={`text-xl font-serif font-black text-white leading-tight mb-2 group-hover:text-[#E2B254] transition-colors ${isNepali ? nepaliFontClass : ''}`}>
+                          {event.title}
+                        </h3>
+                        <p className={`text-[10px] text-gray-300 font-bold uppercase flex items-center gap-1.5 ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                          <Calendar size={12} /> {new Date(event.created_at).toLocaleDateString(isNepali ? 'ne-NP' : 'en-US', { month: 'long', year: 'numeric' })}
                         </p>
                       </div>
                     </div>
@@ -149,7 +163,9 @@ export default function MediaPage() {
                 {videos.length === 0 ? (
                   <div className="col-span-full py-20 text-center text-gray-400">
                     <Play size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="font-bold uppercase tracking-widest">No videos published yet.</p>
+                    <p className={`font-bold uppercase ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                      {t('mediaPage.emptyVideos', 'No videos published yet.')}
+                    </p>
                   </div>
                 ) : videos.map((video, idx) => (
                   <motion.div 
@@ -170,8 +186,12 @@ export default function MediaPage() {
                       ></iframe>
                     </div>
                     <div className="pt-6 px-2 pb-2 text-center">
-                      <h3 className="text-lg font-black text-[#1A1A1A] leading-tight">{video.title}</h3>
-                      <p className="text-[#9e111a] text-[10px] font-black uppercase tracking-widest mt-2">Official Video</p>
+                      <h3 className={`text-lg font-black text-[#1A1A1A] leading-tight ${isNepali ? nepaliFontClass : ''}`}>
+                        {video.title}
+                      </h3>
+                      <p className={`text-[#9e111a] text-[10px] font-black uppercase mt-2 ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                        {t('mediaPage.officialVideo', 'Official Video')}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -184,8 +204,8 @@ export default function MediaPage() {
         {/* --- IN THE NEWS SECTION --- */}
         <div className="mt-24 pt-16 border-t border-gray-200">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif font-black text-[#1A1A1A] tracking-tight">
-              In the <span className="text-[#9e111a]">News</span>
+            <h2 className={`text-3xl md:text-4xl font-serif font-black text-[#1A1A1A] ${isNepali ? nepaliFontClass : 'tracking-tight'}`}>
+              {t('mediaPage.newsTitleLine1', 'In the')} <span className="text-[#9e111a]">{t('mediaPage.newsTitleLine2', 'News')}</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -200,12 +220,12 @@ export default function MediaPage() {
               <div className="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 mb-6">
                 <img 
                   src="https://media.sobizcdn.com/hamroartha.com/media-file/images/2026/06/1782106488-IkWaZ.jpg" 
-                  alt="विदेशी ब्रान्डलाई चुनौती दिँदै सिताराम ‘चिलाक्स’, पूर्वी एशियामा निर्यातको तयारी" 
+                  alt={t('mediaPage.newsItem1', "Sitaram's 'Chilax' challenges foreign brands, prepares for export to East Asia")}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2">
-                विदेशी ब्रान्डलाई चुनौती दिँदै सिताराम ‘चिलाक्स’, पूर्वी एशियामा निर्यातको तयारी
+              <h3 className={`text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2 ${isNepali ? nepaliFontClass : ''}`}>
+                {t('mediaPage.newsItem1', "Sitaram's 'Chilax' challenges foreign brands, prepares for export to East Asia")}
               </h3>
             </a>
 
@@ -219,12 +239,12 @@ export default function MediaPage() {
               <div className="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 mb-6">
                 <img 
                   src="https://bizmandu.com/wp-content/uploads/2026/06/WhatsApp-Image-2026-06-18-at-5.37.05-PM-2.jpeg" 
-                  alt="सीताराम गोकुल मिल्कले मोही उत्पादन गर्न थाल्यो, उपभोक्ता मूल्य ३० रुपैयाँ" 
+                  alt={t('mediaPage.newsItem2', "Sitaram Gokul Milk starts producing Mohi, consumer price Rs 30")} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2">
-                सीताराम गोकुल मिल्कले मोही उत्पादन गर्न थाल्यो, उपभोक्ता मूल्य ३० रुपैयाँ
+              <h3 className={`text-xl md:text-2xl font-bold text-[#1A1A1A] leading-snug group-hover:text-[#9e111a] transition-colors px-2 pb-2 ${isNepali ? nepaliFontClass : ''}`}>
+                {t('mediaPage.newsItem2', "Sitaram Gokul Milk starts producing Mohi, consumer price Rs 30")}
               </h3>
             </a>
 
@@ -243,8 +263,12 @@ export default function MediaPage() {
             {/* Lightbox Header */}
             <div className="flex justify-between items-center p-6 text-white shrink-0">
               <div>
-                <h2 className="text-2xl font-serif font-black">{selectedGallery.title}</h2>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">Gallery View</p>
+                <h2 className={`text-2xl font-serif font-black ${isNepali ? nepaliFontClass : ''}`}>
+                  {selectedGallery.title}
+                </h2>
+                <p className={`text-gray-400 text-xs font-bold uppercase mt-1 ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                  {t('mediaPage.galleryView', 'Gallery View')}
+                </p>
               </div>
               <button 
                 onClick={() => setSelectedGallery(null)}

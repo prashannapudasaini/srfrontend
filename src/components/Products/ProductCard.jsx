@@ -111,7 +111,7 @@ export default function ProductCard({ product }) {
         
         <div className="mt-auto pt-3 border-t border-gray-50 flex justify-between items-center">
           <span className="text-lg font-bold text-[#E2B254]">Rs. {startingPrice}</span>
-          <motion.button 
+         <motion.button 
             whileTap={{ scale: 0.9 }}
             onClick={handleActionClick}
             disabled={totalStock === 0}
@@ -124,6 +124,7 @@ export default function ProductCard({ product }) {
           >
             {hasFlavors ? <Eye size={18} strokeWidth={2.5} /> : <ShoppingCart size={18} strokeWidth={2.5} />}
           </motion.button>
+         
         </div>
       </div>
     </motion.div>

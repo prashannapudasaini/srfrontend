@@ -68,9 +68,12 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="bg-[#FDF8E7] min-h-screen pt-28 pb-20">
+    <div className="bg-[#FDF8E7] min-h-screen pt-12 pb-20">
+      {/* ADJUSTED: Changed pt-28 to pt-12 to reduce the top gap */}
+      
       {/* 1. PAGE HEADER */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10 mt-8">
+      {/* ADJUSTED: Changed mt-8 to mt-2 to reduce the top gap */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10 mt-2">
         <p className="text-xs font-bold text-[#9e111a] uppercase tracking-[0.3em] mb-4">
           Our Collection
         </p>
@@ -206,7 +209,7 @@ function ProductCard({ product, navigate, addToCart }) {
               NPR {lowestPrice}<span className="text-xs text-gray-400 font-bold ml-1">{unit}</span>
             </span>
 
-            {/* Add to Cart Button */}
+           {/* Add to Cart Button*/}
             <button 
               onClick={(e) => {
                 e.stopPropagation(); // Prevents navigating to the detail page when clicking add

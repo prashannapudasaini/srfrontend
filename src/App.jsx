@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react
 import { useEffect, useState } from 'react';
 import { XCircle } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion'; 
+import { useTranslation } from 'react-i18next'; // ADDED FOR i18n
 
 import DeliveryDashboard from './delivery/DeliveryDashboard';
 import Preloader from './components/Preloader'; 
@@ -12,6 +13,7 @@ import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import FloatingChat from './components/FloatingChat'; 
 import ProtectedRoute from './components/ProtectedRoute'; 
+import PromotionalPopup from './components/PromotionalPopup'; 
 
 // Public Facing Pages
 import HomePage from './pages/HomePage';
@@ -27,7 +29,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostDetail from './pages/BlogPostDetail';
 import PaymentSuccess from './pages/PaymentSuccess';
-import ContactPage from './pages/ContactPage'; // ADDED: ContactPage import
+import ContactPage from './pages/ContactPage'; 
 
 // Shopping, Checkout & History
 import CartPage from './pages/CartPage';
@@ -50,6 +52,9 @@ import SubscriptionManagement from './admin/SubscriptionManagement';
 
 // Ice Cream Page
 import IceCreamPage from './pages/IceCreamPage';
+
+// Internationalization Setup
+import './i18n';
 
 /**
  * ScrollToTop Utility Component
@@ -83,6 +88,12 @@ const PublicLayout = ({ children }) => (
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Initialize i18n at the App level
+  const { t, i18n } = useTranslation();
+  const isNepali = i18n.language === 'ne';
+  const nepaliFontClass = isNepali ? "font-['Noto_Sans_Devanagari','Mukta',sans-serif]" : "";
+  const btnFontClass = isNepali ? "font-['Noto_Sans_Devanagari','Mukta',sans-serif] tracking-normal" : "tracking-widest";
 
   // Preloader Logic: Hide after 2 seconds
   useEffect(() => {
@@ -103,6 +114,9 @@ function App() {
       {/* Global Scroll Handler */}
       <ScrollToTop />
 
+      {/* === ADDED PROMOTIONAL POPUP HERE === */}
+      <PromotionalPopup />
+
       {/* === PRELOADER IMPLEMENTATION === */}
       <AnimatePresence mode="wait">
         {isLoading && <Preloader key="preloader" />}
@@ -122,7 +136,7 @@ function App() {
           <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
           <Route path="/delivery" element={<DeliveryDashboard />} />
           <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
-          <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} /> {/* ADDED: Contact Route */}
+          <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} /> 
           
           {/* === ESEWA PAYMENT ROUTES === */}
           <Route path="/payment-success" element={<PaymentSuccess/>} />
@@ -134,12 +148,14 @@ function App() {
                 <div className="w-24 h-24 bg-red-50 rounded-[2rem] border border-red-100 flex items-center justify-center text-[#9e111a] mb-6 shadow-sm">
                   <XCircle size={48} strokeWidth={2.5} />
                 </div>
-                <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Payment Failed</h2>
-                <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
-                  Your transaction was cancelled or unsuccessful. No charges were made to your account.
+                <h2 className={`text-4xl font-serif font-black text-[#1A1A1A] mb-4 ${nepaliFontClass}`}>
+                  {t('errors.payment.title', 'Payment Failed')}
+                </h2>
+                <p className={`text-gray-500 font-medium mb-10 max-w-md mx-auto leading-relaxed ${nepaliFontClass}`}>
+                  {t('errors.payment.desc', 'Your transaction was cancelled or unsuccessful. No charges were made to your account.')}
                 </p>
-                <Link to="/checkout" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
-                  Return to Checkout
+                <Link to="/checkout" className={`inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-xl font-black uppercase text-xs hover:bg-[#1A1A1A] transition-all shadow-xl ${btnFontClass}`}>
+                  {t('errors.payment.btn', 'Return to Checkout')}
                 </Link>
               </div>
             </PublicLayout>
@@ -161,7 +177,6 @@ function App() {
           <Route path="/history" element={<PublicLayout><OrderHistoryPage /></PublicLayout>} />
 
           {/* === ADMIN PANEL (NESTED & PROTECTED) === */}
-          {/* The ProtectedRoute wraps the main Dashboard. All children inherit this protection automatically! */}
           <Route 
             path="/admin" 
             element={
@@ -189,12 +204,14 @@ function App() {
               <div className="flex flex-col items-center justify-center py-40 text-center px-6">
                 <h1 className="text-[12rem] font-serif font-black text-[#9e111a]/5 leading-none">404</h1>
                 <div className="relative -mt-20">
-                  <h2 className="text-4xl font-serif font-black text-[#1A1A1A] mb-4">Lost in the pasture?</h2>
-                  <p className="text-gray-500 font-medium mb-10 max-w-md mx-auto">
-                    The page you are looking for has moved to a different pasture or no longer exists.
+                  <h2 className={`text-4xl font-serif font-black text-[#1A1A1A] mb-4 ${nepaliFontClass}`}>
+                    {t('errors.notFound.title', 'Lost in the pasture?')}
+                  </h2>
+                  <p className={`text-gray-500 font-medium mb-10 max-w-md mx-auto leading-relaxed ${nepaliFontClass}`}>
+                    {t('errors.notFound.desc', 'The page you are looking for has moved to a different pasture or no longer exists.')}
                   </p>
-                  <Link to="/" className="inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-full font-black uppercase tracking-widest text-xs hover:bg-[#1A1A1A] transition-all shadow-xl">
-                    Return to Farm Home
+                  <Link to="/" className={`inline-flex items-center gap-3 bg-[#9e111a] text-white px-10 py-4 rounded-full font-black uppercase text-xs hover:bg-[#1A1A1A] transition-all shadow-xl ${btnFontClass}`}>
+                    {t('errors.notFound.btn', 'Return to Farm Home')}
                   </Link>
                 </div>
               </div>

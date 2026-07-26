@@ -16,8 +16,8 @@ export default function CartPage() {
   const deliveryCharge = subtotal > 2000 ? 0 : 100;
   const total = subtotal > 0 ? subtotal + deliveryCharge : 0;
 
-  // Minimum Order Value Constant
-  const MINIMUM_ORDER_VALUE = 3000;
+  // Minimum Order Value Constant - UPDATED TO 1000
+  const MINIMUM_ORDER_VALUE = 0;
   const isCheckoutDisabled = subtotal < MINIMUM_ORDER_VALUE;
 
   // Professional Auth Guard for Checkout
@@ -65,7 +65,7 @@ export default function CartPage() {
             {/* List of Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               <AnimatePresence mode="popLayout">
-                {/* 🔥 THE FIX: Reversing the array here puts newest items on top! */}
+                {/* Reversing the array here puts newest items on top! */}
                 {[...cartItems].reverse().map((item) => {
                   const itemPrice = Number(item.price) || Number(item.price_npr) || 0;
                   // Use cartItemId if it exists (for variants), otherwise fallback to standard id

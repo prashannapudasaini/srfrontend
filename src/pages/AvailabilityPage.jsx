@@ -1,12 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; 
-import { MapPin, CheckCircle2, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset, Copy, ShieldAlert } from 'lucide-react';
+import { MapPin, CheckCircle2, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset, Copy, ShieldAlert, Lock, CreditCard, Clock, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; 
 import api from '../services/api';
 import ContactModal from '../components/ContactModal';
 
-const AVAILABLE_LOCATIONS = ["Kathmandu", "Lalitpur", "Bhaktapur"];
+// 1. IMPORT CONNECTIPS LOGO
+import cIPSlogo from '../assets/cIPSlogo.png'; 
+
+// EXPANDED KATHMANDU VALLEY LOCATIONS
+const AVAILABLE_LOCATIONS = [
+  "Bafal", "Balaju", "Baluwatar", "Baneshwor", "Basundhara", 
+  "Boudha", "Chabahil", "Chandragiri", "Dhapasi", "Gongabu", 
+  "Gwarko", "Jorpati", "Kalanki", "Kalimati", "Koteshwor", 
+  "Lazimpat", "Macha Pokhari", "Maharajgunj", "Naxal", "New Baneshwor",
+  "Old Baneshwor", "Putalisadak", "Samakhusi", "Sinamangal", "Sitapaila", 
+  "Swayambhu", "Tahachal", "Thamel", "Tokha", "Tripureshwar"
+].sort();
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const ALTERNATE_SETS = {
@@ -23,26 +34,40 @@ export default function AvailabilityPage() {
 
   // --- WIZARD STATES ---
   const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState(''); // 'daily', 'alternate', 'weekly', 'custom'
+  const [plan, setPlan] = useState(''); 
   const [selectedDays, setSelectedDays] = useState([]);
   const [activeDayTab, setActiveDayTab] = useState('');
   
-  // Basket structure: { Monday: { prodId: qty }, Tuesday: { prodId: qty } }
   const [basket, setBasket] = useState({});
   
-  // Delivery States
+  // --- LOCATION SEARCH STATES ---
   const [location, setLocation] = useState(''); 
+  const [locationSearch, setLocationSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const [timing, setTiming] = useState(''); 
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Calculate Tomorrow's Date for the Delivery Notice
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowFormatted = tomorrow.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
-  // Fetch Products
+  // Handle clicking outside the location dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+        // Reset search to actual location if they clicked away without selecting
+        if (location) setLocationSearch(location);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [location]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -55,7 +80,7 @@ export default function AvailabilityPage() {
               name: p.name,
               size: p.variants?.[0]?.size || 'Standard',
               price: lowestPrice,
-              img: p.image || p.variants?.[0]?.image || '/logo.png'
+              img: p.base_image || p.image || p.variants?.[0]?.image || '/logo.png'
             };
           });
           setProducts(formattedProducts);
@@ -69,15 +94,14 @@ export default function AvailabilityPage() {
     fetchProducts();
   }, []);
 
-  // --- PLAN & DAY LOGIC ---
   const handlePlanSelect = (selectedPlan) => {
     setPlan(selectedPlan);
-    setBasket({}); // Reset basket when plan changes
+    setBasket({}); 
     
     if (selectedPlan === 'daily') {
       setSelectedDays(DAYS_OF_WEEK);
       setActiveDayTab(DAYS_OF_WEEK[0]);
-      setStep(3); // Skip day selection for daily
+      setStep(3); 
     } else if (selectedPlan === 'alternate') {
       setSelectedDays(ALTERNATE_SETS.MWF);
       setActiveDayTab(ALTERNATE_SETS.MWF[0]);
@@ -102,14 +126,12 @@ export default function AvailabilityPage() {
         ? selectedDays.filter(d => d !== day) 
         : [...selectedDays, day];
       
-      // Sort days chronologically
       newDays = DAYS_OF_WEEK.filter(d => newDays.includes(d));
       setSelectedDays(newDays);
       if (!newDays.includes(activeDayTab)) setActiveDayTab(newDays[0] || '');
     }
   };
 
-  // --- BASKET LOGIC ---
   const updateQuantity = (productId, delta) => {
     setBasket(prev => {
       const currentDayBasket = prev[activeDayTab] || {};
@@ -136,11 +158,9 @@ export default function AvailabilityPage() {
     alert("Basket copied to all selected days!");
   };
 
-  // --- MATH & VALIDATION ---
   const calculateTotals = () => {
     let baseWeeklyCost = 0;
     
-    // Sum up items across all selected days
     selectedDays.forEach(day => {
       const dayItems = basket[day] || {};
       Object.entries(dayItems).forEach(([prodId, qty]) => {
@@ -149,7 +169,6 @@ export default function AvailabilityPage() {
       });
     });
 
-    // Monthly multiplier (4 weeks) vs Custom (1 week)
     const multiplier = plan === 'custom' ? 1 : 4;
     return { weeklyCost: baseWeeklyCost, finalCost: baseWeeklyCost * multiplier };
   };
@@ -158,7 +177,6 @@ export default function AvailabilityPage() {
 
   const isBasketValid = useMemo(() => {
     if (selectedDays.length === 0) return false;
-    // Check if EVERY selected day has at least 1 item
     return selectedDays.every(day => {
       const dayItems = basket[day] || {};
       const totalItems = Object.values(dayItems).reduce((sum, qty) => sum + qty, 0);
@@ -166,15 +184,19 @@ export default function AvailabilityPage() {
     });
   }, [selectedDays, basket]);
 
-  // --- CHECKOUT & ESEWA ---
-  const handleEsewaCheckout = async () => {
+  const filteredLocations = useMemo(() => {
+    return AVAILABLE_LOCATIONS.filter(loc => 
+      loc.toLowerCase().includes(locationSearch.toLowerCase())
+    );
+  }, [locationSearch]);
+
+  const handleConnectIPSCheckout = async () => {
     if (!isAuthenticated) return navigate('/login');
     if (!isBasketValid || !location || !timing) return alert("Please complete all fields.");
     
     setIsSubmitting(true);
     
     try {
-      // 1. Format the schedule for the database
       const cleanWeeklySchedule = selectedDays.map(day => {
         const itemsForDay = [];
         Object.entries(basket[day] || {}).forEach(([productId, qty]) => {
@@ -186,7 +208,7 @@ export default function AvailabilityPage() {
         return { day, items: itemsForDay };
       });
 
-      // 2. CREATE SUBSCRIPTION IN DATABASE FIRST
+      // 1. Create Sub in Database
       const createRes = await api.post('/orders/create_sub.php', {
         user_id: user.id,
         plan_type: plan,
@@ -202,32 +224,31 @@ export default function AvailabilityPage() {
         return;
       }
 
-      // We capture the real DB ID (e.g., 15)
       const subDbId = createRes.data.id;
 
-      // 3. INITIALIZE ESEWA WITH THE REAL DATABASE ID (e.g., SUB_15)
-      const res = await api.post('/orders/init_esewa.php', {
+      // 2. INITIALIZE CONNECTIPS 
+      const connectIpsRes = await api.post('/orders/init_connectips.php', {
         amount: finalCost,
         purchase_id: `SUB_${subDbId}` 
       });
 
-      if (res.data.status === 'success') {
-        // 4. Send to eSewa
+      if (connectIpsRes.data.success) {
+        // 3. Build & Submit Form
         const form = document.createElement("form");
         form.setAttribute("method", "POST");
-        form.setAttribute("action", "https://rc-epay.esewa.com.np/api/epay/main/v2/form");
+        form.setAttribute("action", connectIpsRes.data.gatewayUrl);
 
-        for (const key in res.data.esewa_payload) {
+        for (const key in connectIpsRes.data.payload) {
           const hiddenField = document.createElement("input");
           hiddenField.setAttribute("type", "hidden");
           hiddenField.setAttribute("name", key);
-          hiddenField.setAttribute("value", res.data.esewa_payload[key]);
+          hiddenField.setAttribute("value", connectIpsRes.data.payload[key]);
           form.appendChild(hiddenField);
         }
         document.body.appendChild(form);
         form.submit();
       } else {
-        alert(res.data.message || "Failed to initialize eSewa.");
+        alert("Failed to initialize connectIPS: " + connectIpsRes.data.message);
         setIsSubmitting(false);
       }
     } catch (error) {
@@ -249,7 +270,6 @@ export default function AvailabilityPage() {
       <div className="bg-[#FAF9F6] min-h-screen pt-28 pb-20 font-sans text-[#1A1A1A]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           
-          {/* Header */}
           <div className="text-center mb-10">
             <h1 className="text-4xl md:text-5xl font-serif font-black text-[#002147] tracking-tight">Curate Your Plan</h1>
             <p className="text-gray-500 font-medium mt-3 max-w-xl mx-auto">Build your recurring farm-fresh delivery schedule in three simple steps.</p>
@@ -257,11 +277,7 @@ export default function AvailabilityPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* ========================================== */}
-            {/* LEFT SIDE: WIZARD FLOW */}
-            {/* ========================================== */}
             <div className="lg:col-span-8 space-y-6">
-              
               {/* STEP 1: CHOOSE PLAN */}
               <div className={`relative bg-white rounded-[2rem] border transition-all duration-300 overflow-hidden ${step === 1 ? 'border-[#002147] shadow-xl' : 'border-gray-100 shadow-sm opacity-60'}`}>
                 <div className="p-6 bg-gray-50/50 flex justify-between items-center cursor-pointer" onClick={() => setStep(1)}>
@@ -437,9 +453,7 @@ export default function AvailabilityPage() {
 
             </div>
 
-            {/* ========================================== */}
             {/* RIGHT SIDE: CHECKOUT SUMMARY */}
-            {/* ========================================== */}
             <div className="lg:col-span-4 sticky top-28 space-y-6">
               <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 bg-[#002147] text-white">
@@ -449,7 +463,6 @@ export default function AvailabilityPage() {
                 </div>
 
                 <div className="p-6 space-y-6">
-                  {/* Validation Warning */}
                   {!isBasketValid && step === 3 && (
                     <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex gap-2 text-xs font-bold">
                       <ShieldAlert size={16} className="shrink-0"/>
@@ -457,35 +470,72 @@ export default function AvailabilityPage() {
                     </div>
                   )}
 
-                  {/* Settings */}
                   <div className="space-y-4">
-                    {/* Notice Box */}
-                    <div className="bg-red-50 border border-red-100 text-[#9e111a] p-3 rounded-xl flex items-start gap-2 mb-3">
-                      <Info size={16} className="shrink-0 mt-0.5" />
-                      <p className="text-[10px] font-bold">Order before 8:00 PM for tomorrow's delivery. Your cycle begins: <strong className="font-black">{tomorrowFormatted}</strong></p>
+                    
+                    {/* UPDATED 12-HOUR WARNING MESSAGE */}
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl flex items-start gap-2 mb-3">
+                      <Clock size={16} className="shrink-0 mt-0.5" />
+                      <p className="text-[10px] font-bold">Please place your order at least <strong className="font-black">12 hours</strong> before your preferred delivery time.</p>
                     </div>
 
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Delivery Zone</label>
+                    {/* SEARCHABLE LOCATION DROPDOWN */}
+                    <div ref={dropdownRef}>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Kathmandu Valley Delivery Zone</label>
                       <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <select value={location} onChange={(e) => setLocation(e.target.value)} className="w-full bg-gray-50 border border-gray-200 text-sm font-bold text-[#1A1A1A] rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-[#002147]">
-                          <option value="" disabled>Select Zone...</option>
-                          {AVAILABLE_LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-                        </select>
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-[#002147]" size={16} />
+                        <input 
+                          type="text"
+                          placeholder="Search your location..."
+                          value={locationSearch}
+                          onFocus={() => setIsDropdownOpen(true)}
+                          onChange={(e) => {
+                            setLocationSearch(e.target.value);
+                            setIsDropdownOpen(true);
+                          }}
+                          className="w-full bg-gray-50 border border-gray-200 text-sm font-bold text-[#1A1A1A] rounded-xl pl-9 pr-10 py-2.5 outline-none focus:border-[#002147] focus:bg-white transition-all shadow-sm"
+                        />
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                        
+                        <AnimatePresence>
+                          {isDropdownOpen && (
+                            <motion.ul 
+                              initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                              className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto custom-scrollbar overflow-hidden"
+                            >
+                              {filteredLocations.length > 0 ? (
+                                filteredLocations.map(loc => (
+                                  <li 
+                                    key={loc} 
+                                    onMouseDown={(e) => {
+                                      // Using onMouseDown instead of onClick to prevent blur from closing it too early
+                                      e.preventDefault();
+                                      setLocation(loc);
+                                      setLocationSearch(loc);
+                                      setIsDropdownOpen(false);
+                                    }}
+                                    className={`px-4 py-2.5 text-sm font-bold cursor-pointer hover:bg-gray-50 transition-colors ${location === loc ? 'bg-blue-50 text-[#002147]' : 'text-gray-700'}`}
+                                  >
+                                    {loc}
+                                  </li>
+                                ))
+                              ) : (
+                                <li className="px-4 py-3 text-xs text-gray-400 font-medium italic text-center">No matching locations found</li>
+                              )}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
                     
                     <div>
                       <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Timing</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={() => setTiming('morning')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'morning' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunrise size={14}/> AM</button>
-                        <button onClick={() => setTiming('evening')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'evening' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunset size={14}/> PM</button>
+                        <button onClick={() => setTiming('morning')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'morning' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunrise size={14}/> 7-10 AM</button>
+                        <button onClick={() => setTiming('evening')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'evening' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunset size={14}/> 2-5 PM</button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Calculations */}
                   <div className="border-t border-gray-100 pt-6 space-y-3">
                     <div className="flex justify-between text-sm font-bold text-gray-600">
                       <span>Weekly Base Cost</span>
@@ -501,14 +551,30 @@ export default function AvailabilityPage() {
                     </div>
                   </div>
 
-                  {/* Checkout Button */}
+                  {/* PROFESSIONAL CHECKOUT BUTTON UPGRADE */}
                   <button 
-                    onClick={handleEsewaCheckout}
+                    onClick={handleConnectIPSCheckout}
                     disabled={!isBasketValid || !location || !timing || isSubmitting}
-                    className="w-full bg-[#60A839] hover:bg-[#4d872d] disabled:bg-gray-200 disabled:text-gray-400 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg flex justify-center items-center gap-2"
+                    className="w-full bg-[#00519E] hover:bg-[#004182] disabled:opacity-70 disabled:hover:bg-[#00519E] text-white p-4 rounded-xl font-bold text-sm uppercase tracking-wide transition-all shadow-md flex justify-center items-center gap-3 relative"
                   >
-                    {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Processing...</> : `Pay via eSewa`}
+                    {isSubmitting ? (
+                      <><Loader2 className="animate-spin" size={20} /> Processing Payment...</>
+                    ) : (
+                      <>
+                        <Lock size={16} className="opacity-70" />
+                        <span>Pay via</span>
+                        <div className="bg-white px-3 py-1 rounded shadow-sm">
+                          <img src={cIPSlogo} alt="connectIPS" className="h-4 object-contain block" />
+                        </div>
+                      </>
+                    )}
                   </button>
+                  
+                  <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <Lock size={12} /> 
+                    <span>Encrypted and secured by connectIPS.</span>
+                  </div>
+
                 </div>
               </div>
             </div>

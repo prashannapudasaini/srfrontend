@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react'; // <-- Imported Icons for arrows
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import MilkDivider from './MilkDivider';
 
 // IMPORT YOUR IMAGES DIRECTLY
@@ -9,34 +10,44 @@ import hero2 from '../../assets/hero_2.webp';
 import hero3 from '../../assets/hero_3.webp';
 
 const HeroSlider = () => {
+  const { t, i18n } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const slides = [
-    {
-      id: 1,
-      title: "Pure Organic Ghee",
-      subtitle: "Authentic Homemade Taste",
-      // Condensed to 22 words
-      description: "Healthy, flavorful ghee with a rich aroma and granulated texture. Hygienically packed for authentic homemade taste, perfect for traditional and modern cooking.",
-      image: hero1, 
-    },
-    {
-      id: 2,
-      title: "Energy Fresh Drink",
-      subtitle: "Smooth & Energizing",
-      // Condensed to 21 words, flavor-neutral for all 5 flavors
-      description: "A refreshing low-fat dairy beverage packed with protein and calcium. Hygienically processed and ready to drink for a smooth, energizing boost.",
-      image: hero2, 
-    },
-    {
-      id: 3,
-      title: "Strawberry Lassi",
-      subtitle: "Fresh Curd & Berries",
-      // Condensed to 21 words
-      description: "Smooth, creamy lassi blended with fresh curd and delicious strawberry crush. Rich in protein and calcium, hygienically packed for refreshing enjoyment.",
-      image: hero3, 
-    }
-  ];
+
+  // 1. Fetch translations as an array with English fallbacks
+  const translatedSlides = t('heroSlider.slides', {
+    returnObjects: true,
+    defaultValue: [
+      {
+        title: "Pure Organic Ghee",
+        subtitle: "Authentic Homemade Taste",
+        description: "Healthy, flavorful ghee with a rich aroma and granulated texture. Hygienically packed for authentic homemade taste, perfect for traditional and modern cooking."
+      },
+      {
+        title: "Energy Fresh Drink",
+        subtitle: "Smooth & Energizing",
+        description: "A refreshing low-fat dairy beverage packed with protein and calcium. Hygienically processed and ready to drink for a smooth, energizing boost."
+      },
+      {
+        title: "Strawberry Lassi",
+        subtitle: "Fresh Curd & Berries",
+        description: "Smooth, creamy lassi blended with fresh curd and delicious strawberry crush. Rich in protein and calcium, hygienically packed for refreshing enjoyment."
+      }
+    ]
+  });
+
+  // 2. Merge static images with the translated text data
+  const slideImages = [hero1, hero2, hero3];
+  const slides = translatedSlides.map((slide, index) => ({
+    ...slide,
+    id: index + 1,
+    image: slideImages[index] || slideImages[0], 
+  }));
+
+  // 3. Nepali Typography Helper
+  const isNepali = i18n.language === 'ne';
+  // Applying the specific font stack, line-height 1.8, removing letter-spacing, and ensuring a safe bounding box
+  // NEW
+const nepaliFontClass = isNepali ? "nepali-heading" : "tracking-wider";
 
   // Manual Navigation Functions
   const nextSlide = useCallback(() => {
@@ -83,24 +94,24 @@ const HeroSlider = () => {
             >
               <div className="flex items-center gap-4 mb-4">
                 <span className="w-12 h-0.5 bg-[#E2B254]"></span>
-                <h2 className="text-[#E2B254] uppercase tracking-[0.2em] text-sm font-bold">
+                <h2 className={`text-[#E2B254] uppercase text-sm font-bold ${isNepali ? nepaliFontClass : 'tracking-[0.2em]'}`}>
                   {slides[currentIndex].subtitle}
                 </h2>
               </div>
-              <h1 className="text-5xl md:text-7xl font-serif font-extrabold mb-6 leading-[1.1] text-white">
+              
+              <h1 className={`text-5xl md:text-7xl font-serif font-extrabold mb-6 text-white ${isNepali ? nepaliFontClass : 'leading-[1.1]'}`}>
                 {slides[currentIndex].title}
               </h1>
-              <p className="text-lg md:text-xl mb-10 text-gray-200 font-sans max-w-lg leading-relaxed">
+              
+              <p className={`text-lg md:text-xl mb-10 text-gray-200 font-sans max-w-lg ${isNepali ? nepaliFontClass : 'leading-relaxed'}`}>
                 {slides[currentIndex].description}
               </p>
-              {/* Button removed as requested previously */}
             </motion.div>
           </div>
         </motion.div>
       </AnimatePresence>
 
       {/* --- MANUAL SLIDING ARROWS --- */}
-      {/* Hidden on mobile to prevent clutter, visible on hover on larger screens */}
       <button 
         onClick={prevSlide}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-black/20 hover:bg-[#E2B254] text-white hover:text-[#a80000] rounded-full backdrop-blur-sm transition-all duration-300 opacity-0 group-hover:opacity-100 hidden md:flex"

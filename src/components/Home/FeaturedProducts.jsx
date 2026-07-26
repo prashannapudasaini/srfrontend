@@ -1,22 +1,36 @@
-// frontend/src/components/Home/FeaturedProducts.jsx
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useTranslation } from 'react-i18next';
 
 const FeaturedProducts = () => {
   const { addToCart } = useCart();
+  const { t, i18n } = useTranslation();
+
+  // Typography helper for Nepali script
+  const isNepali = i18n.language === 'ne';
+  // NEW
+const nepaliFontClass = isNepali ? "nepali-heading" : "tracking-wider";
   
-  // Exactly 13 premium products
+  // Exactly 13 premium products, utilizing translated strings for the mock data
   const products = Array.from({ length: 13 }, (_, i) => ({
     id: i + 1,
-    name: i % 2 === 0 ? "Premium A2 Milk" : "Organic Cow Ghee",
-    category: i % 2 === 0 ? "Milk" : "Ghee",
+    name: i % 2 === 0 
+      ? t('featuredProducts.items.milk.name', "Premium A2 Milk") 
+      : t('featuredProducts.items.ghee.name', "Organic Cow Ghee"),
+    category: i % 2 === 0 
+      ? t('featuredProducts.items.milk.category', "Milk") 
+      : t('featuredProducts.items.ghee.category', "Ghee"),
     price: i % 2 === 0 ? 130 : 1200,
     oldPrice: i % 2 === 0 ? 150 : 1400,
     image: i % 2 === 0 
-      ? "../assets//milk.webp" 
-      : "../assets//ghee.webp",
-    badge: i === 0 ? "Top Seller" : i === 2 ? "New" : null
+      ? "../../assets/milk.webp" 
+      : "../../assets/ghee.webp",
+    badge: i === 0 
+      ? t('featuredProducts.badges.topSeller', "Top Seller") 
+      : i === 2 
+        ? t('featuredProducts.badges.new', "New") 
+        : null
   }));
 
   return (
@@ -33,11 +47,15 @@ const FeaturedProducts = () => {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex justify-between items-end mb-10">
           <div>
-            <h2 className="text-[#9e111a] text-sm font-bold uppercase tracking-widest mb-2">Shop Our Farm</h2>
-            <h3 className="text-3xl md:text-4xl font-serif font-bold text-[#1A1A1A]">Just For You</h3>
+            <h2 className={`text-[#9e111a] text-sm font-bold uppercase mb-2 ${isNepali ? `${nepaliFontClass} inline-block py-1` : 'tracking-widest'}`}>
+              {t('featuredProducts.subtitle', 'Shop Our Farm')}
+            </h2>
+            <h3 className={`text-3xl md:text-4xl font-serif font-bold text-[#1A1A1A] ${isNepali ? nepaliFontClass : ''}`}>
+              {t('featuredProducts.title', 'Just For You')}
+            </h3>
           </div>
-          <button className="text-[#1A1A1A] font-bold hover:text-[#9e111a] transition-colors hidden sm:block border-b-2 border-[#1A1A1A] hover:border-[#9e111a] pb-1">
-            View All Catalog
+          <button className={`text-[#1A1A1A] font-bold hover:text-[#9e111a] transition-colors hidden sm:block border-b-2 border-[#1A1A1A] hover:border-[#9e111a] pb-1 ${isNepali ? nepaliFontClass : ''}`}>
+            {t('featuredProducts.viewAll', 'View All Catalog')}
           </button>
         </div>
 
@@ -50,7 +68,7 @@ const FeaturedProducts = () => {
               className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full relative"
             >
               {product.badge && (
-                <div className="absolute top-3 left-3 z-20 bg-[#9e111a] text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded shadow-md uppercase">
+                <div className={`absolute top-3 left-3 z-20 bg-[#9e111a] text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded shadow-md uppercase ${isNepali ? nepaliFontClass : ''}`}>
                   {product.badge}
                 </div>
               )}
@@ -64,19 +82,21 @@ const FeaturedProducts = () => {
               </div>
 
               <div className="p-4 flex flex-col flex-grow">
-                <p className="text-[10px] sm:text-xs text-[#9e111a] font-black uppercase tracking-wider mb-1">{product.category}</p>
-                <h4 className="text-sm sm:text-base font-bold text-[#1A1A1A] leading-tight mb-2 line-clamp-2">
+                <p className={`text-[10px] sm:text-xs text-[#9e111a] font-black uppercase mb-1 ${isNepali ? nepaliFontClass : 'tracking-wider'}`}>
+                  {product.category}
+                </p>
+                <h4 className={`text-sm sm:text-base font-bold text-[#1A1A1A] leading-tight mb-2 line-clamp-2 ${isNepali ? nepaliFontClass : ''}`}>
                   {product.name}
                 </h4>
                 
                 <div className="mt-auto">
                   <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-lg sm:text-xl font-black text-[#1A1A1A]">
-                      NPR {product.price}
+                    <span className={`text-lg sm:text-xl font-black text-[#1A1A1A] ${isNepali ? nepaliFontClass : ''}`}>
+                      {t('common.currency', 'NPR')} {product.price}
                     </span>
                     {product.oldPrice && (
-                      <span className="text-xs text-gray-400 line-through font-bold">
-                        NPR {product.oldPrice}
+                      <span className={`text-xs text-gray-400 line-through font-bold ${isNepali ? nepaliFontClass : ''}`}>
+                        {t('common.currency', 'NPR')} {product.oldPrice}
                       </span>
                     )}
                   </div>
@@ -87,10 +107,10 @@ const FeaturedProducts = () => {
                       e.preventDefault();
                       if(addToCart) addToCart(product);
                     }}
-                    className="w-full bg-[#FDF8E7] text-[#9e111a] border border-[#9e111a]/20 py-2 sm:py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 group-hover:bg-[#9e111a] group-hover:text-white transition-colors duration-300"
+                    className={`w-full bg-[#FDF8E7] text-[#9e111a] border border-[#9e111a]/20 py-2 sm:py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 group-hover:bg-[#9e111a] group-hover:text-white transition-colors duration-300 ${isNepali ? nepaliFontClass : ''}`}
                   >
                     <ShoppingCart size={16} />
-                    <span>Add to Cart</span>
+                    <span>{t('products.addToCart', 'Add to Cart')}</span>
                   </button>
                 </div>
               </div>

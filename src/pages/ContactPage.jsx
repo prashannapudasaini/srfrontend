@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, CheckCircle2, Send } from 'lucide-react';
+import Footer from '../components/Layout/Footer';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -204,6 +205,8 @@ export default function ContactPage() {
           </form>
         </motion.div>
       </div>
-    </div>
+      
+    </div>  
   );
+
 }

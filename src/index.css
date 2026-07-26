@@ -6,6 +6,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* --- FIX: Prevent horizontal scroll on mobile --- */
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    /* ----------------------------------------------- */
   }
   
   body {
@@ -20,7 +25,20 @@
     /* ------------------------------------ */
     
     @apply font-sans text-dairyBlack antialiased min-h-screen;
+
+    /* --- FIX: Extra safety for body itself --- */
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    /* ---------------------------------------- */
   }
+
+  /* --- FIX: Secure the React root container --- */
+  #root {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  /* -------------------------------------------- */
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif tracking-tight;
@@ -52,4 +70,34 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-dairyRed;
   }
+}
+
+/* ========================================== */
+/* NEPALI TYPOGRAPHY (Matched to English)     */
+/* ========================================== */
+
+/* 1. Body Text: Uses Mukta but explicitly inherits English colors and spacing */
+[lang="ne"],
+[lang="ne"] p,
+[lang="ne"] span,
+[lang="ne"] li,
+.nepali-body {
+  font-family: 'Mukta', sans-serif !important;
+  letter-spacing: normal !important;
+  /* NO color overrides. NO line-height overrides. 
+     This allows Tailwind's text-gray-500 and leading-relaxed to work perfectly identically to English. */
+}
+
+/* 2. Headings: Uses Tiro to match your English serif headings */
+[lang="ne"] h1, 
+[lang="ne"] h2, 
+[lang="ne"] h3, 
+[lang="ne"] h4,
+[lang="ne"] h5,
+[lang="ne"] h6,
+.nepali-heading {
+  font-family: 'Tiro Devanagari Hindi', serif !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+  /* NO color overrides. NO line-height overrides. */
 }

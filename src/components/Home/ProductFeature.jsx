@@ -1,9 +1,15 @@
-// frontend/src/components/Home/ProductFeature.jsx
 import { motion } from 'framer-motion';
 import { Leaf, Baby, ShieldCheck, Droplets } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ProductFeature() {
+  const { t, i18n } = useTranslation();
   const fatContents = ["0.5%", "1.5%", "2.5%", "3.5%", "6%"];
+
+  // Typography helper for Nepali script
+  const isNepali = i18n.language === 'ne';
+  // NEW
+const nepaliFontClass = isNepali ? "nepali-heading" : "tracking-wider";
 
   return (
     <div className="bg-[#FDF8E7] py-24 relative overflow-hidden">
@@ -12,11 +18,14 @@ export default function ProductFeature() {
         {/* Left Column */}
         <div className="space-y-10 relative z-10">
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <h2 className="text-4xl font-serif font-bold text-[#1A1A1A] mb-6 leading-tight">
-              Our products <span className="text-[#9e111a]">are based on high quality milk</span>
+            <h2 className={`text-4xl font-serif font-bold text-[#1A1A1A] mb-6 ${isNepali ? nepaliFontClass : 'leading-tight'}`}>
+              {t('productFeature.titleLine1', 'Our products ')} 
+              <span className={`text-[#9e111a] ${isNepali ? 'inline-block pb-2' : ''}`}>
+                {t('productFeature.titleLine2', 'are based on high quality milk')}
+              </span>
             </h2>
-            <p className="text-sm text-gray-600 leading-relaxed mb-8 font-medium">
-              We ensure the highest standards in dairy processing. Our milk is sourced directly from happy, healthy cattle in Tokha, preserving all natural vitamins and minerals.
+            <p className={`text-sm text-gray-600 mb-8 font-medium ${isNepali ? nepaliFontClass : 'leading-relaxed'}`}>
+              {t('productFeature.description', 'We ensure the highest standards in dairy processing. Our milk is sourced directly from happy, healthy cattle in Tokha, preserving all natural vitamins and minerals.')}
             </p>
             
             {/* Fat Content Circles */}
@@ -29,12 +38,16 @@ export default function ProductFeature() {
             </div>
 
             <div className="bg-white/80 backdrop-blur p-6 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-white">
-              <h3 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-3 mb-3">
-                <Leaf className="text-green-600" size={24} /> Environmentally <span className="text-[#9e111a]">Friendly</span>
+              <h3 className={`text-xl font-bold text-[#1A1A1A] flex items-center gap-3 mb-3 ${isNepali ? nepaliFontClass : ''}`}>
+                <Leaf className="text-green-600" size={24} /> 
+                {t('productFeature.ecoTitle1', 'Environmentally ')} 
+                <span className="text-[#9e111a]">{t('productFeature.ecoTitle2', 'Friendly')}</span>
               </h3>
-              <p className="text-sm text-gray-500 mb-6 font-medium">Sustainable farming practices that protect our soil, water, and local Nepalese ecosystem.</p>
-              <button className="bg-[#1A1A1A] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#9e111a] transition-all duration-300 uppercase tracking-widest text-xs">
-                Read our story
+              <p className={`text-sm text-gray-500 mb-6 font-medium ${isNepali ? nepaliFontClass : ''}`}>
+                {t('productFeature.ecoDescription', 'Sustainable farming practices that protect our soil, water, and local Nepalese ecosystem.')}
+              </p>
+              <button className={`bg-[#1A1A1A] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#9e111a] transition-all duration-300 uppercase text-xs ${isNepali ? nepaliFontClass : 'tracking-widest'}`}>
+                {t('productFeature.readStory', 'Read our story')}
               </button>
             </div>
           </motion.div>
@@ -52,8 +65,8 @@ export default function ProductFeature() {
           
           {/* 3D Realistic Bottle Mockup */}
           <img 
-            src="/milk.png" 
-            alt="Organic Fresh Milk" 
+            src="../../assets/milk.webp" 
+            alt={t('productFeature.imageAlt', 'Organic Fresh Milk')}
             className="relative z-10 h-full object-contain drop-shadow-[0_30px_30px_rgba(0,0,0,0.15)] hover:scale-105 transition-transform duration-500"
           />
         </motion.div>
@@ -62,18 +75,24 @@ export default function ProductFeature() {
         <div className="space-y-8 relative z-10">
           <FeatureBlock 
             icon={<ShieldCheck className="text-[#9e111a]" size={28} />} 
-            title="100% Organic Products" 
-            desc="Sourced from local farms entirely free of synthetic pesticides and artificial fertilizers." 
+            title={t('productFeature.features.organic.title', '100% Organic Products')} 
+            desc={t('productFeature.features.organic.desc', 'Sourced from local farms entirely free of synthetic pesticides and artificial fertilizers.')} 
+            isNepali={isNepali}
+            nepaliFontClass={nepaliFontClass}
           />
           <FeatureBlock 
             icon={<Baby className="text-[#9e111a]" size={28} />} 
-            title="Recommended for Babies" 
-            desc="Rich in natural calcium and essential A2 proteins required for early development." 
+            title={t('productFeature.features.baby.title', 'Recommended for Babies')} 
+            desc={t('productFeature.features.baby.desc', 'Rich in natural calcium and essential A2 proteins required for early development.')} 
+            isNepali={isNepali}
+            nepaliFontClass={nepaliFontClass}
           />
           <FeatureBlock 
             icon={<Droplets className="text-[#9e111a]" size={28} />} 
-            title="High Quality Raw Milk" 
-            desc="Processed minimally and pasteurized perfectly to retain the authentic farm taste." 
+            title={t('productFeature.features.rawMilk.title', 'High Quality Raw Milk')} 
+            desc={t('productFeature.features.rawMilk.desc', 'Processed minimally and pasteurized perfectly to retain the authentic farm taste.')} 
+            isNepali={isNepali}
+            nepaliFontClass={nepaliFontClass}
           />
         </div>
 
@@ -82,15 +101,15 @@ export default function ProductFeature() {
   );
 }
 
-function FeatureBlock({ icon, title, desc }) {
+function FeatureBlock({ icon, title, desc, isNepali, nepaliFontClass }) {
   return (
     <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex gap-6 group bg-white/50 hover:bg-white p-4 rounded-2xl transition-colors shadow-sm hover:shadow-md border border-transparent hover:border-gray-100">
       <div className="w-16 h-16 shrink-0 rounded-full bg-white shadow-sm flex items-center justify-center border border-[#9e111a]/10 group-hover:border-[#9e111a] transition-colors">
         {icon}
       </div>
       <div>
-        <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">{title}</h3>
-        <p className="text-sm text-gray-500 font-medium leading-relaxed">{desc}</p>
+        <h3 className={`text-lg font-bold text-[#1A1A1A] mb-2 ${isNepali ? nepaliFontClass : ''}`}>{title}</h3>
+        <p className={`text-sm text-gray-500 font-medium ${isNepali ? nepaliFontClass : 'leading-relaxed'}`}>{desc}</p>
       </div>
     </motion.div>
   );

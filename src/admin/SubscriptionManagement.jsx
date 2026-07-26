@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, MoreVertical, Truck, CreditCard, Users, Activity, ArrowUpRight, CheckCircle2, XCircle, Clock, Loader2, MapPin, Sunrise, Sunset, CalendarDays, Receipt, Phone, Package } from 'lucide-react';
+import { Search, Filter, Truck, CreditCard, Users, Activity, ArrowUpRight, CheckCircle2, XCircle, Clock, Loader2, MapPin, Sunrise, Sunset, CalendarDays, Receipt, Phone, Package, Smartphone, Globe, ShieldCheck, Printer, Check, Building2 } from 'lucide-react';
 import api from '../services/api';
 
 export default function SubscriptionManagement() {
   const [activeTab, setActiveTab] = useState('subscribers'); 
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Modals State
   const [selectedSub, setSelectedSub] = useState(null);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   
-  // Dynamic State for Database
   const [subscriptions, setSubscriptions] = useState([]);
   const [dispatchRoutes, setDispatchRoutes] = useState([]);
   const [dashboardMetrics, setDashboardMetrics] = useState({
@@ -45,6 +43,38 @@ export default function SubscriptionManagement() {
     };
     fetchSubscriptions();
   }, []);
+
+  // --- STRICT SEQUENTIAL STATUS UPDATE & NOTIFICATION PUSH ---
+  const handleRouteStatusUpdate = async (route, stageIndex) => {
+    const stages = ['Preparing', 'Dispatched', 'Out for Delivery', 'Delivered'];
+    const newStatus = stages[stageIndex];
+    
+    // Save previous state in case of API failure (Optimistic UI Update)
+    const previousRoutes = [...dispatchRoutes];
+    
+    // Instantly update UI for a snappy Daraz-like experience
+    setDispatchRoutes(prev => prev.map(r => 
+      (r.route === route.route && r.time === route.time) 
+        ? { ...r, status: newStatus, progress: (stageIndex / 3) * 100 } 
+        : r
+    ));
+
+    try {
+      const res = await api.post('/admin/update-route-status.php', {
+        route: route.route,
+        time: route.time,
+        status: newStatus
+      });
+      
+      if (res.data.status !== 'success') {
+        setDispatchRoutes(previousRoutes); // Revert on fail
+        alert(res.data.message || "Failed to update route status.");
+      }
+    } catch (err) {
+      setDispatchRoutes(previousRoutes); // Revert on fail
+      alert("Network error while updating status.");
+    }
+  };
 
   const filteredSubs = useMemo(() => {
     return subscriptions.filter(sub => {
@@ -165,7 +195,7 @@ export default function SubscriptionManagement() {
                       <th className="py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Customer & ID</th>
                       <th className="py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Location</th>
                       <th className="py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Plan Details</th>
-                      <th className="py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status</th>
+                      <th className="py-5 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Status & Payment</th>
                       <th className="py-5 px-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Action</th>
                     </tr>
                   </thead>
@@ -183,20 +213,18 @@ export default function SubscriptionManagement() {
                         let planLabel = rawPlan;
                         
                         if (rawPlan === 'daily') {
-                          planStyles = "bg-[#9e111a] text-white border-[#9e111a] shadow-sm";
-                          planLabel = "Daily";
+                          planStyles = "bg-[#9e111a] text-white border-[#9e111a] shadow-sm"; planLabel = "Daily";
                         } else if (rawPlan === 'alternate') {
-                          planStyles = "bg-[#002147] text-white border-[#002147] shadow-sm";
-                          planLabel = "Alternate";
+                          planStyles = "bg-[#002147] text-white border-[#002147] shadow-sm"; planLabel = "Alternate";
                         } else if (rawPlan === 'weekly') {
-                          planStyles = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                          planLabel = "Weekly";
+                          planStyles = "bg-emerald-100 text-emerald-800 border-emerald-200"; planLabel = "Weekly";
                         } else if (rawPlan === 'custom') {
-                          planStyles = "bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#1A1A1A] border-none shadow-sm";
-                          planLabel = "Custom Flex";
+                          planStyles = "bg-gradient-to-r from-[#d4af37] to-[#E2B254] text-[#1A1A1A] border-none shadow-sm"; planLabel = "Custom Flex";
                         }
 
                         const rawTime = (sub.delivery_time || sub.time || 'morning').toLowerCase();
+                        const isApp = sub.source?.toLowerCase().includes('app');
+                        const paymentStatus = (sub.payment_status || sub.payment || 'Pending').toLowerCase();
 
                         return (
                           <motion.tr 
@@ -212,7 +240,10 @@ export default function SubscriptionManagement() {
                                 <div>
                                   <p className="font-black text-[#1A1A1A] text-sm mb-1">{sub.customer}</p>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-black bg-gray-100 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">{sub.sub_id || sub.id}</span>
+                                    <span className="text-[10px] font-black bg-gray-100 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest flex items-center gap-1" title={sub.source || 'Website'}>
+                                      {isApp ? <Smartphone size={10} className="text-blue-500" /> : <Globe size={10} className="text-blue-500" />}
+                                      {sub.sub_id || sub.id}
+                                    </span>
                                     <span className="text-[11px] font-bold text-gray-400">{sub.phone}</span>
                                   </div>
                                 </div>
@@ -229,9 +260,6 @@ export default function SubscriptionManagement() {
                                   <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border ${planStyles}`}>
                                     {planLabel}
                                   </span>
-                                  {(sub.qualifies_free_ghee == 1 || sub.freeGhee) && (
-                                    <span className="text-[9px] bg-green-100 text-green-700 border border-green-200 font-black uppercase tracking-widest px-2 py-1 rounded-md">Free Ghee</span>
-                                  )}
                                 </div>
                                 <span className="text-xs font-bold text-gray-500 flex items-center gap-2">
                                   <CalendarDays size={14} className="text-gray-400"/> 
@@ -245,16 +273,21 @@ export default function SubscriptionManagement() {
                                 </span>
                               </div>
                             </td>
-                            <td className="p-6">
-                              <span className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border ${
+                            <td className="p-6 flex flex-col gap-2">
+                              <span className={`inline-flex items-center w-max gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border ${
                                 sub.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 
                                 sub.status === 'Paused' ? 'bg-amber-50 border-amber-200 text-amber-700' : 
                                 'bg-red-50 border-red-200 text-red-700'
                               }`}>
-                                {sub.status === 'Active' && <CheckCircle2 size={14}/>}
-                                {sub.status === 'Paused' && <Clock size={14}/>}
-                                {sub.status === 'Cancelled' && <XCircle size={14}/>}
-                                {sub.status || 'Unknown'}
+                                {sub.status === 'Active' && <CheckCircle2 size={12}/>}
+                                {sub.status === 'Paused' && <Clock size={12}/>}
+                                {sub.status === 'Cancelled' && <XCircle size={12}/>}
+                                Sub: {sub.status || 'Unknown'}
+                              </span>
+                              <span className={`inline-flex items-center w-max gap-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
+                                paymentStatus === 'paid' || paymentStatus === 'completed' ? 'text-emerald-600 bg-white border-emerald-100' : 'text-amber-600 bg-white border-amber-100'
+                              }`}>
+                                <CreditCard size={10} /> {paymentStatus === 'completed' ? 'Paid' : paymentStatus}
                               </span>
                             </td>
                             <td className="p-6 text-right">
@@ -274,52 +307,99 @@ export default function SubscriptionManagement() {
               </motion.div>
             )}
 
-            {/* TAB 2: DISPATCH TRACKING */}
+            {/* TAB 2: ADVANCED DARAZ-STYLE DISPATCH TRACKING */}
             {activeTab === 'dispatch' && (
-              <motion.div key="dispatch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-8">
-                <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-100">
+              <motion.div key="dispatch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-8 bg-gray-50/50 min-h-full">
+                <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-200">
                   <div>
                     <h3 className="text-2xl font-black text-[#002147] mb-1">Today's Active Routes</h3>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-time Logistics Overview</p>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Interactive Logistics Overview</p>
                   </div>
-                  <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
+                  <span className="bg-white text-emerald-700 border border-emerald-200 text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    {dashboardMetrics.todaysDispatches} Deliveries Scheduled
+                    {dashboardMetrics.todaysDispatches} Routes Live
                   </span>
                 </div>
                 
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {dispatchRoutes.map((route, i) => (
-                    <div key={i} className="border-2 border-gray-100 p-6 rounded-[2rem] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all bg-white relative overflow-hidden group">
-                      <Truck size={120} className="absolute -right-6 -bottom-6 text-gray-50 opacity-50 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                      <div className="flex justify-between items-start mb-6 relative z-10">
-                        <div>
-                          <span className="text-[10px] font-black text-[#9e111a] bg-[#9e111a]/10 px-2 py-1 rounded uppercase tracking-widest">{route.time}</span>
-                          <h4 className="font-black text-lg text-[#1A1A1A] mt-3">{route.route}</h4>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border ${
-                          route.status === 'Completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                          route.status === 'Preparing' ? 'bg-gray-50 border-gray-200 text-gray-500' : 
-                          route.status === 'Standby' ? 'bg-gray-100 border-gray-200 text-gray-400' : 'bg-blue-50 border-blue-200 text-blue-700'
-                        }`}>
-                          {route.status}
-                        </span>
-                      </div>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                  {dispatchRoutes.map((route, i) => {
+                    const stages = ['Preparing', 'Dispatched', 'Out for Delivery', 'Delivered'];
+                    
+                    // Determine current step exactly. Start at -1 (nothing ticked) if status is null.
+                    let currentStepIndex = -1; 
+                    const normalizedStatus = (route.status || '').toLowerCase();
+                    
+                    if (normalizedStatus === 'completed' || normalizedStatus === 'delivered' || route.progress === 100) currentStepIndex = 3;
+                    else if (normalizedStatus === 'out for delivery' || route.progress > 50) currentStepIndex = 2;
+                    else if (normalizedStatus === 'dispatched' || route.progress > 0) currentStepIndex = 1;
+                    else if (normalizedStatus === 'preparing') currentStepIndex = 0;
 
-                      <div className="relative z-10">
-                        <div className="mb-3 flex justify-between text-xs font-black uppercase tracking-widest text-gray-500">
-                          <span>Route Progress</span>
-                          <span className="text-[#1A1A1A]">{route.count} Stops</span>
+                    return (
+                      <div key={i} className="border border-gray-200 p-8 rounded-3xl shadow-sm hover:shadow-lg transition-all bg-white relative overflow-hidden group">
+                        
+                        <div className="flex justify-between items-start mb-8 relative z-10">
+                          <div>
+                            <span className="text-[10px] font-black text-white bg-[#002147] px-3 py-1 rounded-md uppercase tracking-widest shadow-sm">
+                              {route.time} ROUTE
+                            </span>
+                            <h4 className="font-black text-xl text-[#1A1A1A] mt-4 flex items-center gap-2">
+                              <MapPin size={20} className="text-[#9e111a]" /> {route.route}
+                            </h4>
+                            <p className="text-xs text-gray-400 font-bold mt-1 tracking-wide">{route.count} Total Delivery Stops</p>
+                          </div>
+                          
+                          <div className="text-right">
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border ${
+                              currentStepIndex === 3 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                              currentStepIndex === -1 ? 'bg-gray-50 border-gray-200 text-gray-500' : 
+                              'bg-blue-50 border-blue-200 text-blue-700'
+                            }`}>
+                              {currentStepIndex === -1 ? 'Standby' : stages[currentStepIndex]}
+                            </span>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
-                          <motion.div 
-                            initial={{ width: 0 }} animate={{ width: `${route.progress}%` }} transition={{ duration: 1, ease: "easeOut" }}
-                            className={`h-full rounded-full ${route.progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} 
-                          />
+
+                        {/* STRICT SEQUENTIAL DARAZ-STYLE STEPPER */}
+                        <div className="relative z-10 mt-10">
+                          <div className="absolute top-1/2 left-0 w-full h-1.5 bg-gray-100 -translate-y-1/2 rounded-full"></div>
+                          <div className="absolute top-1/2 left-0 h-1.5 bg-emerald-500 -translate-y-1/2 rounded-full transition-all duration-700" style={{ width: `${currentStepIndex >= 0 ? (currentStepIndex / 3) * 100 : 0}%` }}></div>
+                          
+                          <div className="relative flex justify-between w-full">
+                            {stages.map((stage, idx) => {
+                              const isCompleted = idx <= currentStepIndex;
+                              // STRICT LOGIC: Can only click if it's EXACTLY the next step in line.
+                              const isNextAllowed = idx === currentStepIndex + 1 || (currentStepIndex === -1 && idx === 0);
+                              // Admin cannot mark as Delivered
+                              const isDeliveredStep = idx === 3; 
+                              
+                              const canClick = isNextAllowed && !isDeliveredStep;
+
+                              return (
+                                <div key={idx} className="flex flex-col items-center gap-3">
+                                  <button 
+                                    onClick={() => canClick && handleRouteStatusUpdate(route, idx)}
+                                    disabled={!canClick}
+                                    title={isDeliveredStep ? "Locked: Only delivery staff can mark as Delivered" : canClick ? `Click to mark as ${stage} and Notify Users` : "Complete previous steps first"}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center border-4 z-10 transition-all duration-300 shadow-sm ${
+                                      isCompleted ? 'bg-emerald-500 border-emerald-100 text-white' : 
+                                      canClick ? 'bg-white border-blue-300 hover:border-blue-500 cursor-pointer animate-pulse' : 
+                                      'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    {isCompleted ? <Check size={14} strokeWidth={4} /> : <div className={`w-2 h-2 rounded-full ${canClick ? 'bg-blue-400' : 'bg-transparent'}`}></div>}
+                                  </button>
+                                  <span className={`text-[10px] font-black uppercase tracking-widest text-center max-w-[70px] leading-tight ${
+                                    isCompleted ? 'text-[#1A1A1A]' : canClick ? 'text-blue-600' : 'text-gray-400'
+                                  }`}>{stage}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
+
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </motion.div>
             )}
@@ -346,7 +426,7 @@ export default function SubscriptionManagement() {
                       </tr>
                     ) : (
                       filteredSubs.map((sub, i) => {
-                        const paymentStatus = sub.payment_status || sub.payment || 'Pending';
+                        const paymentStatus = (sub.payment_status || sub.payment || 'Pending').toLowerCase();
                         return (
                           <motion.tr 
                             initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
@@ -360,9 +440,8 @@ export default function SubscriptionManagement() {
                             </td>
                             <td className="p-6">
                               <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border ${
-                                paymentStatus === 'Paid' || paymentStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 
-                                paymentStatus === 'Pending' ? 'bg-amber-50 border-amber-200 text-amber-700' : 
-                                'bg-red-50 border-red-200 text-red-700'
+                                paymentStatus === 'paid' || paymentStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 
+                                'bg-amber-50 border-amber-200 text-amber-700'
                               }`}>
                                 {paymentStatus === 'completed' ? 'Paid' : paymentStatus}
                               </span>
@@ -387,39 +466,69 @@ export default function SubscriptionManagement() {
         </div>
       </div>
 
-      {/* --- SUBSCRIPTION DETAILS MODAL --- */}
+      {/* --- SUBSCRIPTION DETAILS MODAL (UNCHANGED) --- */}
       <AnimatePresence>
         {selectedSub && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} 
-              className="bg-[#FAF9F6] rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
+              className="bg-[#FAF9F6] rounded-[2.5rem] w-full max-w-3xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
             >
-              {/* Modal Header */}
               <div className="p-6 sm:p-8 bg-white border-b border-gray-100 flex justify-between items-start shrink-0 relative">
                 <div>
                   <h3 className="text-2xl font-serif font-black text-[#002147] mb-1">Subscription Details</h3>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{selectedSub.sub_id || selectedSub.id}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{selectedSub.sub_id || selectedSub.id}</span>
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                      selectedSub.status === 'Active' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'
+                    }`}>
+                      {selectedSub.status}
+                    </span>
+                  </div>
                 </div>
                 <button onClick={() => setSelectedSub(null)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-200 transition-colors">
                   <XCircle size={20} className="text-gray-400" />
                 </button>
               </div>
 
-              {/* Modal Body (Scrollable) */}
               <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-grow space-y-6">
-                
-                {/* Customer Info */}
-                <div className="bg-white border border-gray-100 p-5 rounded-2xl flex flex-col sm:flex-row gap-6 shadow-sm">
-                  <div className="flex-1 space-y-3">
-                    <p className="font-black text-sm text-[#002147] flex items-center gap-3"><Users size={16} className="text-gray-400"/> {selectedSub.customer}</p>
-                    <p className="text-xs font-bold text-gray-600 flex items-center gap-3"><Phone size={14} className="text-gray-400"/> {selectedSub.phone || 'N/A'}</p>
-                    <p className="text-xs font-bold text-gray-600 flex items-center gap-3"><MapPin size={14} className="text-gray-400"/> {selectedSub.location}</p>
+                <div className="bg-white border border-gray-100 p-5 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 shadow-sm">
+                  {/* Customer Info */}
+                  <div className="space-y-3 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 pr-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Customer Profile</p>
+                    <p className="font-black text-sm text-[#002147] flex items-center gap-2"><Users size={14} className="text-gray-400"/> {selectedSub.customer}</p>
+                    <p className="text-xs font-bold text-gray-600 flex items-center gap-2"><Phone size={14} className="text-gray-400"/> {selectedSub.phone || 'N/A'}</p>
+                    <p className="text-xs font-bold text-gray-600 flex items-center gap-2"><MapPin size={14} className="text-gray-400"/> {selectedSub.location}</p>
                   </div>
-                  <div className="flex-1 bg-gray-50 p-4 rounded-xl">
+                  {/* Plan Info */}
+                  <div className="space-y-3 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 pr-4">
                     <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Plan Setup</p>
-                    <p className="text-sm font-bold text-[#1A1A1A] capitalize mb-1">{selectedSub.plan_type || selectedSub.plan || 'Standard'} Plan</p>
-                    <p className="text-xs text-gray-500 capitalize">{selectedSub.delivery_time || selectedSub.time || 'Morning'} Delivery</p>
+                    <p className="font-black text-sm text-[#1A1A1A] capitalize flex items-center gap-2"><CalendarDays size={14} className="text-gray-400"/> {selectedSub.plan_type || selectedSub.plan || 'Standard'} Plan</p>
+                    <p className="text-xs font-bold text-gray-600 capitalize flex items-center gap-2">
+                      {selectedSub.delivery_time?.toLowerCase() === 'morning' ? <Sunrise size={14} className="text-gray-400"/> : <Sunset size={14} className="text-gray-400"/>}
+                      {selectedSub.delivery_time || selectedSub.time || 'Morning'} Delivery
+                    </p>
+                  </div>
+                  {/* Payment & Source Info */}
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Order & Payment</p>
+                    <p className="font-bold text-xs text-gray-700 flex items-center gap-2">
+                      {selectedSub.source?.toLowerCase().includes('app') ? <Smartphone size={14} className="text-blue-500"/> : <Globe size={14} className="text-blue-500"/>}
+                      Purchased via {selectedSub.source || 'Website'}
+                    </p>
+                    <p className="font-bold text-xs text-gray-700 flex items-center gap-2">
+                      <ShieldCheck size={14} className="text-gray-400"/>
+                      {selectedSub.payment_method || 'ConnectIPS'}
+                    </p>
+                    <div className="pt-1">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded border ${
+                        (selectedSub.payment_status || selectedSub.payment)?.toLowerCase() === 'completed' || (selectedSub.payment_status || selectedSub.payment)?.toLowerCase() === 'paid' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}>
+                        Payment: {(selectedSub.payment_status || selectedSub.payment)?.toLowerCase() === 'completed' ? 'Paid' : (selectedSub.payment_status || selectedSub.payment || 'Pending')}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -427,25 +536,45 @@ export default function SubscriptionManagement() {
                 <div>
                   <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest border-b border-gray-200 pb-2 mb-4">Ordered Products & Schedule</h4>
                   {selectedSub.items && selectedSub.items.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedSub.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-[#002147]/5 p-2 rounded-lg text-[#002147]">
-                              <Package size={16} />
+                    <>
+                      <div className="space-y-3">
+                        {selectedSub.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 overflow-hidden flex-shrink-0 relative">
+                                {item.base_image && (
+                                  <img 
+                                    src={item.base_image} 
+                                    alt={item.name || item.product_name} 
+                                    className="w-full h-full object-cover absolute inset-0 z-10"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                )}
+                                <Package size={20} className="z-0" />
+                              </div>
+                              <div>
+                                <span className="font-bold text-[#1A1A1A] text-sm">{item.product_name || item.name}</span>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Day: <span className="text-[#9e111a]">{item.day_of_week || item.day}</span></p>
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-bold text-[#1A1A1A] text-sm">{item.product_name || item.name}</span>
-                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Day: <span className="text-[#9e111a]">{item.day_of_week || item.day}</span></p>
+                            <div className="text-right">
+                              <p className="text-[10px] font-bold text-gray-400 mb-0.5">
+                                NPR {parseFloat(item.price).toLocaleString()} × {item.qty || item.quantity}
+                              </p>
+                              <p className="font-black text-sm text-[#002147]">
+                                NPR {(parseFloat(item.price) * parseFloat(item.qty || item.quantity)).toLocaleString()}
+                              </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <span className="text-xs font-bold text-gray-500 mr-3">Qty: {item.qty || item.quantity}</span>
-                            <span className="font-black text-sm text-[#002147]">NPR {parseFloat(item.price).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 bg-gray-50/80 p-5 rounded-xl border border-gray-100 flex justify-between items-center">
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-500">Total Billed Amount</span>
+                        <span className="text-2xl font-black text-[#9e111a]">
+                          NPR {parseFloat(selectedSub.weekly_total_cost || selectedSub.totalCost || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </>
                   ) : (
                     <div className="bg-gray-50 p-6 rounded-xl text-center border border-dashed border-gray-200">
                       <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">No item breakdown provided by database.</p>
@@ -458,52 +587,123 @@ export default function SubscriptionManagement() {
         )}
       </AnimatePresence>
 
-      {/* --- INVOICE MODAL --- */}
+      {/* --- PROFESSIONAL B2B INVOICE MODAL --- */}
       <AnimatePresence>
         {selectedInvoice && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm print:bg-white print:p-0">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} 
-              className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col"
+              className="bg-white rounded-xl w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh] print:shadow-none print:h-auto print:max-h-none print:w-full print:border-none"
             >
-              <div className="bg-[#002147] text-white p-6 text-center relative">
-                <button onClick={() => setSelectedInvoice(null)} className="absolute top-4 right-4 p-1 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                  <XCircle size={20} />
+              {/* No-print Action Bar */}
+              <div className="bg-gray-100 p-4 flex justify-end gap-3 rounded-t-xl print:hidden shrink-0 border-b border-gray-200">
+                <button onClick={() => window.print()} className="flex items-center gap-2 bg-[#002147] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#1A1A1A] transition-colors shadow-sm">
+                  <Printer size={14} /> Print Invoice
                 </button>
-                <Receipt size={32} className="mx-auto text-[#E2B254] mb-2" />
-                <h3 className="text-xl font-black uppercase tracking-widest">Payment Invoice</h3>
-                <p className="text-xs text-[#E2B254] font-bold tracking-widest mt-1">{selectedInvoice.sub_id || selectedInvoice.id}</p>
+                <button onClick={() => setSelectedInvoice(null)} className="flex items-center gap-2 bg-white border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-gray-50 transition-colors shadow-sm">
+                  <XCircle size={14} /> Close
+                </button>
               </div>
 
-              <div className="p-8">
-                <div className="text-center mb-8 border-b border-gray-100 pb-8">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Billed Amount</p>
-                  <p className="text-4xl font-black text-[#9e111a]">NPR {parseFloat(selectedInvoice.weekly_total_cost || selectedInvoice.totalCost || 0).toLocaleString()}</p>
-                  <span className={`inline-block mt-3 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md border ${
-                    (selectedInvoice.payment_status || selectedInvoice.payment || 'Pending') === 'Paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
-                  }`}>
-                    Status: {selectedInvoice.payment_status || selectedInvoice.payment || 'Pending'}
-                  </span>
+              {/* Printable Area */}
+              <div className="p-10 sm:p-12 overflow-y-auto bg-white print:p-0 relative">
+                
+                {/* Watermark */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+                  <Building2 size={400} />
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-bold text-gray-400">Billed To</span>
-                    <span className="font-black text-[#1A1A1A]">{selectedInvoice.customer}</span>
+                {/* Header */}
+                <div className="flex justify-between items-start border-b-2 border-[#002147] pb-8 mb-8 relative z-10">
+                  <div>
+                    <h1 className="text-4xl font-black text-[#002147] tracking-tight uppercase">INVOICE</h1>
+                    <p className="text-sm font-bold text-gray-500 tracking-widest mt-1">INV-{selectedInvoice.sub_id}</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="font-bold text-gray-400">Plan Period</span>
-                    <span className="font-black text-[#1A1A1A] capitalize">{selectedInvoice.plan_type || selectedInvoice.plan || 'Standard'}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="font-bold text-gray-400">Contact</span>
-                    <span className="font-black text-[#1A1A1A]">{selectedInvoice.phone || 'N/A'}</span>
+                  <div className="text-right">
+                    <div className="w-12 h-12 bg-[#002147] text-[#E2B254] rounded-xl flex items-center justify-center ml-auto mb-3">
+                      <Receipt size={24} />
+                    </div>
+                    <h2 className="text-lg font-black text-[#1A1A1A]">Sita Ram Gokul Milks</h2>
+                    <p className="text-sm text-gray-500 font-medium">Kathmandu Pvt. Ltd.</p>
                   </div>
                 </div>
-              </div>
-              
-              <div className="bg-gray-50 p-4 text-center">
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Sita Ram Gokul Milks Kathmandu Pvt. Ltd.</p>
+
+                {/* Meta Data */}
+                <div className="grid grid-cols-2 gap-8 mb-10 relative z-10">
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-200 pb-1">Billed To</p>
+                    <p className="font-black text-lg text-[#1A1A1A]">{selectedInvoice.customer}</p>
+                    <p className="text-sm text-gray-600">{selectedInvoice.phone}</p>
+                    <p className="text-sm text-gray-600">{selectedInvoice.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-200 pb-1">Payment Details</p>
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-bold text-[#1A1A1A]">Method:</span> {selectedInvoice.payment_method || 'ConnectIPS'}</p>
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-bold text-[#1A1A1A]">Plan:</span> {selectedInvoice.plan_type || 'Standard'} Routine</p>
+                    <p className="text-sm text-gray-600 flex items-center gap-2">
+                      <span className="font-bold text-[#1A1A1A]">Status:</span> 
+                      <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded border ${
+                        (selectedInvoice.payment_status || 'Pending').toLowerCase() === 'completed' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'
+                      }`}>
+                        {selectedInvoice.payment_status || 'Pending'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Itemized Table */}
+                <div className="mb-10 relative z-10">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-[#002147] text-white">
+                      <tr>
+                        <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider w-[50%] border border-[#002147]">Description</th>
+                        <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-center border border-[#002147]">Qty/Week</th>
+                        <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right border border-[#002147]">Unit Price</th>
+                        <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right border border-[#002147]">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-sm border border-gray-200">
+                      {selectedInvoice.items && selectedInvoice.items.length > 0 ? (
+                        selectedInvoice.items.map((item, idx) => (
+                          <tr key={idx} className="border-b border-gray-200">
+                            <td className="py-3 px-4 text-gray-800 font-medium">
+                              <span className="font-bold text-[#1A1A1A] block">{item.product_name || item.name}</span>
+                              <span className="text-[10px] text-gray-500 uppercase">Delivery Day: {item.day_of_week || item.day}</span>
+                            </td>
+                            <td className="py-3 px-4 text-gray-600 text-center">{item.qty || item.quantity}</td>
+                            <td className="py-3 px-4 text-gray-600 text-right">NPR {parseFloat(item.price).toLocaleString()}</td>
+                            <td className="py-3 px-4 text-[#1A1A1A] font-black text-right">NPR {(parseFloat(item.price) * parseFloat(item.qty || item.quantity)).toLocaleString()}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr><td colSpan="4" className="py-6 text-center text-gray-400 font-medium italic">No itemized details available for this invoice.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Total Section */}
+                <div className="flex justify-end relative z-10">
+                  <div className="w-1/2 bg-gray-50 rounded-lg p-5 border border-gray-200">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-bold text-gray-500 uppercase">Subtotal</span>
+                      <span className="text-sm font-bold text-gray-800">NPR {parseFloat(selectedInvoice.weekly_total_cost).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
+                      <span className="text-sm font-bold text-gray-500 uppercase">Tax (0%)</span>
+                      <span className="text-sm font-bold text-gray-800">NPR 0.00</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-black text-[#002147] uppercase tracking-widest">Grand Total</span>
+                      <span className="text-2xl font-black text-[#9e111a]">NPR {parseFloat(selectedInvoice.weekly_total_cost).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-16 text-center border-t border-gray-200 pt-8 relative z-10">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Thank you for your business.</p>
+                  <p className="text-[9px] text-gray-400 mt-1">This is a computer generated document. No signature is required.</p>
+                </div>
               </div>
             </motion.div>
           </div>

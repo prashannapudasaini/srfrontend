@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
+import './i18n';
 
 // CRITICAL: Global Styles & Tailwind
 import './index.css'; 

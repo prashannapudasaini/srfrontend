@@ -11,12 +11,12 @@ const FloatingTypography = () => {
     offset: ["start end", "end start"]
   });
 
-  // Parallax scrolling value for the background image
-  const imgY = useTransform(scrollYProgress, [0, 1], [-60, 60]);
+  // Parallax effect (Now only applied to desktop)
+  const imgY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
-  // Adjusted height for mobile (50vh) so object-contain doesn't leave massive white gaps
   return (
-    <div ref={containerRef} className="relative overflow-hidden bg-white flex flex-col items-center justify-center min-h-[50vh] md:min-h-screen border-y border-gray-100">
+    // ADJUSTED: Using py-2 on mobile for a very tight, balanced gap at the top and bottom
+    <div ref={containerRef} className="relative overflow-hidden bg-[#FDF8E7] flex flex-col items-center justify-center md:min-h-screen border-y border-gray-100 py-2 md:py-0">
       
       {/* 1. THE WATERMARK: Responsive "SR" Background */}
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none z-0">
@@ -25,31 +25,43 @@ const FloatingTypography = () => {
         </span>
       </div>
 
-      {/* 2. THE HERO IMAGE: Parallax and Responsive Fitting */}
+      {/* ========================================================= */}
+      {/* 2A. DESKTOP HERO IMAGE (Absolute, Full Screen, Parallax)  */}
+      {/* ========================================================= */}
       <motion.div 
         style={{ y: imgY }}
-        className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 px-4 md:px-0"
+        className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none z-10 w-full"
       >
-        {/* object-contain for mobile, object-cover for larger screens */}
         <img 
-          src={hero5} // 2. USE THE IMPORTED VARIABLE HERE INSTEAD OF THE STRING
+          src={hero5} 
           alt="Sita Ram Heritage"
-          className="w-full h-full object-contain md:object-cover md:scale-105 transition-all duration-700 ease-out drop-shadow-2xl"
+          className="w-full h-full object-cover object-center scale-105 transition-all duration-700 ease-out shadow-2xl"
         />
-        {/* Subtle Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#FDF8E7]/40 via-transparent to-[#FDF8E7]/20 pointer-events-none" />
       </motion.div>
 
-      {/* 3. DECORATIVE FLOATING ORBS: Scaled down for mobile */}
+      {/* ========================================================= */}
+      {/* 2B. MOBILE HERO IMAGE (Relative, Static, NO Parallax Gap) */}
+      {/* ========================================================= */}
+      <div className="flex md:hidden relative items-center justify-center pointer-events-none z-10 w-full px-4">
+        <img 
+          src={hero5} 
+          alt="Sita Ram Heritage"
+          className="w-full h-auto object-contain object-center shadow-2xl rounded-2xl"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#FDF8E7]/40 via-transparent to-[#FDF8E7]/20 pointer-events-none rounded-2xl" />
+      </div>
+
+      {/* 3. DECORATIVE FLOATING ORBS */}
       <motion.div
-        animate={{ y: [0, -40, 0], scale: [1, 1.1, 1] }}
+        animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute left-[10%] top-[25%] w-32 md:w-56 h-32 md:h-56 bg-[#7A0000]/10 rounded-full blur-[80px] md:blur-[110px] z-20"
+        className="absolute left-[5%] top-[10%] w-24 md:w-56 h-24 md:h-56 bg-[#7A0000]/15 rounded-full blur-[60px] md:blur-[110px] z-20 pointer-events-none"
       />
       <motion.div
-        animate={{ y: [0, 50, 0], scale: [1, 1.2, 1] }}
+        animate={{ y: [0, 30, 0], scale: [1, 1.1, 1] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute right-[8%] bottom-[15%] w-40 md:w-72 h-40 md:h-72 bg-[#1A1A1A]/5 rounded-full blur-[90px] md:blur-[130px] z-20"
+        className="absolute right-[5%] bottom-[10%] w-32 md:w-72 h-32 md:h-72 bg-[#1A1A1A]/10 rounded-full blur-[70px] md:blur-[130px] z-20 pointer-events-none"
       />
     </div>
   );
