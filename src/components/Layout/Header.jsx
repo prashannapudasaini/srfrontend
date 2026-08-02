@@ -7,12 +7,16 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import CartDrawer from './CartDrawer';
 import { useTranslation } from 'react-i18next';
+import api from '../../services/api';
 
 const Header = () => {
   // isContactOpen state removed
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState(null); 
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hideHeaderBadge, setHideHeaderBadge] = useState(false);
+  const prevUnreadRef = useRef(0);
   
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -64,6 +68,43 @@ const Header = () => {
   const activeLink = location.pathname === '/' ? 'home' : location.pathname.slice(1);
   const [hoveredItem, setHoveredItem] = useState(null);
 
+  // --- Fetch Unread Notifications Count ---
+  useEffect(() => {
+    let intervalId;
+    const fetchUnreadNotifications = async () => {
+      if (!isAuthenticated || !user?.id) {
+        setUnreadCount(0);
+        return;
+      }
+      try {
+        const res = await api.get(`/user/notifications.php?user_id=${user.id}`);
+        if (res?.data?.status === 'success' && Array.isArray(res.data.data)) {
+          const unread = res.data.data.filter(n => parseInt(n.is_read) === 0).length;
+          setUnreadCount(unread);
+          // If a new alert arrived, re-enable the navbar badge
+          if (unread > prevUnreadRef.current) {
+            setHideHeaderBadge(false);
+          }
+          prevUnreadRef.current = unread;
+        }
+      } catch (error) {
+        // Silently catch errors
+      }
+    };
+
+    fetchUnreadNotifications();
+    if (isAuthenticated && user?.id) {
+      intervalId = setInterval(fetchUnreadNotifications, 30000); // Check for new alerts every 30 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isAuthenticated, user?.id]);
+
+  // Only show badge in navbar if not on account pages AND user hasn't clicked "My Account" yet
+  const showHeaderBadge = unreadCount > 0 && !hideHeaderBadge && !location.pathname.includes('/history') && !location.pathname.includes('/admin');
+
   const navItems = [
     { id: 'home', label: t('nav.home', 'Home'), path: '/' },
     { 
@@ -104,6 +145,11 @@ const Header = () => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
     setExpandedMobileMenu(null);
+  };
+
+  const handleMyAccountClick = () => {
+    setHideHeaderBadge(true);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -210,26 +256,32 @@ const Header = () => {
                 <PhoneCall size={20} />
               </Link>
 
-              {/* Profile Dropdown / Login Block - COMMENTED OUT FOR NOW */}
+              {/* Profile Dropdown / Login Block */}
               {isAuthenticated ? (
                 <div className="relative group hidden sm:block">
-                  <button className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 py-1.5 px-3 rounded-full transition-colors cursor-pointer">
-                    <div className="w-6 h-6 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shrink-0">
-                      <User size={14} />
+                  <button className="relative flex items-center justify-center w-9 h-9 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full transition-colors cursor-pointer">
+                    <div className="w-7 h-7 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center shrink-0">
+                      <User size={15} />
                     </div>
-                    <span className="text-xs font-bold text-[#1A1A1A] tracking-wider uppercase truncate max-w-[100px]">
-                      {user?.name?.split(' ')[0] || 'Profile'}
-                    </span>
-                    <ChevronDown size={14} className="text-gray-500 shrink-0" />
+                    {showHeaderBadge && (
+                      <span className="absolute -top-1 -right-1 bg-[#9e111a] text-white text-[9px] sm:text-[10px] font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white">
+                        {unreadCount}
+                      </span>
+                    )}
                   </button>
                   
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <Link 
                       to={user?.role === 'admin' ? '/admin' : '/history'} 
-                      onClick={() => window.scrollTo(0, 0)}
-                      className="block px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#9e111a] hover:bg-red-50 transition-colors border-b border-gray-50"
+                      onClick={handleMyAccountClick}
+                      className="flex items-center justify-between px-5 py-3 text-xs uppercase tracking-wider font-bold text-gray-600 hover:text-[#9e111a] hover:bg-red-50 transition-colors border-b border-gray-50"
                     >
-                      My Account
+                      <span>My Account</span>
+                      {showHeaderBadge && (
+                        <span className="bg-[#9e111a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
                     </Link>
                     <button 
                       onClick={handleLogout} 
@@ -364,7 +416,7 @@ const Header = () => {
                     </Link>
                   </div>
 
-                  {/* Mobile Auth Links - COMMENTED OUT FOR NOW */}
+                  {/* Mobile Auth Links */}
                   <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
                     {!isAuthenticated ? (
                       <Link to="/login" onClick={() => { setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="text-sm tracking-wider uppercase font-bold text-[#1A1A1A] flex items-center gap-2">
@@ -372,8 +424,20 @@ const Header = () => {
                       </Link>
                     ) : (
                       <>
-                        <Link to={user?.role === 'admin' ? '/admin' : '/history'} onClick={() => { setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="text-sm tracking-wider uppercase font-bold text-[#002147] flex items-center gap-2">
-                          <User size={18} /> My Account
+                        <Link 
+                          to={user?.role === 'admin' ? '/admin' : '/history'} 
+                          onClick={() => { 
+                            setIsMobileMenuOpen(false); 
+                            handleMyAccountClick();
+                          }} 
+                          className="text-sm tracking-wider uppercase font-bold text-[#002147] flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-2"><User size={18} /> My Account</span>
+                          {showHeaderBadge && (
+                            <span className="bg-[#9e111a] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                              {unreadCount}
+                            </span>
+                          )}
                         </Link>
                         <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-sm tracking-wider uppercase font-bold text-[#9e111a] text-left flex items-center gap-2">
                           <LogOut size={18} /> Logout

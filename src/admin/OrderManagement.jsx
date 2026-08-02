@@ -3,7 +3,7 @@ import api from '../services/api';
 import { 
   Truck, CheckCircle2, XCircle, Search, MapPin, 
   Loader2, User, Phone, CreditCard, Clock, 
-  Package, Receipt, FileText, ChevronRight, Banknote, Printer, AlertTriangle, Send
+  Package, Receipt, FileText, ChevronRight, Banknote, Printer, AlertTriangle, Send, DollarSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,7 +13,7 @@ export default function OrderManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   
-  // --- ADDED: UI States for Updating ---
+  // UI States for Updating
   const [isUpdating, setIsUpdating] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
@@ -22,12 +22,16 @@ export default function OrderManagement() {
     setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 3500);
   };
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => { 
+    fetchOrders(); 
+  }, []);
 
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders/index.php');
-      if (res.data.status === 'success') setOrders(res.data.data);
+      if (res.data.status === 'success') {
+        setOrders(res.data.data);
+      }
     } catch (error) { 
       console.error("Failed to fetch orders"); 
     } finally { 
@@ -35,12 +39,11 @@ export default function OrderManagement() {
     }
   };
 
-  // --- ADDED: Handle Live Status Update & Notifications ---
+  // Handle Order Fulfillment Status Update
   const handleStatusUpdate = async (orderId, newStatus) => {
     if (isUpdating) return;
     setIsUpdating(true);
     
-    // Optimistic UI Update
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, order_status: newStatus } : o));
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
@@ -53,14 +56,44 @@ export default function OrderManagement() {
       });
 
       if (res.data.status === 'success') {
-        showToast(`Order updated to ${newStatus}. User Notified!`, 'success');
+        showToast(`Order updated to ${newStatus.replace(/_/g, ' ')}. User Notified!`, 'success');
       } else {
         showToast(res.data.message || "Failed to update order status.", 'error');
-        fetchOrders(); // Revert on failure
+        fetchOrders();
       }
     } catch (err) {
       showToast("Network error while updating status.", 'error');
-      fetchOrders(); // Revert on failure
+      fetchOrders();
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // --- NEW: Handle Payment Status Update ---
+  const handlePaymentStatusUpdate = async (orderId, newPaymentStatus) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, payment_status: newPaymentStatus } : o));
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder(prev => ({ ...prev, payment_status: newPaymentStatus }));
+    }
+
+    try {
+      const res = await api.post('/admin/update-payment-status.php', {
+        order_id: orderId,
+        payment_status: newPaymentStatus
+      });
+
+      if (res.data.status === 'success') {
+        showToast(`Payment marked as ${newPaymentStatus.toUpperCase()}. User Notified!`, 'success');
+      } else {
+        showToast(res.data.message || "Failed to update payment status.", 'error');
+        fetchOrders();
+      }
+    } catch (err) {
+      showToast("Network error while updating payment status.", 'error');
+      fetchOrders();
     } finally {
       setIsUpdating(false);
     }
@@ -74,7 +107,7 @@ export default function OrderManagement() {
     );
   }, [orders, searchQuery]);
 
-  // --- PROFESSIONAL INVOICE GENERATOR ---
+  // PROFESSIONAL INVOICE GENERATOR
   const handlePrintInvoice = (order) => {
     const printWindow = window.open('', '_blank');
     
@@ -189,19 +222,65 @@ export default function OrderManagement() {
     printWindow.document.close();
   };
 
-  // --- HELPER COMPONENTS ---
   const PaymentStatusBadge = ({ status }) => {
     const normalized = status?.toLowerCase() || 'pending';
-    if (normalized === 'completed') return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200"><CheckCircle2 size={12}/> Paid</span>;
-    if (normalized === 'failed') return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200"><XCircle size={12}/> Failed</span>;
-    return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200"><Clock size={12}/> Pending</span>;
+    if (normalized === 'completed') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <CheckCircle2 size={12}/> Paid
+        </span>
+      );
+    }
+    if (normalized === 'failed') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">
+          <XCircle size={12}/> Failed
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+        <Clock size={12}/> Pending
+      </span>
+    );
   };
 
   const OrderStatusBadge = ({ status }) => {
-    const normalized = status?.toLowerCase() || 'processing';
-    if (normalized === 'delivered') return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200"><CheckCircle2 size={12}/> Delivered</span>;
-    if (normalized === 'cancelled') return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200"><XCircle size={12}/> Cancelled</span>;
-    return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200"><Truck size={12}/> {normalized.replace('_', ' ')}</span>;
+    const normalized = status?.toLowerCase()?.replace(/\s+/g, '_') || 'processing';
+    
+    switch (normalized) {
+      case 'delivered':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 size={12} /> Delivered
+          </span>
+        );
+      case 'out_for_delivery':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
+            <Truck size={12} /> Out For Delivery
+          </span>
+        );
+      case 'dispatched':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+            <Package size={12} /> Dispatched
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200">
+            <XCircle size={12} /> Cancelled
+          </span>
+        );
+      case 'processing':
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+            <Clock size={12} /> Processing
+          </span>
+        );
+    }
   };
 
   const renderItemsSummary = (items) => {
@@ -218,7 +297,9 @@ export default function OrderManagement() {
       <AnimatePresence>
         {toast.visible && (
           <motion.div 
-            initial={{ opacity: 0, y: 50, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, y: 50, scale: 0.9 }} 
+            animate={{ opacity: 1, y: 0, scale: 1 }} 
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
             className={`fixed bottom-6 right-6 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border ${
               toast.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-900 text-white border-gray-800'
             }`}
@@ -329,7 +410,9 @@ export default function OrderManagement() {
         {selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm">
             <motion.div 
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: 20 }} 
               className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="bg-gray-50 border-b border-gray-100 px-8 py-6 flex justify-between items-center sticky top-0 z-10">
@@ -337,6 +420,7 @@ export default function OrderManagement() {
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-2xl font-black text-[#1A1A1A]">Order #{selectedOrder.id}</h3>
                     <OrderStatusBadge status={selectedOrder.order_status} />
+                    <PaymentStatusBadge status={selectedOrder.payment_status} />
                   </div>
                   <p className="text-sm text-gray-500 font-medium">
                     Placed on {selectedOrder.created_at ? new Date(selectedOrder.created_at).toLocaleString() : 'Date Not Available'}
@@ -357,18 +441,24 @@ export default function OrderManagement() {
 
               <div className="p-8 overflow-y-auto flex-grow">
                 
-                {/* --- ADDED: LIVE STATUS TRACKER & NOTIFICATION SENDER --- */}
-                <div className="mb-8 bg-blue-50/50 border border-blue-100 p-5 rounded-2xl">
-                  <h4 className="text-xs font-black uppercase text-[#002147] tracking-wider mb-4 flex items-center gap-2">
-                    <Send size={14} className="text-blue-500" /> Dispatch & Notify Customer
+                {/* 1. ORDER FULFILLMENT STATUS CONTROL */}
+                <div className="mb-6 bg-blue-50/50 border border-blue-100 p-5 rounded-2xl">
+                  <h4 className="text-xs font-black uppercase text-[#002147] tracking-wider mb-3 flex items-center gap-2">
+                    <Send size={14} className="text-blue-500" /> Fulfillment Status (Dispatch & Notify)
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {['Processing', 'Dispatched', 'Out for Delivery', 'Delivered', 'Cancelled'].map(status => {
-                      const isActive = selectedOrder.order_status?.toLowerCase() === status.toLowerCase();
+                    {[
+                      { label: 'Processing', value: 'processing' },
+                      { label: 'Dispatched', value: 'dispatched' },
+                      { label: 'Out for Delivery', value: 'out_for_delivery' },
+                      { label: 'Delivered', value: 'delivered' },
+                      { label: 'Cancelled', value: 'cancelled' }
+                    ].map(item => {
+                      const isActive = selectedOrder.order_status?.toLowerCase()?.replace(/\s+/g, '_') === item.value;
                       return (
                         <button
-                          key={status}
-                          onClick={() => handleStatusUpdate(selectedOrder.id, status)}
+                          key={item.value}
+                          onClick={() => handleStatusUpdate(selectedOrder.id, item.value)}
                           disabled={isUpdating}
                           className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
                             isActive 
@@ -376,13 +466,43 @@ export default function OrderManagement() {
                               : 'bg-white border border-gray-200 text-gray-500 hover:border-[#002147] hover:text-[#002147] shadow-sm'
                           }`}
                         >
-                          {status}
+                          {item.label}
                         </button>
                       );
                     })}
                   </div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-3">
-                    Clicking a status updates the database and instantly sends a notification to the user's dashboard.
+                </div>
+
+                {/* 2. NEW: PAYMENT STATUS CONTROL */}
+                <div className="mb-8 bg-emerald-50/50 border border-emerald-100 p-5 rounded-2xl">
+                  <h4 className="text-xs font-black uppercase text-emerald-800 tracking-wider mb-3 flex items-center gap-2">
+                    <DollarSign size={14} className="text-emerald-600" /> Payment Status (Financial Record)
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: 'Pending (Unpaid)', value: 'pending', activeClass: 'bg-amber-500 text-white' },
+                      { label: 'Completed (Paid)', value: 'completed', activeClass: 'bg-emerald-600 text-white' },
+                      { label: 'Failed', value: 'failed', activeClass: 'bg-red-600 text-white' }
+                    ].map(item => {
+                      const isActive = selectedOrder.payment_status?.toLowerCase() === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          onClick={() => handlePaymentStatusUpdate(selectedOrder.id, item.value)}
+                          disabled={isUpdating}
+                          className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                            isActive 
+                              ? `${item.activeClass} shadow-md cursor-default` 
+                              : 'bg-white border border-gray-200 text-gray-500 hover:border-emerald-600 hover:text-emerald-700 shadow-sm'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2.5">
+                    Changing payment status marks the invoice as Paid/Unpaid and sends a notification to the customer.
                   </p>
                 </div>
 
