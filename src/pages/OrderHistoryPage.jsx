@@ -292,12 +292,16 @@ export default function OrderHistoryPage() {
 
   const renderItemsSummary = (items) => {
     if (!items || items.length === 0) return <span className="text-gray-400 italic text-sm">No items listed</span>;
-    const summary = items.slice(0, 2).map(i => `${i.name || i.product_name} (x${i.quantity})`).join(', ');
+    const summary = items.slice(0, 2).map(i => `${i.name || i.product_name} (x${i.quantity || i.qty || 1})`).join(', ');
     const extra = items.length > 2 ? ` + ${items.length - 2} more` : '';
     return <span className="text-sm font-semibold text-gray-700">{summary} <span className="text-gray-400 text-xs">{extra}</span></span>;
   };
 
   if (!user) return null;
+
+  const currentAddressDisplay = profileData.address && profileData.address !== 'Not set yet' 
+    ? profileData.address 
+    : 'Not set yet (Saves automatically on your first order)';
 
   return (
     <div className="bg-[#FAF9F6] min-h-screen pt-24 pb-20 font-sans text-[#1A1A1A]">
@@ -491,7 +495,9 @@ export default function OrderHistoryPage() {
                   <MapPin size={18} className="text-gray-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-gray-400 uppercase mb-0.5">Delivery Address</p>
-                    <p className="font-medium text-base text-gray-800">{profileData.address || user.address || 'Not provided'}</p>
+                    <p className={`font-medium text-sm ${profileData.address && profileData.address !== 'Not set yet' ? 'text-gray-800' : 'text-amber-600 italic'}`}>
+                      {currentAddressDisplay}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -763,11 +769,14 @@ export default function OrderHistoryPage() {
                           <input 
                             type="text" 
                             required
-                            placeholder="Enter your complete delivery address"
-                            value={profileData.address}
+                            placeholder="e.g., Jawalakhel - House #12, Street 5 (Near Zoo Gate)"
+                            value={profileData.address === 'Not set yet' ? '' : profileData.address}
                             onChange={e => setProfileData({...profileData, address: e.target.value})}
                             className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-[#002147] text-sm font-medium text-[#1A1A1A]"
                           />
+                          <p className="text-xs text-gray-400 mt-1.5">
+                            * Please ensure your address is within <strong>5 km of Patan or Kuleshwor</strong> to receive deliveries.
+                          </p>
                         </div>
 
                         <div className="sm:col-span-2">
@@ -1012,9 +1021,9 @@ export default function OrderHistoryPage() {
                         {selectedOrder.items && selectedOrder.items.map((item, i) => (
                           <tr key={i} className="hover:bg-gray-50/50">
                             <td className="p-4 font-semibold text-[#1A1A1A]">{item.name}</td>
-                            <td className="p-4 text-gray-500 text-center">x{item.quantity}</td>
+                            <td className="p-4 text-gray-500 text-center">x{item.quantity || item.qty || 1}</td>
                             <td className="p-4 text-gray-500 text-right">NPR {formatCurrency(item.price)}</td>
-                            <td className="p-4 font-bold text-[#002147] text-right">NPR {formatCurrency(Number(item.price) * item.quantity)}</td>
+                            <td className="p-4 font-bold text-[#002147] text-right">NPR {formatCurrency(Number(item.price) * (item.quantity || item.qty || 1))}</td>
                           </tr>
                         ))}
                       </tbody>

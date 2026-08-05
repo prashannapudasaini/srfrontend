@@ -1,40 +1,131 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Loader2, User, Phone, MapPin, Lock, ShieldCheck, CreditCard, Banknote, CheckCircle, ArrowRight, AlertTriangle } from 'lucide-react';
+import { 
+  Loader2, User, Phone, MapPin, Lock, ShieldCheck, 
+  CreditCard, Banknote, CheckCircle, ArrowRight, 
+  AlertTriangle, AlertCircle, CheckCircle2 
+} from 'lucide-react';
 import api from '../../services/api'; 
 import cIPSlogo from '../../assets/cIPSlogo.png'; 
 import { useAuth } from '../../context/AuthContext'; 
 
+// FULL 5 KM SERVICEABLE ZONE (Patan Hub + Kuleshwor Hub)
+const DELIVERY_AREAS = [
+  // --- Central / Core Kathmandu (~2–4 km from Kuleshwor/Patan) ---
+  "Anamnagar",
+  "Asan / Kshetrapati",
+  "Babarmahal",
+  "Basantapur / New Road",
+  "Buddhanagar",
+  "Jamal / Kamaladi",
+  "Maitighar",
+  "New Baneshwor",
+  "Old Baneshwor",
+  "Putalisadak",
+  "Shantinagar / Minbhawan",
+  "Sinamangal",
+  "Sundhara / Bhrikutimandap",
+  "Teku",
+  "Thapathali",
+  "Tripureshwor",
+
+  // --- Lalitpur Core & North (~0–3 km from Patan) ---
+  "Balkumari (Lalitpur)",
+  "Chakupat",
+  "Ekantakuna",
+  "Gwarko",
+  "Jawalakhel",
+  "Kumaripati",
+  "Kupondole",
+  "Lagankhel",
+  "Mahalaxmisthan",
+  "Mangal Bazar / Patan Core",
+  "Pulchowk",
+  "Sanepa",
+  "Satdobato",
+  "Shankhamul (Lalitpur)",
+
+  // --- Lalitpur South & East (~3–5 km from Patan) ---
+  "Bhaisepati",
+  "Dhapakhel (Lower)",
+  "Harisiddhi",
+  "Imadol",
+  "Khumaltar",
+  "Kusunti",
+  "Nakhipot",
+  "Sunakoti",
+  "Thaiba",
+
+  // --- Kuleshwor & Western Kathmandu (~0–4 km from Kuleshwor) ---
+  "Bafal",
+  "Balkhu",
+  "Chhauni",
+  "Dallu",
+  "Kalanki",
+  "Kalimati",
+  "Kuleshwor",
+  "Ravi Bhawan",
+  "Sitapaila",
+  "Solteemode",
+  "Swayambhu",
+  "Syuchatar / Naikap (Lower)",
+  "Tahachal",
+
+  // --- Kirtipur & South-West (~2–5 km from Kuleshwor) ---
+  "Chobhar / Taudaha (Lower)",
+  "Kirtipur (Naya Bazar / Panga)",
+  "Kirtipur (Sundarighat / Lower)",
+  "Tyangla Phant",
+
+  // --- Gatekeeper Option ---
+  "OTHER"
+].sort();
+
 export default function CheckoutPage({ cartTotal, cartItems }) {
   const navigate = useNavigate();
-  
-  // USE THE GLOBAL AUTH STATE INSTEAD OF LOCALSTORAGE
   const { user } = useAuth(); 
   
-  // SAFELY EXTRACT VALUES (Falling back to empty string if loading)
   const safeName = user?.name || '';
   const safePhone = user?.phone || '';
-  const safeAddress = user?.address || '';
+
+  // ADDRESS GATING STATE
+  const [addressData, setAddressData] = useState({
+    area: '',
+    detailedAddress: '',
+    landmark: '',
+    phone: safePhone
+  });
 
   const [paymentMethod, setPaymentMethod] = useState('connectips');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Determine if profile is incomplete
-  const isProfileIncomplete = !safeName || !safePhone || !safeAddress;
+  // GATEKEEPER CONDITIONS
+  const isAreaSelected = Boolean(addressData.area) && addressData.area !== 'OTHER';
+  const isOutsideService = addressData.area === 'OTHER';
+  const isAddressValid = isAreaSelected && Boolean(addressData.detailedAddress.trim()) && Boolean(addressData.phone.trim());
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setAddressData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
-    if (isProfileIncomplete) return; 
+    if (!isAddressValid || !safeName) return; 
 
     setIsProcessing(true);
 
+    // Format clean address string for delivery riders
+    const fullDeliveryAddress = `${addressData.area} - ${addressData.detailedAddress.trim()}` + 
+      (addressData.landmark.trim() ? ` (${addressData.landmark.trim()})` : '');
+
     try {
       const orderRes = await api.post('/orders/verify.php', {
-        user_id: user.id, // <-- ADDED: This links the order to the user's profile
+        user_id: user.id,
         customer_name: safeName,
-        phone: safePhone,
-        address: safeAddress,
+        phone: addressData.phone,
+        address: fullDeliveryAddress,
         total_amount: cartTotal,
         payment_method: paymentMethod,
         items: cartItems 
@@ -94,7 +185,7 @@ export default function CheckoutPage({ cartTotal, cartItems }) {
         </div>
         <h2 className="text-3xl font-black text-[#1A1A1A] mb-3">Order Confirmed!</h2>
         <p className="text-gray-500 font-medium mb-8 max-w-md mx-auto leading-relaxed">
-          Thank you, <strong>{safeName}</strong>. We have received your order and will deliver it to your registered address shortly.
+          Thank you, <strong>{safeName}</strong>. We have received your order and will deliver it to your address shortly.
         </p>
         <button 
           onClick={() => navigate('/products')}
@@ -106,71 +197,129 @@ export default function CheckoutPage({ cartTotal, cartItems }) {
     );
   }
 
-  // STANDARD CHECKOUT FORM
+  // STANDARD CHECKOUT FORM WITH GATEKEEPER
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="bg-gray-50 border-b border-gray-100 p-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-800">Checkout</h2>
-          <p className="text-sm text-gray-500 mt-1">Your registered delivery details</p>
+          <h2 className="text-lg font-bold text-gray-800">Checkout Details</h2>
+          <p className="text-sm text-gray-500 mt-1">Select your delivery neighborhood and confirm order</p>
         </div>
         <div className="flex items-center gap-2 text-green-700 bg-green-100/50 px-3 py-1.5 rounded-full border border-green-200">
           <ShieldCheck size={16} className="text-green-600" />
-          <span className="text-[11px] font-bold uppercase tracking-wider">Verified Profile</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider">Verified User</span>
         </div>
       </div>
 
       <div className="p-6">
-        {isProfileIncomplete && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex items-start gap-3 text-sm font-medium">
-            <AlertTriangle size={20} className="flex-shrink-0 text-amber-600 mt-0.5" />
-            <div>
-              <p className="font-bold mb-1">Incomplete Profile Details</p>
-              <p className="text-amber-700/80 mb-2">You must provide your full name, phone number, and address to place an order.</p>
-              <Link to="/history" className="inline-block bg-amber-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-700 transition-colors">
-                Update Profile Now
-              </Link>
-            </div>
-          </div>
-        )}
-
         <form onSubmit={handleCheckoutSubmit} className="space-y-6">
-          <div className="space-y-5">
+          
+          {/* 1. CUSTOMER IDENTITY */}
+          <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 ml-1">Registered Name</label>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5 ml-1">Customer Name</label>
               <div className="relative cursor-not-allowed">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
-                  type="text" readOnly value={safeName || 'Missing Name'}
-                  className={`w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg outline-none font-bold text-sm text-gray-600 cursor-not-allowed ${!safeName && 'text-red-500'}`} 
+                  type="text" readOnly value={safeName || 'Customer'}
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-sm text-gray-600 cursor-not-allowed" 
                 />
               </div>
             </div>
 
+            {/* 2. DELIVERY AREA GATEKEEPER DROPDOWN */}
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 ml-1">Registered Mobile</label>
-              <div className="relative cursor-not-allowed">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" readOnly value={safePhone || 'Missing Phone Number'}
-                  className={`w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg outline-none font-bold text-sm text-gray-600 cursor-not-allowed ${!safePhone && 'text-red-500'}`} 
-                />
-              </div>
+              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5 ml-1">
+                Select Delivery Neighborhood *
+              </label>
+              <select
+                name="area"
+                value={addressData.area}
+                onChange={handleAddressChange}
+                required
+                className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-sm text-[#1A1A1A] outline-none focus:border-[#002147] focus:bg-white transition-colors"
+              >
+                <option value="" disabled>-- Select Your Neighborhood --</option>
+                {DELIVERY_AREAS.map((area, idx) => (
+                  <option key={idx} value={area}>{area}</option>
+                ))}
+                <option value="OTHER">Other / My Area is Not Listed</option>
+              </select>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 ml-1">Registered Address</label>
-              <div className="relative cursor-not-allowed">
-                <MapPin className="absolute left-3.5 top-3.5 text-gray-400" size={18} />
-                <textarea 
-                  readOnly value={safeAddress || 'Missing Delivery Address'}
-                  className={`w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg outline-none font-bold text-sm text-gray-600 cursor-not-allowed resize-none ${!safeAddress && 'text-red-500'}`} rows="2"
-                ></textarea>
+            {/* AVAILABILITY FEEDBACK */}
+            {isAreaSelected && (
+              <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold animate-fade-in">
+                <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                <span>Service available! We deliver fresh dairy to {addressData.area}.</span>
               </div>
-              <p className="text-[10px] text-gray-400 font-bold mt-2 ml-1">To change these details, please <Link to="/history" className="text-[#00519E] hover:underline">update your profile</Link>.</p>
-            </div>
+            )}
+
+            {isOutsideService && (
+              <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs font-semibold leading-relaxed animate-fade-in">
+                <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold uppercase text-[11px] tracking-wider text-red-900">Service Currently Unavailable</p>
+                  <p className="mt-0.5">
+                    We currently only deliver within a 5 km radius of our <strong>Patan</strong> and <strong>Kuleshwor</strong> hubs. We are expanding soon!
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* 3. DETAILED ADDRESS & LANDMARK (Only visible if inside serviceable zone) */}
+            {isAreaSelected && (
+              <div className="space-y-4 animate-fade-in pt-2">
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5 ml-1">
+                    Detailed House / Street Address *
+                  </label>
+                  <input
+                    type="text"
+                    name="detailedAddress"
+                    value={addressData.detailedAddress}
+                    onChange={handleAddressChange}
+                    placeholder="e.g., House No. 12, Street Name, Chowk"
+                    required
+                    className="w-full p-3.5 border border-gray-200 rounded-xl font-medium text-sm outline-none focus:border-[#002147]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5 ml-1">
+                      Nearest Landmark (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      name="landmark"
+                      value={addressData.landmark}
+                      onChange={handleAddressChange}
+                      placeholder="e.g., Near Bhatbhateni / Opp. School"
+                      className="w-full p-3.5 border border-gray-200 rounded-xl font-medium text-sm outline-none focus:border-[#002147]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-1.5 ml-1">
+                      Contact Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={addressData.phone}
+                      onChange={handleAddressChange}
+                      placeholder="98XXXXXXXX"
+                      required
+                      className="w-full p-3.5 border border-gray-200 rounded-xl font-medium text-sm outline-none focus:border-[#002147]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* 4. PAYMENT SECTION */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
               <CreditCard size={18} className="text-gray-500" />
@@ -178,16 +327,16 @@ export default function CheckoutPage({ cartTotal, cartItems }) {
             </h3>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${paymentMethod === 'connectips' ? 'border-[#00519E] bg-[#00519E]/5' : 'border-gray-100 hover:border-gray-200 bg-gray-50/50'} ${isProfileIncomplete && 'opacity-50 cursor-not-allowed'}`}>
-                <input type="radio" name="paymentMethod" value="connectips" className="sr-only" disabled={isProfileIncomplete} checked={paymentMethod === 'connectips'} onChange={() => setPaymentMethod('connectips')} />
+              <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${paymentMethod === 'connectips' ? 'border-[#00519E] bg-[#00519E]/5' : 'border-gray-100 hover:border-gray-200 bg-gray-50/50'} ${!isAddressValid && 'opacity-50 cursor-not-allowed'}`}>
+                <input type="radio" name="paymentMethod" value="connectips" className="sr-only" disabled={!isAddressValid} checked={paymentMethod === 'connectips'} onChange={() => setPaymentMethod('connectips')} />
                 <div className="h-8 flex items-center justify-center">
                   <img src={cIPSlogo} alt="connectIPS" className="h-6 object-contain" />
                 </div>
                 <span className={`text-xs font-bold uppercase tracking-wide ${paymentMethod === 'connectips' ? 'text-[#00519E]' : 'text-gray-500'}`}>Online Payment</span>
               </label>
 
-              <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${paymentMethod === 'cod' ? 'border-[#9e111a] bg-[#9e111a]/5' : 'border-gray-100 hover:border-gray-200 bg-gray-50/50'} ${isProfileIncomplete && 'opacity-50 cursor-not-allowed'}`}>
-                <input type="radio" name="paymentMethod" value="cod" className="sr-only" disabled={isProfileIncomplete} checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
+              <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all ${paymentMethod === 'cod' ? 'border-[#9e111a] bg-[#9e111a]/5' : 'border-gray-100 hover:border-gray-200 bg-gray-50/50'} ${!isAddressValid && 'opacity-50 cursor-not-allowed'}`}>
+                <input type="radio" name="paymentMethod" value="cod" className="sr-only" disabled={!isAddressValid} checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
                 <div className={`h-8 w-8 rounded-full flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-[#9e111a] text-white' : 'bg-gray-200 text-gray-500'}`}>
                   <Banknote size={18} />
                 </div>
@@ -201,13 +350,15 @@ export default function CheckoutPage({ cartTotal, cartItems }) {
             </div>
 
             <button 
-              type="submit" disabled={isProcessing || cartTotal <= 0 || isProfileIncomplete}
+              type="submit" disabled={isProcessing || cartTotal <= 0 || !isAddressValid}
               className={`w-full text-white p-4 rounded-xl font-bold text-sm uppercase tracking-wide transition-all shadow-md flex justify-center items-center gap-3 relative disabled:opacity-50 disabled:cursor-not-allowed ${
                 paymentMethod === 'connectips' ? 'bg-[#00519E] hover:bg-[#004182]' : 'bg-[#9e111a] hover:bg-[#7a0d14]'
               }`}
             >
               {isProcessing ? (
                 <><Loader2 className="animate-spin" size={20} /> Processing Order...</>
+              ) : !isAddressValid ? (
+                <span>Select Valid Delivery Neighborhood</span>
               ) : paymentMethod === 'connectips' ? (
                 <>
                   <Lock size={16} className="opacity-70" />

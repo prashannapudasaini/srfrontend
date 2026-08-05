@@ -18,7 +18,7 @@ const HeroSlider = () => {
     returnObjects: true,
     defaultValue: [
       {
-        title: "Pure Organic Ghee",
+        title: "Pure Ghee",
         subtitle: "Authentic Homemade Taste",
         description: "Healthy, flavorful ghee with a rich aroma and granulated texture. Hygienically packed for authentic homemade taste, perfect for traditional and modern cooking."
       },

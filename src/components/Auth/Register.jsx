@@ -28,6 +28,8 @@ export default function Register({ handleSubmit, formData, setFormData, error })
     }
 
     // If all validations pass, call the parent's handleSubmit
+    // Note: If your backend expects an address field, we default it cleanly
+    setFormData(prev => ({ ...prev, address: prev.address || "Not set yet" }));
     handleSubmit(e);
   };
 
@@ -42,50 +44,55 @@ export default function Register({ handleSubmit, formData, setFormData, error })
       )}
 
       <form onSubmit={onFormSubmit} className="space-y-4">
+        {/* Full Name */}
         <div>
           <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
           <input 
-            type="text" required 
+            type="text" 
+            required 
+            placeholder="e.g., Ram Sharma"
+            value={formData.name || ''}
             onChange={e => setFormData({...formData, name: e.target.value})}
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
           />
         </div>
         
-        <div>
-          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
-          <input 
-            type="email" required 
-            onChange={e => setFormData({...formData, email: e.target.value})}
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
-          />
-        </div>
-
+        {/* Email & Phone Number (2 Columns) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
+            <input 
+              type="email" 
+              required 
+              placeholder="name@example.com"
+              value={formData.email || ''}
+              onChange={e => setFormData({...formData, email: e.target.value})}
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
             <input 
-              type="tel" required 
+              type="tel" 
+              required 
               placeholder="98XXXXXXXX"
+              value={formData.phone || ''}
               onChange={e => setFormData({...formData, phone: e.target.value})}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Delivery Address</label>
-            <input 
-              type="text" required 
-              placeholder="e.g., Sanepa, Lalitpur"
-              onChange={e => setFormData({...formData, address: e.target.value})}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
-            />
-          </div>
         </div>
 
+        {/* Password & Confirm Password (2 Columns) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Password</label>
             <input 
-              type="password" required 
+              type="password" 
+              required 
+              placeholder="Min. 8 characters"
+              value={formData.password || ''}
               onChange={e => setFormData({...formData, password: e.target.value})}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
             />
@@ -93,7 +100,10 @@ export default function Register({ handleSubmit, formData, setFormData, error })
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Confirm Password</label>
             <input 
-              type="password" required 
+              type="password" 
+              required 
+              placeholder="Re-enter password"
+              value={formData.password_confirmation || ''}
               onChange={e => setFormData({...formData, password_confirmation: e.target.value})}
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#E2B254] focus:ring-2 focus:ring-[#E2B254]/20 outline-none transition-all" 
             />

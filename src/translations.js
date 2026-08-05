@@ -11,7 +11,7 @@ export const resources = {
       heroSlider: {
         slides: [
           {
-            title: "Pure Organic Ghee",
+            title: "Pure Ghee",
             subtitle: "Authentic Homemade Taste",
             description: "Healthy, flavorful ghee with a rich aroma and granulated texture. Hygienically packed for authentic homemade taste, perfect for traditional and modern cooking."
           },
@@ -479,7 +479,7 @@ export const resources = {
       heroSlider: {
         slides: [
           {
-            title: "शुद्ध अर्गानिक घ्यू",
+            title: "शुद्ध घ्यू",
             subtitle: "प्रामाणिक घरेलु स्वाद",
             description: "स्वस्थ, स्वादिष्ट र सुगन्धित दानेदार घ्यू। प्रामाणिक घरेलु स्वादका लागि स्वच्छ रूपमा प्याक गरिएको, परम्परागत र आधुनिक खाना पकाउनको लागि उत्तम।"
           },

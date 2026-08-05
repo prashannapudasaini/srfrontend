@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom'; 
-import { MapPin, CheckCircle2, Loader2, Plus, Minus, ShoppingBag, CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset, Copy, ShieldAlert, Lock, CreditCard, Clock, ChevronDown } from 'lucide-react';
+import { 
+  MapPin, CheckCircle2, Loader2, Plus, Minus, ShoppingBag, 
+  CalendarDays, Receipt, Calendar, Info, Sunrise, Sunset, 
+  Copy, ShieldAlert, Lock, CreditCard, Clock, ChevronDown, 
+  AlertCircle, Phone, Home 
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; 
 import api from '../services/api';
 import ContactModal from '../components/ContactModal';
@@ -9,14 +14,76 @@ import ContactModal from '../components/ContactModal';
 // 1. IMPORT CONNECTIPS LOGO
 import cIPSlogo from '../assets/cIPSlogo.png'; 
 
-// EXPANDED KATHMANDU VALLEY LOCATIONS
-const AVAILABLE_LOCATIONS = [
-  "Bafal", "Balaju", "Baluwatar", "Baneshwor", "Basundhara", 
-  "Boudha", "Chabahil", "Chandragiri", "Dhapasi", "Gongabu", 
-  "Gwarko", "Jorpati", "Kalanki", "Kalimati", "Koteshwor", 
-  "Lazimpat", "Macha Pokhari", "Maharajgunj", "Naxal", "New Baneshwor",
-  "Old Baneshwor", "Putalisadak", "Samakhusi", "Sinamangal", "Sitapaila", 
-  "Swayambhu", "Tahachal", "Thamel", "Tokha", "Tripureshwar"
+// FULL 5 KM SERVICEABLE ZONE (Patan Hub + Kuleshwor Hub)
+const DELIVERY_AREAS = [
+  // --- Central / Core Kathmandu (~2–4 km from Kuleshwor/Patan) ---
+  "Anamnagar",
+  "Asan / Kshetrapati",
+  "Babarmahal",
+  "Basantapur / New Road",
+  "Buddhanagar",
+  "Jamal / Kamaladi",
+  "Maitighar",
+  "New Baneshwor",
+  "Old Baneshwor",
+  "Putalisadak",
+  "Shantinagar / Minbhawan",
+  "Sinamangal",
+  "Sundhara / Bhrikutimandap",
+  "Teku",
+  "Thapathali",
+  "Tripureshwor",
+
+  // --- Lalitpur Core & North (~0–3 km from Patan) ---
+  "Balkumari (Lalitpur)",
+  "Chakupat",
+  "Ekantakuna",
+  "Gwarko",
+  "Jawalakhel",
+  "Kumaripati",
+  "Kupondole",
+  "Lagankhel",
+  "Mahalaxmisthan",
+  "Mangal Bazar / Patan Core",
+  "Pulchowk",
+  "Sanepa",
+  "Satdobato",
+  "Shankhamul (Lalitpur)",
+
+  // --- Lalitpur South & East (~3–5 km from Patan) ---
+  "Bhaisepati",
+  "Dhapakhel (Lower)",
+  "Harisiddhi",
+  "Imadol",
+  "Khumaltar",
+  "Kusunti",
+  "Nakhipot",
+  "Sunakoti",
+  "Thaiba",
+
+  // --- Kuleshwor & Western Kathmandu (~0–4 km from Kuleshwor) ---
+  "Bafal",
+  "Balkhu",
+  "Chhauni",
+  "Dallu",
+  "Kalanki",
+  "Kalimati",
+  "Kuleshwor",
+  "Ravi Bhawan",
+  "Sitapaila",
+  "Solteemode",
+  "Swayambhu",
+  "Syuchatar / Naikap (Lower)",
+  "Tahachal",
+
+  // --- Kirtipur & South-West (~2–5 km from Kuleshwor) ---
+  "Chobhar / Taudaha (Lower)",
+  "Kirtipur (Naya Bazar / Panga)",
+  "Kirtipur (Sundarighat / Lower)",
+  "Tyangla Phant",
+
+  // --- Gatekeeper Option ---
+  "OTHER"
 ].sort();
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -40,9 +107,13 @@ export default function AvailabilityPage() {
   
   const [basket, setBasket] = useState({});
   
-  // --- LOCATION SEARCH STATES ---
+  // --- LOCATION & ADDRESS STATES ---
   const [location, setLocation] = useState(''); 
   const [locationSearch, setLocationSearch] = useState('');
+  const [detailedAddress, setDetailedAddress] = useState('');
+  const [landmark, setLandmark] = useState('');
+  const [phone, setPhone] = useState(user?.phone || '');
+  
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -51,17 +122,17 @@ export default function AvailabilityPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowFormatted = tomorrow.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+  // GATEKEEPER CHECKS
+  const isAreaSelected = Boolean(location) && location !== 'OTHER';
+  const isOutsideService = location === 'OTHER';
+  const isAddressValid = isAreaSelected && Boolean(detailedAddress.trim()) && Boolean(phone.trim());
 
   // Handle clicking outside the location dropdown
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-        // Reset search to actual location if they clicked away without selecting
-        if (location) setLocationSearch(location);
+        if (location) setLocationSearch(location === 'OTHER' ? 'Other / Area Not Listed' : location);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -185,14 +256,14 @@ export default function AvailabilityPage() {
   }, [selectedDays, basket]);
 
   const filteredLocations = useMemo(() => {
-    return AVAILABLE_LOCATIONS.filter(loc => 
+    return DELIVERY_AREAS.filter(loc => 
       loc.toLowerCase().includes(locationSearch.toLowerCase())
     );
   }, [locationSearch]);
 
   const handleConnectIPSCheckout = async () => {
     if (!isAuthenticated) return navigate('/login');
-    if (!isBasketValid || !location || !timing) return alert("Please complete all fields.");
+    if (!isBasketValid || !isAddressValid || !timing) return alert("Please complete all required address and schedule fields.");
     
     setIsSubmitting(true);
     
@@ -208,12 +279,17 @@ export default function AvailabilityPage() {
         return { day, items: itemsForDay };
       });
 
+      // Combine full address for delivery riders
+      const fullDeliveryAddress = `${location} - ${detailedAddress.trim()}` + 
+        (landmark.trim() ? ` (${landmark.trim()})` : '');
+
       // 1. Create Sub in Database
       const createRes = await api.post('/orders/create_sub.php', {
         user_id: user.id,
         plan_type: plan,
         delivery_time: timing,
-        location: location,
+        location: fullDeliveryAddress,
+        phone: phone,
         weekly_total_cost: finalCost,
         schedule: cleanWeeklySchedule
       });
@@ -453,16 +529,16 @@ export default function AvailabilityPage() {
 
             </div>
 
-            {/* RIGHT SIDE: CHECKOUT SUMMARY */}
+            {/* RIGHT SIDE: CHECKOUT SUMMARY & 5KM ADDRESS GATEKEEPER */}
             <div className="lg:col-span-4 sticky top-28 space-y-6">
               <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 bg-[#002147] text-white">
                   <h2 className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                    <Receipt size={20} className="text-[#E2B254]"/> Order Summary
+                    <Receipt size={20} className="text-[#E2B254]"/> Routine Summary
                   </h2>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-5">
                   {!isBasketValid && step === 3 && (
                     <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl flex gap-2 text-xs font-bold">
                       <ShieldAlert size={16} className="shrink-0"/>
@@ -472,20 +548,22 @@ export default function AvailabilityPage() {
 
                   <div className="space-y-4">
                     
-                    {/* UPDATED 12-HOUR WARNING MESSAGE */}
-                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl flex items-start gap-2 mb-3">
+                    {/* 12-HOUR WARNING MESSAGE */}
+                    <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl flex items-start gap-2">
                       <Clock size={16} className="shrink-0 mt-0.5" />
                       <p className="text-[10px] font-bold">Please place your order at least <strong className="font-black">12 hours</strong> before your preferred delivery time.</p>
                     </div>
 
-                    {/* SEARCHABLE LOCATION DROPDOWN */}
+                    {/* 5 KM PATAN / KULESHWOR AREA GATEKEEPER */}
                     <div ref={dropdownRef}>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Kathmandu Valley Delivery Zone</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">
+                        Select Delivery Neighborhood *
+                      </label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-[#002147]" size={16} />
                         <input 
                           type="text"
-                          placeholder="Search your location..."
+                          placeholder="Search Patan / Kuleshwor zone..."
                           value={locationSearch}
                           onFocus={() => setIsDropdownOpen(true)}
                           onChange={(e) => {
@@ -500,43 +578,104 @@ export default function AvailabilityPage() {
                           {isDropdownOpen && (
                             <motion.ul 
                               initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                              className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto custom-scrollbar overflow-hidden"
+                              className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-52 overflow-y-auto custom-scrollbar overflow-hidden"
                             >
                               {filteredLocations.length > 0 ? (
                                 filteredLocations.map(loc => (
                                   <li 
                                     key={loc} 
                                     onMouseDown={(e) => {
-                                      // Using onMouseDown instead of onClick to prevent blur from closing it too early
                                       e.preventDefault();
                                       setLocation(loc);
-                                      setLocationSearch(loc);
+                                      setLocationSearch(loc === 'OTHER' ? 'Other / Area Not Listed' : loc);
                                       setIsDropdownOpen(false);
                                     }}
                                     className={`px-4 py-2.5 text-sm font-bold cursor-pointer hover:bg-gray-50 transition-colors ${location === loc ? 'bg-blue-50 text-[#002147]' : 'text-gray-700'}`}
                                   >
-                                    {loc}
+                                    {loc === 'OTHER' ? 'Other / My Area is Not Listed' : loc}
                                   </li>
                                 ))
                               ) : (
-                                <li className="px-4 py-3 text-xs text-gray-400 font-medium italic text-center">No matching locations found</li>
+                                <li className="px-4 py-3 text-xs text-gray-400 font-medium italic text-center">No matching neighborhoods found</li>
                               )}
                             </motion.ul>
                           )}
                         </AnimatePresence>
                       </div>
                     </div>
+
+                    {/* OUTSIDE 5KM SERVICE BANNER */}
+                    {isOutsideService && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs font-semibold leading-relaxed animate-fade-in">
+                        <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold uppercase text-[10px] tracking-wider text-red-900">Service Restricted</p>
+                          <p className="mt-0.5">
+                            We currently only deliver within a 5 km radius of our <strong>Patan</strong> and <strong>Kuleshwor</strong> hubs.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DETAILED HOUSE ADDRESS & PHONE (Only shown when inside serviceable zone) */}
+                    {isAreaSelected && (
+                      <div className="space-y-3 animate-fade-in pt-1">
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">
+                            Detailed House / Street Address *
+                          </label>
+                          <input
+                            type="text"
+                            value={detailedAddress}
+                            onChange={(e) => setDetailedAddress(e.target.value)}
+                            placeholder="e.g., House No. 12, Street Name"
+                            required
+                            className="w-full bg-gray-50 border border-gray-200 text-sm font-medium text-[#1A1A1A] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#002147] focus:bg-white"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">
+                              Landmark
+                            </label>
+                            <input
+                              type="text"
+                              value={landmark}
+                              onChange={(e) => setLandmark(e.target.value)}
+                              placeholder="Near Zoo Gate"
+                              className="w-full bg-gray-50 border border-gray-200 text-sm font-medium text-[#1A1A1A] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#002147] focus:bg-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">
+                              Contact Phone *
+                            </label>
+                            <input
+                              type="tel"
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              placeholder="98XXXXXXXX"
+                              required
+                              className="w-full bg-gray-50 border border-gray-200 text-sm font-medium text-[#1A1A1A] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#002147] focus:bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
+                    {/* TIMING SELECTION */}
                     <div>
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Timing</label>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1 block">Timing Route *</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <button onClick={() => setTiming('morning')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'morning' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunrise size={14}/> 7-10 AM</button>
-                        <button onClick={() => setTiming('evening')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'evening' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunset size={14}/> 2-5 PM</button>
+                        <button type="button" onClick={() => setTiming('morning')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'morning' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunrise size={14}/> 7-10 AM</button>
+                        <button type="button" onClick={() => setTiming('evening')} className={`py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${timing === 'evening' ? 'border-[#002147] bg-[#002147] text-white' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}><Sunset size={14}/> 2-5 PM</button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-100 pt-6 space-y-3">
+                  <div className="border-t border-gray-100 pt-5 space-y-3">
                     <div className="flex justify-between text-sm font-bold text-gray-600">
                       <span>Weekly Base Cost</span>
                       <span>NPR {weeklyCost.toLocaleString()}</span>
@@ -545,20 +684,22 @@ export default function AvailabilityPage() {
                       <span>Plan Multiplier</span>
                       <span className="bg-gray-100 px-2 py-0.5 rounded text-xs">x{plan === 'custom' ? '1 Week' : '4 Weeks'}</span>
                     </div>
-                    <div className="flex justify-between items-end pt-3">
+                    <div className="flex justify-between items-end pt-3 border-t border-gray-100">
                       <span className="text-[10px] font-black uppercase tracking-widest text-[#002147]">Grand Total</span>
                       <span className="text-3xl font-black text-[#9e111a]">NPR {finalCost.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  {/* PROFESSIONAL CHECKOUT BUTTON UPGRADE */}
+                  {/* CONNECTIPS SUBSCRIPTION CHECKOUT BUTTON */}
                   <button 
                     onClick={handleConnectIPSCheckout}
-                    disabled={!isBasketValid || !location || !timing || isSubmitting}
-                    className="w-full bg-[#00519E] hover:bg-[#004182] disabled:opacity-70 disabled:hover:bg-[#00519E] text-white p-4 rounded-xl font-bold text-sm uppercase tracking-wide transition-all shadow-md flex justify-center items-center gap-3 relative"
+                    disabled={!isBasketValid || !isAddressValid || !timing || isSubmitting}
+                    className="w-full bg-[#00519E] hover:bg-[#004182] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-[#00519E] text-white p-4 rounded-xl font-bold text-sm uppercase tracking-wide transition-all shadow-md flex justify-center items-center gap-3 relative"
                   >
                     {isSubmitting ? (
                       <><Loader2 className="animate-spin" size={20} /> Processing Payment...</>
+                    ) : !isAddressValid ? (
+                      <span>Select Valid Neighborhood</span>
                     ) : (
                       <>
                         <Lock size={16} className="opacity-70" />
