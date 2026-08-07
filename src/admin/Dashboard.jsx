@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X, Video, CalendarDays } from 'lucide-react';
+// 🔥 NEW: Added 'Truck' to the lucide-react imports
+import { Package, ShoppingCart, Image as ImageIcon, Users, LogOut, LayoutDashboard, ChevronRight, Droplets, Menu, X, Video, CalendarDays, Truck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Dashboard() {
@@ -19,7 +20,9 @@ export default function Dashboard() {
     { name: 'Products', path: '/admin/products', icon: Package },
     { name: 'Milk Inventory', path: '/admin/milk', icon: Droplets },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
-    { name: 'Subscriptions', path: '/admin/subscriptions', icon: CalendarDays }, // <-- NEW SUBSCRIPTIONS LINK
+    // 🔥 NEW: Delivery Routing Navigation Item
+    { name: 'Delivery Routing', path: '/admin/deliveries', icon: Truck },
+    { name: 'Subscriptions', path: '/admin/subscriptions', icon: CalendarDays }, 
     { name: 'Banners', path: '/admin/banners', icon: ImageIcon },
     { name: 'Media Center', path: '/admin/media', icon: Video },
     { name: 'Users', path: '/admin/users', icon: Users },
@@ -98,7 +101,7 @@ export default function Dashboard() {
               <Menu size={24} />
             </button>
             <h1 className="text-xl lg:text-3xl font-serif font-black text-[#1A1A1A] tracking-tight">
-              {navItems.find(i => i.path === location.pathname)?.name || 'Admin Overview'}
+              {navItems.find(i => location.pathname === i.path || (i.path !== '/admin' && location.pathname.startsWith(i.path)))?.name || 'Admin Overview'}
             </h1>
           </div>
           <div className="flex items-center gap-6">

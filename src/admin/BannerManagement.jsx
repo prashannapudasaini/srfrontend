@@ -14,9 +14,24 @@ export default function BannerManagement() {
   const fetchBanners = async () => {
     try {
       const res = await api.get('/admin/banners.php');
-      setBanners(res.data || []);
-    } catch (error) { console.error("Failed to fetch banners"); } 
-    finally { setLoading(false); }
+      
+      // 🔥 DEFENSIVE ARRAY PARSING: Handles array, { status, data }, or fallback
+      let bannerList = [];
+      if (Array.isArray(res.data)) {
+        bannerList = res.data;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        bannerList = res.data.data;
+      } else if (res.data && Array.isArray(res.data.banners)) {
+        bannerList = res.data.banners;
+      }
+
+      setBanners(bannerList);
+    } catch (error) { 
+      console.error("Failed to fetch banners", error); 
+      setBanners([]); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleUpload = async (e) => {
@@ -32,7 +47,8 @@ export default function BannerManagement() {
       await api.post('/admin/banners.php', formData);
       setTitle('');
       setImageFile(null);
-      document.getElementById('banner-upload').value = '';
+      const inputElem = document.getElementById('banner-upload');
+      if (inputElem) inputElem.value = '';
       fetchBanners();
     } catch (error) {
       alert("Upload failed. Ensure backend permissions are correct.");
@@ -57,6 +73,9 @@ export default function BannerManagement() {
     }
   };
 
+  // 🔥 SAFE ARRAY GUARD: Prevents banners.map is not a function
+  const safeBanners = Array.isArray(banners) ? banners : [];
+
   return (
     <div className="space-y-8">
       {/* Upload Section */}
@@ -67,10 +86,12 @@ export default function BannerManagement() {
             id="banner-upload" 
             type="file" 
             accept="image/*" 
-            onChange={(e) => setImageFile(e.target.files[0])}
+            onChange={(e) => setImageFile(e.target.files[0] || null)}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <span className="text-sm font-bold text-indigo-700">Browse Image</span>
+          <span className="text-sm font-bold text-indigo-700">
+            {imageFile ? imageFile.name : "Browse Image"}
+          </span>
           <span className="text-xs text-slate-400 mt-1">1920x1080px (16:9)</span>
         </div>
 
@@ -99,32 +120,48 @@ export default function BannerManagement() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2"><ImageIcon size={22} /> Active Slides</h2>
-          <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">{banners.length} Banners</span>
+          <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">{safeBanners.length} Banners</span>
         </div>
         
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? <p className="text-slate-500 p-4">Loading banners...</p> : banners.map(banner => (
-            <div key={banner.id} className="group rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all relative">
-              <div className="h-40 w-full relative bg-slate-900">
-                <img src={banner.image_url} alt={banner.title} className={`w-full h-full object-cover transition-opacity ${!banner.is_active && 'opacity-40 grayscale'}`} />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <h3 className="text-white font-bold text-sm truncate">{banner.title || 'Untitled Banner'}</h3>
+          {loading ? (
+            <p className="text-slate-500 p-4">Loading banners...</p>
+          ) : safeBanners.length === 0 ? (
+            <p className="text-slate-400 p-4 col-span-3 text-center font-medium">No banners uploaded yet.</p>
+          ) : (
+            safeBanners.map(banner => {
+              const isActive = banner.is_active == 1 || banner.is_active === true;
+              const imgUrl = banner.image_url || banner.image || '';
+
+              return (
+                <div key={banner.id} className="group rounded-xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all relative">
+                  <div className="h-40 w-full relative bg-slate-900">
+                    <img 
+                      src={imgUrl} 
+                      alt={banner.title || 'Banner'} 
+                      className={`w-full h-full object-cover transition-opacity ${!isActive && 'opacity-40 grayscale'}`} 
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/600x300?text=Banner+Image'; }}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <h3 className="text-white font-bold text-sm truncate">{banner.title || 'Untitled Banner'}</h3>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4 flex justify-between items-center">
+                    <button 
+                      onClick={() => handleToggle(banner.id, isActive)}
+                      className={`flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-md transition-colors ${isActive ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    >
+                      {isActive ? <><Eye size={14}/> Visible</> : <><EyeOff size={14}/> Hidden</>}
+                    </button>
+                    <button onClick={() => handleDelete(banner.id)} className="text-slate-400 hover:text-rose-600 bg-slate-50 p-2 rounded-md transition-colors">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="bg-white p-4 flex justify-between items-center">
-                <button 
-                  onClick={() => handleToggle(banner.id, banner.is_active)}
-                  className={`flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-md transition-colors ${banner.is_active ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                >
-                  {banner.is_active ? <><Eye size={14}/> Visible</> : <><EyeOff size={14}/> Hidden</>}
-                </button>
-                <button onClick={() => handleDelete(banner.id)} className="text-slate-400 hover:text-rose-600 bg-slate-50 p-2 rounded-md transition-colors">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

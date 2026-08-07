@@ -3,14 +3,21 @@ import api from '../services/api';
 import { 
   Truck, CheckCircle2, XCircle, Search, MapPin, 
   Loader2, User, Phone, CreditCard, Clock, 
-  Package, Receipt, FileText, ChevronRight, Banknote, Printer, AlertTriangle, Send, DollarSign
+  Package, Receipt, FileText, ChevronRight, Banknote, Printer, AlertTriangle, Send, DollarSign, Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrderManagement() {
+  // Helper to get Today's Date in YYYY-MM-DD format
+  const getTodayString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(getTodayString()); // Default to Today
   const [selectedOrder, setSelectedOrder] = useState(null);
   
   // UI States for Updating
@@ -69,7 +76,7 @@ export default function OrderManagement() {
     }
   };
 
-  // --- NEW: Handle Payment Status Update ---
+  // Handle Payment Status Update
   const handlePaymentStatusUpdate = async (orderId, newPaymentStatus) => {
     if (isUpdating) return;
     setIsUpdating(true);
@@ -99,13 +106,33 @@ export default function OrderManagement() {
     }
   };
 
+  // Helper to change selected date by relative days offset
+  const setRelativeDate = (daysOffset) => {
+    if (daysOffset === 'all') {
+      setSelectedDate('all');
+      return;
+    }
+    const d = new Date();
+    d.setDate(d.getDate() + daysOffset);
+    setSelectedDate(d.toISOString().split('T')[0]);
+  };
+
+  // Filter orders by Date AND Search Query
   const filteredOrders = useMemo(() => {
-    return orders.filter(order => 
-      order.id?.toString().includes(searchQuery) || 
-      order.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.phone_number?.includes(searchQuery)
-    );
-  }, [orders, searchQuery]);
+    return orders.filter(order => {
+      // 1. Date filter check (extracts YYYY-MM-DD from created_at timestamp)[cite: 1]
+      const orderDate = order.created_at ? order.created_at.substring(0, 10) : '';
+      const matchesDate = selectedDate === 'all' || orderDate === selectedDate;
+
+      // 2. Search query check
+      const matchesSearch = 
+        order.id?.toString().includes(searchQuery) || 
+        order.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.phone_number?.includes(searchQuery);
+
+      return matchesDate && matchesSearch;
+    });
+  }, [orders, searchQuery, selectedDate]);
 
   // PROFESSIONAL INVOICE GENERATOR
   const handlePrintInvoice = (order) => {
@@ -328,6 +355,70 @@ export default function OrderManagement() {
         </div>
       </div>
 
+      {/* 🔥 CALENDAR DATE FILTER BAR */}
+      <div className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold uppercase text-gray-400 flex items-center gap-1.5">
+            <Calendar size={15} className="text-[#002147]" /> Filter By Date:
+          </span>
+          <input
+            type="date"
+            value={selectedDate === 'all' ? '' : selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value || 'all')}
+            className="border border-gray-200 rounded-xl px-3.5 py-2 text-sm font-bold text-gray-800 bg-gray-50/80 focus:outline-none focus:border-[#002147] transition-all"
+          />
+          {selectedDate !== 'all' && (
+            <span className="text-xs font-semibold text-gray-500">
+              ({new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })})
+            </span>
+          )}
+        </div>
+
+        {/* Quick Date Shortcuts */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setRelativeDate(0)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              selectedDate === getTodayString()
+                ? 'bg-[#002147] text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => setRelativeDate(-1)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              selectedDate === (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; })()
+                ? 'bg-[#002147] text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Yesterday
+          </button>
+          <button
+            onClick={() => setRelativeDate(-2)}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              selectedDate === (() => { const d = new Date(); d.setDate(d.getDate() - 2); return d.toISOString().split('T')[0]; })()
+                ? 'bg-[#002147] text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            2 Days Ago
+          </button>
+          <button
+            onClick={() => setRelativeDate('all')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              selectedDate === 'all'
+                ? 'bg-[#9e111a] text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All Dates
+          </button>
+        </div>
+      </div>
+
       {/* TABLE */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
@@ -354,7 +445,7 @@ export default function OrderManagement() {
               ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="p-16 text-center text-sm font-medium text-gray-400">
-                    No orders found matching your search criteria.
+                    No orders found matching your search and selected date criteria.
                   </td>
                 </tr>
               ) : (
@@ -473,7 +564,7 @@ export default function OrderManagement() {
                   </div>
                 </div>
 
-                {/* 2. NEW: PAYMENT STATUS CONTROL */}
+                {/* 2. PAYMENT STATUS CONTROL */}
                 <div className="mb-8 bg-emerald-50/50 border border-emerald-100 p-5 rounded-2xl">
                   <h4 className="text-xs font-black uppercase text-emerald-800 tracking-wider mb-3 flex items-center gap-2">
                     <DollarSign size={14} className="text-emerald-600" /> Payment Status (Financial Record)

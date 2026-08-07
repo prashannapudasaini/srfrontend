@@ -5,7 +5,6 @@ import { XCircle } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion'; 
 import { useTranslation } from 'react-i18next'; // ADDED FOR i18n
 
-import DeliveryDashboard from './delivery/DeliveryDashboard';
 import Preloader from './components/Preloader'; 
 
 // Global Layout Components
@@ -49,6 +48,8 @@ import BannerManagement from './admin/BannerManagement';
 import UserManagement from './admin/UserManagement'; 
 import MediaManagement from './admin/MediaManagement';
 import SubscriptionManagement from './admin/SubscriptionManagement';
+// 🔥 NEW: Import the Delivery Management Page
+import DeliveryManagement from './admin/DeliveryManagement'; 
 
 // Ice Cream Page
 import IceCreamPage from './pages/IceCreamPage';
@@ -134,7 +135,6 @@ function App() {
           <Route path="/notices" element={<PublicLayout><NoticesPage /></PublicLayout>} />
           <Route path="/subscription-success" element={<PublicLayout><SubscriptionSuccessPage /></PublicLayout>} />
           <Route path="/blog" element={<PublicLayout><BlogPage /></PublicLayout>} />
-          <Route path="/delivery" element={<DeliveryDashboard />} />
           <Route path="/blog/:id" element={<PublicLayout><BlogPostDetail /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} /> 
           
@@ -193,6 +193,8 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="media" element={<MediaManagement />} />
             <Route path="subscriptions" element={<SubscriptionManagement />} />
+            {/* 🔥 NEW: Added Delivery Route */}
+            <Route path="deliveries" element={<DeliveryManagement />} />
           </Route>
 
           {/* === ICE CREAM PAGE === */}

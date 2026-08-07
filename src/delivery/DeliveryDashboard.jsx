@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Phone, Package, Repeat, Navigation, CheckCircle, Loader2, AlertTriangle, Truck, Clock, ArrowRight } from 'lucide-react';
+import { 
+  MapPin, Phone, Package, Repeat, Navigation, CheckCircle, 
+  Loader2, AlertTriangle, Truck, Clock, ArrowRight, 
+  ChevronDown, ChevronUp, Banknote, CreditCard, ListOrdered 
+} from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,8 +14,9 @@ export default function DeliveryDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Pending'); 
   const [updatingId, setUpdatingId] = useState(null);
+  
+  const [expandedTaskId, setExpandedTaskId] = useState(null);
 
-  // Custom UI Alert
   const [dialog, setDialog] = useState({ isOpen: false, message: '', onConfirm: null });
   const showAlert = (message) => setDialog({ isOpen: true, message, onConfirm: () => setDialog({ isOpen: false, message: '', onConfirm: null }) });
   
@@ -35,7 +40,7 @@ export default function DeliveryDashboard() {
   };
 
   const handleUpdateStatus = async (taskId, newStatus) => {
-    setUpdatingId(taskId);
+    setUpdatingId(taskId + 'status');
     try {
       const res = await api.post('delivery/update_status.php', {
         task_id: taskId,
@@ -43,7 +48,6 @@ export default function DeliveryDashboard() {
       });
       
       if (res.data.status === 'success') {
-        // Instantly update UI locally
         setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, status: newStatus } : t));
       } else {
         showAlert(res.data.message || "Failed to update status.");
@@ -55,7 +59,30 @@ export default function DeliveryDashboard() {
     }
   };
 
-  // Filter tasks based on active tab
+  const handleUpdatePayment = async (taskId) => {
+    setUpdatingId(taskId + 'payment');
+    try {
+      const res = await api.post('delivery/update_payment.php', {
+        task_id: taskId,
+        payment_status: 'paid'
+      });
+      
+      if (res.data.status === 'success') {
+        setTasks(prev => prev.map(t => t.task_id === taskId ? { ...t, payment_status: 'paid' } : t));
+      } else {
+        showAlert(res.data.message || "Failed to update payment status.");
+      }
+    } catch (error) {
+      showAlert("Network error while updating payment.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const toggleExpand = (taskId) => {
+    setExpandedTaskId(prev => prev === taskId ? null : taskId);
+  };
+
   const displayedTasks = useMemo(() => {
     return tasks.filter(t => {
       const isCompleted = t.status === 'Delivered' || t.status === 'Completed';
@@ -70,7 +97,7 @@ export default function DeliveryDashboard() {
   return (
     <div className="min-h-screen bg-[#F4F6F8] pb-24 font-sans selection:bg-[#002147] selection:text-white">
       
-      {/* --- MOBILE OPTIMIZED DIALOG --- */}
+      {/* MOBILE OPTIMIZED DIALOG */}
       <AnimatePresence>
         {dialog.isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-5">
@@ -92,7 +119,7 @@ export default function DeliveryDashboard() {
         )}
       </AnimatePresence>
 
-      {/* --- PREMIUM MOBILE HEADER --- */}
+      {/* HEADER */}
       <div className="bg-gradient-to-b from-[#00152e] to-[#002147] text-white px-6 pt-12 pb-8 rounded-b-[2.5rem] shadow-xl relative overflow-hidden z-40">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 bg-white opacity-[0.03] rounded-full blur-2xl"></div>
         <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-40 h-40 bg-blue-400 opacity-[0.05] rounded-full blur-2xl"></div>
@@ -109,7 +136,6 @@ export default function DeliveryDashboard() {
           </div>
         </div>
 
-        {/* Live Progress Bar */}
         <div className="mb-8 relative z-10">
           <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 text-white/80">
             <span>Route Progress</span>
@@ -120,15 +146,14 @@ export default function DeliveryDashboard() {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex bg-black/20 backdrop-blur-sm p-1.5 rounded-2xl relative z-10 border border-white/5">
           <TabButton name="Pending" active={activeTab} onClick={setActiveTab} count={pendingCount} />
           <TabButton name="Completed" active={activeTab} onClick={setActiveTab} count={completedCount} />
         </div>
       </div>
 
-      {/* --- TASK LIST --- */}
-      <div className="p-5 space-y-5 mt-2">
+      {/* TASK LIST */}
+      <div className="p-4 space-y-4 mt-2">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <Loader2 className="animate-spin text-[#002147] mb-4" size={32} />
@@ -144,91 +169,180 @@ export default function DeliveryDashboard() {
           </motion.div>
         ) : (
           <AnimatePresence>
-            {displayedTasks.map((task, idx) => (
-              <motion.div
-                key={task.task_id}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: idx * 0.05 }}
-                className="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group"
-              >
-                {/* Visual Indicator Line */}
-                <div className={`absolute top-0 left-0 w-2 h-full ${task.type === 'Routine Subscription' ? 'bg-emerald-400' : 'bg-[#002147]'}`} />
+            {displayedTasks.map((task, idx) => {
+              const isExpanded = expandedTaskId === task.task_id;
+              const isPaid = task.payment_status?.toLowerCase() === 'paid';
+              const isCOD = task.payment_method?.toLowerCase() === 'cod';
+              const isSub = task.type === 'Routine Subscription';
 
-                {/* Customer Info Header */}
-                <div className="flex justify-between items-start mb-6 pl-3">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center shadow-inner ${task.type === 'Routine Subscription' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
-                      {task.type === 'Routine Subscription' ? <Repeat size={24} /> : <Package size={24} />}
+              return (
+                <motion.div
+                  key={task.task_id}
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: idx * 0.05 }}
+                  className="bg-white rounded-[1.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 relative overflow-hidden group"
+                >
+                  {/* Left Color Bar */}
+                  <div className={`absolute top-0 left-0 w-1.5 h-full ${isSub ? 'bg-emerald-400' : 'bg-[#002147]'}`} />
+
+                  {/* PERFECTLY ALIGNED CONTENT CONTAINER */}
+                  <div className="p-5 pl-6">
+                    
+                    {/* 1. Header Row (Icon, Name, Amount, Tags) */}
+                    <div className="flex items-start gap-4 mb-5">
+                      {/* Icon */}
+                      <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center shadow-sm border ${isSub ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                        {isSub ? <Repeat size={24} /> : <Package size={24} />}
+                      </div>
+                      
+                      {/* Details */}
+                      <div className="flex-1 pt-0.5 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="text-[17px] leading-tight font-black text-[#1A1A1A] tracking-tight truncate">{task.customer}</h3>
+                          <span className="block text-[16px] font-black text-[#9e111a] tracking-tight shrink-0">
+                            NPR {task.amount}
+                          </span>
+                        </div>
+                        
+                        {/* Unified Badges Container */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${isSub ? 'bg-emerald-100/50 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
+                            {task.task_id} • {isSub ? 'Sub' : 'Order'}
+                          </span>
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md flex items-center gap-1 ${isCOD ? 'bg-orange-50 text-orange-700' : 'bg-blue-50 text-[#00519E]'}`}>
+                            {isCOD ? <Banknote size={10} /> : <CreditCard size={10} />}
+                            {isCOD ? 'COD' : 'ConnectIPS'}
+                          </span>
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md flex items-center gap-1 ${isPaid ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                            {isPaid ? 'Paid' : 'Unpaid'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* 2. Sleek Logistics Cards */}
+                    <div className="space-y-2.5 mb-5">
+                      <a href={`https://maps.google.com/?q=${encodeURIComponent(task.address)}`} target="_blank" rel="noreferrer" 
+                         className="flex items-center gap-3 p-3 bg-gray-50/70 hover:bg-gray-100 rounded-2xl transition-colors border border-gray-100 group">
+                        <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center shadow-sm shrink-0 text-[#002147] border border-gray-100 group-hover:scale-105 transition-transform">
+                          <MapPin size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Delivery Address</p>
+                          <p className="text-[13px] font-bold text-[#1A1A1A] leading-tight truncate">{task.address}</p>
+                        </div>
+                        <ArrowRight size={16} className="text-gray-300" />
+                      </a>
+                      
+                      <a href={`tel:${task.phone}`} 
+                         className="flex items-center gap-3 p-3 bg-gray-50/70 hover:bg-gray-100 rounded-2xl transition-colors border border-gray-100 group">
+                        <div className="w-9 h-9 bg-white rounded-[10px] flex items-center justify-center shadow-sm shrink-0 text-emerald-600 border border-gray-100 group-hover:scale-105 transition-transform">
+                          <Phone size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Contact Customer</p>
+                          <p className="text-[13px] font-bold text-[#1A1A1A] leading-tight truncate">{task.phone}</p>
+                        </div>
+                        <ArrowRight size={16} className="text-gray-300" />
+                      </a>
+                    </div>
+
+                    {/* 3. Dropdown Accordion */}
+                    <div className="mb-5">
+                      <button 
+                        onClick={() => toggleExpand(task.task_id)}
+                        className={`w-full flex items-center justify-between p-3.5 border rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors shadow-sm ${isExpanded ? 'bg-gray-50 border-gray-200 text-[#002147]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                      >
+                        <span className="flex items-center gap-2"><ListOrdered size={16} className={isExpanded ? 'text-[#002147]' : 'text-gray-400'}/> View Items & Payment</span>
+                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pt-3 space-y-3">
+                              {/* Order Items */}
+                              <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <h4 className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-2 border-b border-gray-50 pb-2">Package Contents</h4>
+                                <ul className="space-y-2">
+                                  {task.items && task.items.length > 0 ? (
+                                    task.items.map((item, i) => (
+                                      <li key={i} className="flex justify-between items-center text-[13px] font-bold text-[#1A1A1A]">
+                                        <span><span className="text-gray-400 mr-1">{item.qty}x</span> {item.name}</span>
+                                        <span className="text-gray-400 text-xs font-medium">{item.size || ''}</span>
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <li className="text-xs text-gray-400 italic">No specific item data found.</li>
+                                  )}
+                                </ul>
+                              </div>
+
+                              {/* Cash Collection Prompt */}
+                              {!isPaid && isCOD && activeTab === 'Pending' && (
+                                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                  <div>
+                                    <p className="text-[9px] font-black uppercase text-red-800 tracking-widest mb-0.5">Collect Cash Amount</p>
+                                    <p className="text-[17px] font-black text-[#9e111a] leading-none">NPR {task.amount}</p>
+                                  </div>
+                                  <button 
+                                    onClick={() => handleUpdatePayment(task.task_id)}
+                                    disabled={updatingId === task.task_id + 'payment'}
+                                    className="bg-[#9e111a] text-white px-5 py-2.5 rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-md shadow-red-900/20 hover:bg-red-800 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                  >
+                                    {updatingId === task.task_id + 'payment' ? <Loader2 className="animate-spin" size={14} /> : <><Banknote size={14}/> Mark Paid</>}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* 4. Action Buttons */}
                     <div>
-                      <h3 className="text-lg font-black text-[#1A1A1A] tracking-tight">{task.customer}</h3>
-                      <span className={`inline-block mt-0.5 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${task.type === 'Routine Subscription' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'}`}>
-                        {task.type}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-xl font-black text-[#9e111a] tracking-tight">{task.amount}</span>
-                  </div>
-                </div>
-
-                {/* Logistics Info Buttons (HUGE tap targets) */}
-                <div className="space-y-3 mb-6 pl-3">
-                  <a href={`https://maps.google.com/?q=${encodeURIComponent(task.address)}`} target="_blank" rel="noreferrer" 
-                     className="flex items-center gap-4 p-4 bg-[#FAF9F6] rounded-2xl active:bg-gray-100 transition-colors border border-gray-100">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-gray-50">
-                      <MapPin className="text-[#002147]" size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Delivery Address</p>
-                      <p className="text-sm font-bold text-[#1A1A1A] leading-tight">{task.address}</p>
-                    </div>
-                    <ArrowRight size={16} className="text-gray-300" />
-                  </a>
-                  
-                  <a href={`tel:${task.phone}`} 
-                     className="flex items-center gap-4 p-4 bg-[#FAF9F6] rounded-2xl active:bg-gray-100 transition-colors border border-gray-100">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 border border-gray-50">
-                      <Phone className="text-emerald-600" size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Contact Customer</p>
-                      <p className="text-sm font-black text-[#1A1A1A] tracking-wide">{task.phone}</p>
-                    </div>
-                    <ArrowRight size={16} className="text-gray-300" />
-                  </a>
-                </div>
-
-                {/* ACTION BUTTONS */}
-                <div className="pt-2 pl-3">
-                  {activeTab === 'Pending' && (
-                    <>
-                      {task.status === 'Pending' || task.status === 'Pending Dispatch' ? (
-                         <button 
-                         onClick={() => handleUpdateStatus(task.task_id, 'On Way')}
-                         disabled={updatingId === task.task_id}
-                         className="w-full bg-[#E2B254] text-[#002147] py-4 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#E2B254]/20 active:scale-[0.98] transition-all"
-                       >
-                         {updatingId === task.task_id ? <Loader2 className="animate-spin" size={18} /> : <><Navigation size={18} /> Start Delivery</>}
-                       </button>
-                      ) : (
-                        <button 
-                          onClick={() => handleUpdateStatus(task.task_id, 'Delivered')}
-                          disabled={updatingId === task.task_id}
-                          className="w-full bg-[#002147] text-white py-4 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#002147]/20 active:scale-[0.98] transition-all"
-                        >
-                          {updatingId === task.task_id ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Mark as Delivered</>}
-                        </button>
+                      {activeTab === 'Pending' && (
+                        <>
+                          {task.status === 'Pending' || task.status === 'Pending Dispatch' ? (
+                             <button 
+                             onClick={() => handleUpdateStatus(task.task_id, 'On Way')}
+                             disabled={updatingId === task.task_id + 'status'}
+                             className="w-full bg-gradient-to-r from-[#E2B254] to-[#d4af37] text-[#002147] py-4 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#E2B254]/30 hover:opacity-90 active:scale-[0.98] transition-all border border-[#d4af37]"
+                           >
+                             {updatingId === task.task_id + 'status' ? <Loader2 className="animate-spin" size={18} /> : <><Navigation size={18} /> Start Delivery</>}
+                           </button>
+                          ) : (
+                            <button 
+                              onClick={() => {
+                                if (isCOD && !isPaid) {
+                                  showAlert("Please collect cash and 'Mark Paid' before finishing delivery.");
+                                  setExpandedTaskId(task.task_id); // Auto-open the payment section
+                                  return;
+                                }
+                                handleUpdateStatus(task.task_id, 'Delivered');
+                              }}
+                              disabled={updatingId === task.task_id + 'status'}
+                              className="w-full bg-gradient-to-r from-[#002147] to-[#00152e] text-white py-4 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#002147]/30 hover:opacity-90 active:scale-[0.98] transition-all border border-[#00152e]"
+                            >
+                              {updatingId === task.task_id + 'status' ? <Loader2 className="animate-spin" size={18} /> : <><CheckCircle size={18} /> Mark as Delivered</>}
+                            </button>
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                  {activeTab === 'Completed' && (
-                    <div className="w-full bg-emerald-50 border border-emerald-100 text-emerald-700 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                      <CheckCircle size={16} /> Delivery Successful
+                      {activeTab === 'Completed' && (
+                        <div className="w-full bg-emerald-50 border border-emerald-100 text-emerald-700 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                          <CheckCircle size={16} /> Delivery Successful
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         )}
       </div>
